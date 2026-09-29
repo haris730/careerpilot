@@ -14,7 +14,8 @@
 .cv-kicker{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:800;margin-bottom:15px;color:#8a5f4d}.cv-modern .cv-kicker{color:#cbd5e1}.cv-modern .cv-header h1{font-family:Georgia,serif;text-transform:none;letter-spacing:.5px}.cv-modern .cv-header .role{color:#dbeafe}.cv-professional .cv-kicker{color:#777}.cv-professional .cv-header h1{font-family:Georgia,serif}.cv-ats .cv-kicker{color:#444}.cv-ats .cv-header h1{font-family:Arial,sans-serif}.cv-ats .cv-header .role{color:#333}.cv-main .cv-section:first-child{background:#faf8f5;padding:14px 16px;border-left:3px solid #8a5f4d}.cv-modern .cv-main .cv-section:first-child{background:#f4f7fb;border-left-color:#334155}.cv-ats .cv-main .cv-section:first-child{background:#fff;border-left:0;padding:0}
 .builder-shell{display:grid;grid-template-columns:minmax(360px,520px) minmax(500px,1fr);gap:22px;align-items:start}
 .builder-panel{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}
-.builder-preview{position:sticky;top:18px}
+.builder-right{position:sticky;top:18px;min-width:0}
+.builder-preview{position:static}
 .builder-title{font-size:16px;font-weight:800;margin:0 0 12px}
 .option-row{display:flex;gap:8px;flex-wrap:wrap}
 .swatch{width:34px;height:34px;border-radius:9px;border:2px solid #fff;box-shadow:0 0 0 1px #d7dce5;cursor:pointer}
@@ -134,10 +135,10 @@
 </div>
 <div class="actions"><button type="button" class="btn" id="saveCvBottom">Save CV</button><button type="button" class="btn secondary" id="clearCv">Clear</button></div><div id="saveStatus" class="muted" style="margin-top:12px;min-height:18px"></div>
 </div>
-<div class="editor-toolbar card" id="editorToolbar">
+<div class="builder-right"><div class="editor-toolbar card" id="editorToolbar">
 <div class="editor-toolbar-top"><strong>CV Canvas Editor</strong><span id="selectedElementName">Select any text or photo</span></div>
 <div class="editor-tools">
-<label>Text Color <input id="elementTextColor" type="color" value="#172033"></label>
+<label>Color <input id="elementTextColor" type="color" value="#172033"></label><label>Font <select id="elementFontFamily"><option>Inter</option><option>Georgia</option><option>Arial</option><option>Trebuchet MS</option></select></label>
 <label>Size <input id="elementFontSize" type="number" min="8" max="72" value="16"></label>
 <button type="button" class="tool-btn" id="toggleBold">B</button>
 <button type="button" class="tool-btn" id="alignLeft">L</button>
