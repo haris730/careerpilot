@@ -44,21 +44,25 @@
 @media(max-width:1100px){.builder-shell{grid-template-columns:1fr}.builder-panel,.builder-preview{position:static;max-height:none}.builder-preview .preview-wrap{padding:15px}}
 @media(max-width:900px){.sidebar{width:210px}.main{margin-left:210px;width:calc(100% - 210px);padding:20px}.grid{grid-template-columns:repeat(2,1fr)}.templates{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}}@media(max-width:650px){.sidebar{position:static;width:100%;height:auto}.app{display:block}.main{margin:0;width:100%}.nav{display:flex;overflow:auto}.nav button{min-width:max-content}.grid{grid-template-columns:1fr}.cv-body{grid-template-columns:1fr}.cv-side{border-right:0;border-bottom:1px solid #ded2ca}.cv-header,.cv-main{padding:25px}.cv-header h1{font-size:30px}}
 
-.editor-toolbar{margin-bottom:12px;padding:14px;position:sticky;top:0;z-index:4}
-.editor-toolbar-top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
-.editor-toolbar-top strong{font-size:14px}.editor-toolbar-top span{font-size:11px;color:#64748b}
-.editor-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.editor-tools label{font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px}
-.editor-tools input[type=color]{width:30px;height:28px;padding:2px;border:1px solid #dbe1ea;border-radius:7px}
-.editor-tools input[type=number]{width:58px;padding:6px;border:1px solid #dbe1ea;border-radius:7px}
-.tool-btn{background:#f1f5f9;color:#334155;padding:7px 10px;border-radius:7px;font-weight:800;font-size:11px}
-.tool-btn:hover,.tool-btn.active{background:#111827;color:#fff}.tool-btn.reset{background:#fee2e2;color:#991b1b}
-.move-label{font-size:11px;font-weight:800;color:#64748b;margin-left:4px}
-.cv [data-edit]{cursor:text;user-select:text;outline:1px solid transparent;outline-offset:3px;transition:outline .12s,background .12s}
+.editor-toolbar{margin-bottom:14px;padding:16px;position:sticky;top:12px;z-index:20;border:1px solid #dfe4ec;box-shadow:0 10px 30px #11182712}
+.editor-toolbar-top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}
+.editor-toolbar-top strong{font-size:16px}.editor-sub{font-size:11px;color:#64748b;margin-top:3px}.selected-pill{font-size:11px;font-weight:800;color:#4338ca;background:#eef2ff;padding:7px 10px;border-radius:999px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.editor-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:10px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px}
+.editor-tools label{font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;background:#fff;border:1px solid #e2e8f0;padding:5px 7px;border-radius:8px}
+.editor-tools input[type=color]{width:32px;height:28px;padding:2px;border:1px solid #dbe1ea;border-radius:7px;cursor:pointer}
+.editor-tools select,.editor-tools input[type=number]{padding:6px;border:1px solid #dbe1ea;border-radius:7px;background:#fff}
+.editor-tools input[type=number]{width:62px}
+.tool-btn{background:#fff;color:#334155;padding:8px 11px;border:1px solid #dbe1ea;border-radius:8px;font-weight:800;font-size:11px;min-height:32px}
+.tool-btn:hover,.tool-btn.active{background:#111827;color:#fff;border-color:#111827}.tool-btn.primary-tool{background:#4f46e5;color:#fff;border-color:#4f46e5}.tool-btn.reset{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+.move-label{font-size:10px;font-weight:800;color:#64748b;margin-left:3px;text-transform:uppercase}
+.editor-help{font-size:11px;color:#64748b;margin-top:10px;line-height:1.6}
+.cv [data-edit]{cursor:text;user-select:text;outline:1px solid transparent;outline-offset:4px;transition:outline .12s,background .12s,box-shadow .12s}
 .cv [data-edit]:hover{outline:1px dashed #94a3b8}
-.cv [data-edit].edit-selected{outline:2px solid #4f46e5!important;outline-offset:4px;background:#4f46e50d}
-.cv [contenteditable=true]:focus{outline:2px solid #4f46e5!important;outline-offset:4px}
-.cv .cv-photo[data-edit]{cursor:move}
+.cv [data-edit].edit-selected{outline:2px solid #4f46e5!important;outline-offset:5px;background:#4f46e50d;box-shadow:0 0 0 5px #4f46e508}
+.cv [contenteditable=true]:focus{outline:2px solid #4f46e5!important;outline-offset:5px}
+.cv.move-mode [data-edit]{cursor:grab}
+.cv.move-mode [data-edit]:active{cursor:grabbing}
+.cv .cv-photo[data-edit]{cursor:grab}
 .cv-modern{background:#fff}
 .cv-modern .cv-header{background:#0f172a;padding-left:52px;padding-right:52px;border-bottom:0;min-height:245px}
 .cv-modern .cv-header h1{font-size:54px;line-height:.98;font-weight:800}
@@ -135,24 +139,23 @@
 </div>
 <div class="actions"><button type="button" class="btn" id="saveCvBottom">Save CV</button><button type="button" class="btn secondary" id="clearCv">Clear</button></div><div id="saveStatus" class="muted" style="margin-top:12px;min-height:18px"></div>
 </div>
-<div class="builder-right"><div class="editor-toolbar card" id="editorToolbar">
-<div class="editor-toolbar-top"><strong>CV Canvas Editor</strong><span id="selectedElementName">Select any text or photo</span></div>
-<div class="editor-tools">
-<label>Color <input id="elementTextColor" type="color" value="#172033"></label><label>Font <select id="elementFontFamily"><option>Inter</option><option>Georgia</option><option>Arial</option><option>Trebuchet MS</option></select></label>
-<label>Size <input id="elementFontSize" type="number" min="8" max="72" value="16"></label>
-<button type="button" class="tool-btn" id="toggleBold">B</button>
-<button type="button" class="tool-btn" id="alignLeft">L</button>
-<button type="button" class="tool-btn" id="alignCenter">C</button>
-<button type="button" class="tool-btn" id="alignRight">R</button>
-<span class="move-label">Move</span>
-<button type="button" class="tool-btn" data-move="up">↑</button>
-<button type="button" class="tool-btn" data-move="down">↓</button>
-<button type="button" class="tool-btn" data-move="left">←</button>
-<button type="button" class="tool-btn" data-move="right">→</button>
-<button type="button" class="tool-btn reset" id="resetElement">Reset</button>
+<div class="builder-right">
+<div class="editor-toolbar card" id="editorToolbar">
+  <div class="editor-toolbar-top"><div><strong>CV Editor</strong><div class="editor-sub">Canva-style editing — select an element, then edit it</div></div><span id="selectedElementName" class="selected-pill">Nothing selected</span></div>
+  <div class="editor-tools">
+    <button type="button" class="tool-btn primary-tool" id="editModeBtn">✎ Edit</button>
+    <button type="button" class="tool-btn" id="moveModeBtn">↕ Move</button>
+    <label>Text Color <input id="elementTextColor" type="color" value="#172033"></label>
+    <label>Font <select id="elementFontFamily"><option>Inter</option><option>Georgia</option><option>Arial</option><option>Trebuchet MS</option></select></label>
+    <label>Size <input id="elementFontSize" type="number" min="8" max="96" value="16"></label>
+    <button type="button" class="tool-btn" id="toggleBold"><b>B</b></button>
+    <button type="button" class="tool-btn" id="alignLeft">L</button><button type="button" class="tool-btn" id="alignCenter">C</button><button type="button" class="tool-btn" id="alignRight">R</button>
+    <span class="move-label">Nudge</span><button type="button" class="tool-btn" data-move="up">↑</button><button type="button" class="tool-btn" data-move="down">↓</button><button type="button" class="tool-btn" data-move="left">←</button><button type="button" class="tool-btn" data-move="right">→</button>
+    <button type="button" class="tool-btn reset" id="resetElement">Reset</button>
+  </div>
+  <div class="editor-help"><b>1</b> Click a text block • <b>2</b> Edit directly • <b>3</b> Use Color/Font/Size • <b>4</b> Switch to Move and drag the selected element • <b>5</b> Save CV</div>
 </div>
-<div class="live-note">Click text to select • double-click/type to edit • use Move arrows for exact placement.</div>
-</div><div class="builder-preview"><div class="card"><div class="top" style="margin-bottom:12px"><div><div class="builder-title" style="margin:0">Live Preview</div><div class="live-note">Changes appear here instantly.</div></div><button class="btn secondary" id="downloadBuilderPdf">PDF</button></div><div class="preview-wrap"><div class="cv" id="builderPaper"></div></div></div></div>
+<div class="builder-preview"><div class="card"><div class="top" style="margin-bottom:12px"><div><div class="builder-title" style="margin:0">Live CV Canvas</div><div class="live-note">A4 preview • click any editable item to customize it</div></div><button class="btn secondary" id="downloadBuilderPdf">Download PDF</button></div><div class="preview-wrap"><div class="cv" id="builderPaper"></div></div></div></div>
 </div></section>
 <section id="templates" class="section"><div class="top"><div><h1>CV Templates</h1><div class="muted" style="margin-top:5px">Six genuinely different layouts. Pick one and customize it in the builder.</div></div></div><div class="templates">
 <div class="template" data-template="Modern"><div style="height:125px;border-radius:10px;background:linear-gradient(135deg,#172033,#334155);border:1px solid #ddd;padding:16px;color:#172033"><div style="font:800 20px Inter">YOUR NAME</div><div style="font-size:9px;margin-top:8px;opacity:.75">TWO-COLUMN EXECUTIVE</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#e5e7eb 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">Modern</h3><p class="muted">Dark header + sidebar + strong hierarchy</p><button class="btn">Use Template</button></div><div class="template" data-template="Professional"><div style="height:125px;border-radius:10px;background:#fff;border:1px solid #ddd;padding:16px;color:#172033"><div style="font:800 20px Georgia">YOUR NAME</div><div style="font-size:9px;margin-top:8px;opacity:.75">EDITORIAL CORPORATE</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#e5e7eb 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">Professional</h3><p class="muted">White page + serif name + structured sections</p><button class="btn">Use Template</button></div><div class="template" data-template="ATS-Friendly"><div style="height:125px;border-radius:10px;background:#fff;border:1px solid #ddd;padding:16px;color:#172033"><div style="font:800 20px Inter">YOUR NAME</div><div style="font-size:9px;margin-top:8px;opacity:.75">ATS TEXT-FIRST</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#e5e7eb 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">ATS-Friendly</h3><p class="muted">Simple machine-readable black & white</p><button class="btn">Use Template</button></div><div class="template" data-template="Elegant"><div style="height:125px;border-radius:10px;background:#fbf8f1;border:1px solid #ddd;padding:16px;color:#172033"><div style="font:800 20px Georgia">Your Name</div><div style="font-size:9px;margin-top:8px;opacity:.75">ELEGANT EDITORIAL</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#e5e7eb 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">Elegant</h3><p class="muted">Cream paper + serif typography + spacious layout</p><button class="btn">Use Template</button></div><div class="template" data-template="Creative"><div style="height:125px;border-radius:10px;background:#111827;border:1px solid #ddd;padding:16px;color:white"><div style="font:800 20px Inter">YOUR NAME</div><div style="font-size:9px;margin-top:8px;opacity:.75">CREATIVE PORTFOLIO</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#7c3aed 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">Creative</h3><p class="muted">Bold dark header + violet accent + visual sidebar</p><button class="btn">Use Template</button></div><div class="template" data-template="Minimal"><div style="height:125px;border-radius:10px;background:#fff;border:1px solid #ddd;padding:16px;color:#172033"><div style="font:800 20px Inter">YOUR NAME</div><div style="font-size:9px;margin-top:8px;opacity:.75">MINIMAL EXECUTIVE</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#e5e7eb 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">Minimal</h3><p class="muted">Clean typography + generous whitespace + sharp rules</p><button class="btn">Use Template</button></div>
@@ -241,19 +244,24 @@ function renderCV(target='cvPaper'){
 function selectEditable(el){
   if(!el)return;
   selectedEditKey=el.dataset.edit||'';
-  document.querySelectorAll('.cv [data-edit].edit-selected').forEach(x=>x.classList.remove('edit-selected'));
+  document.querySelectorAll('#builderPaper .cv [data-edit].edit-selected').forEach(x=>x.classList.remove('edit-selected'));
   el.classList.add('edit-selected');
   $('selectedElementName').textContent=selectedEditKey||'Selected element';
   const s=elementStyles[selectedEditKey]||{};
-  $('elementTextColor').value=s.color||'#172033';
-  $('elementFontSize').value=s.size||Math.round(parseFloat(getComputedStyle(el).fontSize)||16);
-  $('elementFontFamily').value=s.font||'Inter';
-  $('toggleBold').classList.toggle('active',s.weight==='800');
+  const computed=getComputedStyle(el);
+  $('elementTextColor').value=s.color||rgbToHex(computed.color)||'#172033';
+  $('elementFontSize').value=s.size||Math.round(parseFloat(computed.fontSize)||16);
+  $('elementFontFamily').value=s.font||computed.fontFamily.replace(/,.*/,'').replace(/["']/g,'')||'Inter';
+  $('toggleBold').classList.toggle('active',s.weight==='800'||computed.fontWeight==='800'||computed.fontWeight==='bold');
 }
+function rgbToHex(rgb){const m=String(rgb).match(/\d+/g);if(!m||m.length<3)return null;return '#'+m.slice(0,3).map(n=>Number(n).toString(16).padStart(2,'0')).join('')}
 function applyElementChange(){
   if(!selectedEditKey)return;
   elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),color:$('elementTextColor').value,size:Number($('elementFontSize').value)||16,font:$('elementFontFamily').value};
+  const el=document.querySelector('#builderPaper .cv [data-edit="'+CSS.escape(selectedEditKey)+'"]');
+  if(el){el.style.color=$('elementTextColor').value;el.style.fontSize=(Number($('elementFontSize').value)||16)+'px';el.style.fontFamily=$('elementFontFamily').value+',Arial,sans-serif';}
   renderCV('builderPaper');
+  autoSaveEditor();
 }
 function moveSelected(dir){
   if(!selectedEditKey)return;
@@ -296,15 +304,34 @@ document.addEventListener('input',e=>{
   if(key==='certifications'){$('certifications').value=value;return}
   if(key==='skills'){$('skills').value=[...document.querySelectorAll('#builderPaper .cv .cv-skill')].map(x=>x.innerText.trim()).filter(Boolean).join(', ')}
 });
+let editorMode='edit',dragState=null;
+function autoSaveEditor(){try{saveStorage('careerpilot_cv',JSON.stringify(data()))}catch(e){}}
 $('elementTextColor').addEventListener('input',applyElementChange);
 $('elementFontSize').addEventListener('input',applyElementChange);
 $('elementFontFamily').addEventListener('change',applyElementChange);
-$('toggleBold').onclick=()=>{if(!selectedEditKey)return;const s=elementStyles[selectedEditKey]||{};s.weight=s.weight==='800'?'400':'800';elementStyles[selectedEditKey]=s;renderCV('builderPaper')};
-$('alignLeft').onclick=()=>{if(!selectedEditKey)return;elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),align:'left'};renderCV('builderPaper')};
-$('alignCenter').onclick=()=>{if(!selectedEditKey)return;elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),align:'center'};renderCV('builderPaper')};
-$('alignRight').onclick=()=>{if(!selectedEditKey)return;elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),align:'right'};renderCV('builderPaper')};
+$('editModeBtn').onclick=()=>{editorMode='edit';$('editModeBtn').classList.add('active');$('moveModeBtn').classList.remove('active');$('builderPaper').querySelector('.cv')?.classList.remove('move-mode')};
+$('moveModeBtn').onclick=()=>{editorMode='move';$('moveModeBtn').classList.add('active');$('editModeBtn').classList.remove('active');$('builderPaper').querySelector('.cv')?.classList.add('move-mode')};
+document.addEventListener('pointerdown',e=>{
+  const el=e.target.closest('#builderPaper .cv [data-edit]');
+  if(!el||editorMode!=='move')return;
+  selectEditable(el);
+  const s=elementStyles[selectedEditKey]||{x:0,y:0};
+  dragState={el,key:selectedEditKey,startX:e.clientX,startY:e.clientY,baseX:Number(s.x||0),baseY:Number(s.y||0)};
+  el.setPointerCapture?.(e.pointerId);e.preventDefault();
+});
+document.addEventListener('pointermove',e=>{
+  if(!dragState)return;
+  const dx=e.clientX-dragState.startX,dy=e.clientY-dragState.startY;
+  elementStyles[dragState.key]={...(elementStyles[dragState.key]||{}),x:Math.round(dragState.baseX+dx),y:Math.round(dragState.baseY+dy)};
+  const s=elementStyles[dragState.key];dragState.el.style.transform='translate('+s.x+'px,'+s.y+'px)';
+});
+document.addEventListener('pointerup',()=>{if(dragState){dragState=null;renderCV('builderPaper');autoSaveEditor()}});
+$('toggleBold').onclick=()=>{if(!selectedEditKey)return;const s=elementStyles[selectedEditKey]||{};s.weight=s.weight==='800'?'400':'800';elementStyles[selectedEditKey]=s;renderCV('builderPaper');autoSaveEditor()};
+$('alignLeft').onclick=()=>{if(!selectedEditKey)return;elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),align:'left'};renderCV('builderPaper');autoSaveEditor()};
+$('alignCenter').onclick=()=>{if(!selectedEditKey)return;elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),align:'center'};renderCV('builderPaper');autoSaveEditor()};
+$('alignRight').onclick=()=>{if(!selectedEditKey)return;elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),align:'right'};renderCV('builderPaper');autoSaveEditor()};
 document.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>moveSelected(b.dataset.move));
-$('resetElement').onclick=()=>{if(!selectedEditKey)return;delete elementStyles[selectedEditKey];renderCV('builderPaper');toast('Element reset')};
+$('resetElement').onclick=()=>{if(!selectedEditKey)return;delete elementStyles[selectedEditKey];renderCV('builderPaper');autoSaveEditor();toast('Element reset')};
 
 function liveRender(){try{renderCV('builderPaper');updateDash()}catch(e){}}
 $('saveCv').addEventListener('click',save);$('saveCvBottom').addEventListener('click',save);$('previewBtn').onclick=()=>go('preview');
