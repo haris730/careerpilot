@@ -221,14 +221,14 @@ function renderCV(target='cvPaper'){
  const d=data(),tpl=d.template||'Modern';
  const cls=tpl==='Professional'?'cv-professional':tpl==='ATS-Friendly'?'cv-ats':tpl==='Elegant'?'cv-elegant':tpl==='Creative'?'cv-creative':tpl==='Minimal'?'cv-minimal':'cv-modern';
  const contact=[d.email,d.phone,d.location,d.portfolio].filter(Boolean).map(esc).join('<span>•</span>');
- const skills=d.skills.split(/[,\n]+/).map(x=>x.trim()).filter(Boolean).map((x,i)=>'<div class="cv-skill" data-edit="skill-'+i+'" contenteditable="true" spellcheck="false" data-bind="skills" style="'+styleAttr('skill-'+i)+'">'+esc(x)+'</div>').join('');
+ const skills=d.skills.split(/[,\n]+/).map(x=>x.trim()).filter(Boolean).map((x,i)=>'<div class="cv-skill" data-edit="skill-'+i+'" contenteditable="true" spellcheck="false" data-bind="skill-'+i+'" style="'+styleAttr('skill-'+i)+'">'+esc(x)+'</div>').join('');
  const side=(skills?'<div class="cv-section"><h2>Core Skills</h2><div class="cv-skills">'+skills+'</div></div>':'')+
    (d.languages?section('Languages',d.languages,'languages'):'')+
-   (d.educations?.length?'<div class="cv-section"><h2>Education</h2>'+educationBlocks(d)+'</div>':'')+
+   (d.educations?.length?'<div class="cv-section"><h2 data-edit="education-heading" contenteditable="true" spellcheck="false" data-bind="education-heading" style="'+styleAttr('education-heading')+'">Education</h2>'+educationBlocks(d)+'</div>':'')+
    (d.certifications&&d.sectionState.certifications?section('Certifications',d.certifications,'certifications'):'');
  const blocks={
-   summary:d.summary?'<div class="cv-section"><h2>Professional Profile</h2><div class="cv-text" data-edit="summary" contenteditable="true" spellcheck="false" data-bind="summary" style="'+styleAttr('summary')+'">'+esc(d.summary)+'</div></div>':'',
-   experience:d.experiences?.length?'<div class="cv-section"><h2>Experience</h2>'+jobBlocks(d)+'</div>':'',
+   summary:d.summary?'<div class="cv-section"><h2 data-edit="summary-heading" contenteditable="true" spellcheck="false" data-bind="summary-heading" style="'+styleAttr('summary-heading')+'">Professional Profile</h2><div class="cv-text" data-edit="summary" contenteditable="true" spellcheck="false" data-bind="summary" style="'+styleAttr('summary')+'">'+esc(d.summary)+'</div></div>':'',
+   experience:d.experiences?.length?'<div class="cv-section"><h2 data-edit="experience-heading" contenteditable="true" spellcheck="false" data-bind="experience-heading" style="'+styleAttr('experience-heading')+'">Experience</h2>'+jobBlocks(d)+'</div>':'',
    achievements:d.achievements&&d.sectionState.achievements?section('Key Achievements',d.achievements,'key-achievements'):'',
    projects:d.projects&&d.sectionState.projects?section('Selected Projects',d.projects,'selected-projects'):''
  };
@@ -314,6 +314,13 @@ document.addEventListener('input',e=>{
     if(items[idx])items[idx][k]=value;
     return;
   }
+  if(key.startsWith('skill-')){
+    const vals=[...document.querySelectorAll('#builderPaper .cv .cv-skill')].map(x=>x.innerText.trim()).filter(Boolean);
+    $('skills').value=vals.join(', ');
+    return;
+  }
+  if(key.endsWith('-heading')) return;
+  if(key==='contact') return;
   if($(key)){$(key).value=value;return}
   if(key==='key-achievements'){$('achievements').value=value;return}
   if(key==='selected-projects'){$('projects').value=value;return}
