@@ -42,6 +42,37 @@
 .cv-minimal{background:#fff;font-family:Inter,Arial,sans-serif}.cv-minimal .cv-header{background:#fff;padding:48px 48px 26px;border-bottom:1px solid #111827}.cv-minimal .cv-header h1{font-family:Inter,Arial,sans-serif;text-transform:none;letter-spacing:-1.5px;font-size:42px}.cv-minimal .cv-body{display:block}.cv-minimal .cv-side{display:none}.cv-minimal .cv-main{padding:28px 48px}.cv-minimal .cv-section h2{color:#111827;border-bottom:2px solid #111827}.cv-minimal .cv-main .cv-section:first-child{background:#fff;border-left:0;padding:0}.cv-minimal .cv-photo{right:48px;top:42px;border-color:#111827}
 @media(max-width:1100px){.builder-shell{grid-template-columns:1fr}.builder-panel,.builder-preview{position:static;max-height:none}.builder-preview .preview-wrap{padding:15px}}
 @media(max-width:900px){.sidebar{width:210px}.main{margin-left:210px;width:calc(100% - 210px);padding:20px}.grid{grid-template-columns:repeat(2,1fr)}.templates{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}}@media(max-width:650px){.sidebar{position:static;width:100%;height:auto}.app{display:block}.main{margin:0;width:100%}.nav{display:flex;overflow:auto}.nav button{min-width:max-content}.grid{grid-template-columns:1fr}.cv-body{grid-template-columns:1fr}.cv-side{border-right:0;border-bottom:1px solid #ded2ca}.cv-header,.cv-main{padding:25px}.cv-header h1{font-size:30px}}
+
+.editor-toolbar{margin-bottom:12px;padding:14px;position:sticky;top:0;z-index:4}
+.editor-toolbar-top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
+.editor-toolbar-top strong{font-size:14px}.editor-toolbar-top span{font-size:11px;color:#64748b}
+.editor-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.editor-tools label{font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px}
+.editor-tools input[type=color]{width:30px;height:28px;padding:2px;border:1px solid #dbe1ea;border-radius:7px}
+.editor-tools input[type=number]{width:58px;padding:6px;border:1px solid #dbe1ea;border-radius:7px}
+.tool-btn{background:#f1f5f9;color:#334155;padding:7px 10px;border-radius:7px;font-weight:800;font-size:11px}
+.tool-btn:hover,.tool-btn.active{background:#111827;color:#fff}.tool-btn.reset{background:#fee2e2;color:#991b1b}
+.move-label{font-size:11px;font-weight:800;color:#64748b;margin-left:4px}
+.cv [data-edit]{cursor:text;user-select:text;outline:1px solid transparent;outline-offset:3px;transition:outline .12s,background .12s}
+.cv [data-edit]:hover{outline:1px dashed #94a3b8}
+.cv [data-edit].edit-selected{outline:2px solid #4f46e5!important;outline-offset:4px;background:#4f46e50d}
+.cv [contenteditable=true]:focus{outline:2px solid #4f46e5!important;outline-offset:4px}
+.cv .cv-photo[data-edit]{cursor:move}
+.cv-modern{background:#fff}
+.cv-modern .cv-header{background:#0f172a;padding-left:52px;padding-right:52px;border-bottom:0;min-height:245px}
+.cv-modern .cv-header h1{font-size:54px;line-height:.98;font-weight:800}
+.cv-modern .cv-header .role{font-size:14px;letter-spacing:2px}
+.cv-modern .cv-body{grid-template-columns:205px 1fr}
+.cv-modern .cv-side{background:#f8fafc;border-right:1px solid #e2e8f0}
+.cv-modern .cv-main{padding-left:40px;padding-right:40px}
+.cv-modern .cv-main .cv-section:first-child{background:transparent;border-left:0;padding:0}
+.cv-modern .cv-section h2{border-bottom:2px solid var(--accent);padding-bottom:8px}
+.cv-modern .cv-skill{background:#f1f5f9!important;color:#172033!important;border-left:3px solid var(--accent);border-radius:0}
+.cv-professional .cv-header{padding-left:52px;padding-right:52px}
+.cv-creative .cv-header{min-height:270px;padding-left:48px;padding-right:48px}
+.cv-creative .cv-header h1{font-size:56px;font-weight:800}
+.cv-elegant .cv-header h1{font-size:58px}
+.cv-minimal .cv-header h1{font-size:58px;font-weight:800}
 </style></head>
 <body>
 <div class="app"><aside class="sidebar"><div class="brand">Career<span>Pilot</span></div><nav class="nav">
@@ -103,7 +134,24 @@
 </div>
 <div class="actions"><button type="button" class="btn" id="saveCvBottom">Save CV</button><button type="button" class="btn secondary" id="clearCv">Clear</button></div><div id="saveStatus" class="muted" style="margin-top:12px;min-height:18px"></div>
 </div>
-<div class="builder-preview"><div class="card"><div class="top" style="margin-bottom:12px"><div><div class="builder-title" style="margin:0">Live Preview</div><div class="live-note">Changes appear here instantly.</div></div><button class="btn secondary" id="downloadBuilderPdf">PDF</button></div><div class="preview-wrap"><div class="cv" id="builderPaper"></div></div></div></div>
+<div class="editor-toolbar card" id="editorToolbar">
+<div class="editor-toolbar-top"><strong>CV Canvas Editor</strong><span id="selectedElementName">Select any text or photo</span></div>
+<div class="editor-tools">
+<label>Text Color <input id="elementTextColor" type="color" value="#172033"></label>
+<label>Size <input id="elementFontSize" type="number" min="8" max="72" value="16"></label>
+<button type="button" class="tool-btn" id="toggleBold">B</button>
+<button type="button" class="tool-btn" id="alignLeft">L</button>
+<button type="button" class="tool-btn" id="alignCenter">C</button>
+<button type="button" class="tool-btn" id="alignRight">R</button>
+<span class="move-label">Move</span>
+<button type="button" class="tool-btn" data-move="up">↑</button>
+<button type="button" class="tool-btn" data-move="down">↓</button>
+<button type="button" class="tool-btn" data-move="left">←</button>
+<button type="button" class="tool-btn" data-move="right">→</button>
+<button type="button" class="tool-btn reset" id="resetElement">Reset</button>
+</div>
+<div class="live-note">Click text to select • double-click/type to edit • use Move arrows for exact placement.</div>
+</div><div class="builder-preview"><div class="card"><div class="top" style="margin-bottom:12px"><div><div class="builder-title" style="margin:0">Live Preview</div><div class="live-note">Changes appear here instantly.</div></div><button class="btn secondary" id="downloadBuilderPdf">PDF</button></div><div class="preview-wrap"><div class="cv" id="builderPaper"></div></div></div></div>
 </div></section>
 <section id="templates" class="section"><div class="top"><div><h1>CV Templates</h1><div class="muted" style="margin-top:5px">Six genuinely different layouts. Pick one and customize it in the builder.</div></div></div><div class="templates">
 <div class="template" data-template="Modern"><div style="height:125px;border-radius:10px;background:linear-gradient(135deg,#172033,#334155);border:1px solid #ddd;padding:16px;color:#172033"><div style="font:800 20px Inter">YOUR NAME</div><div style="font-size:9px;margin-top:8px;opacity:.75">TWO-COLUMN EXECUTIVE</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#e5e7eb 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">Modern</h3><p class="muted">Dark header + sidebar + strong hierarchy</p><button class="btn">Use Template</button></div><div class="template" data-template="Professional"><div style="height:125px;border-radius:10px;background:#fff;border:1px solid #ddd;padding:16px;color:#172033"><div style="font:800 20px Georgia">YOUR NAME</div><div style="font-size:9px;margin-top:8px;opacity:.75">EDITORIAL CORPORATE</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#e5e7eb 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">Professional</h3><p class="muted">White page + serif name + structured sections</p><button class="btn">Use Template</button></div><div class="template" data-template="ATS-Friendly"><div style="height:125px;border-radius:10px;background:#fff;border:1px solid #ddd;padding:16px;color:#172033"><div style="font:800 20px Inter">YOUR NAME</div><div style="font-size:9px;margin-top:8px;opacity:.75">ATS TEXT-FIRST</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#e5e7eb 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">ATS-Friendly</h3><p class="muted">Simple machine-readable black & white</p><button class="btn">Use Template</button></div><div class="template" data-template="Elegant"><div style="height:125px;border-radius:10px;background:#fbf8f1;border:1px solid #ddd;padding:16px;color:#172033"><div style="font:800 20px Georgia">Your Name</div><div style="font-size:9px;margin-top:8px;opacity:.75">ELEGANT EDITORIAL</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#e5e7eb 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">Elegant</h3><p class="muted">Cream paper + serif typography + spacious layout</p><button class="btn">Use Template</button></div><div class="template" data-template="Creative"><div style="height:125px;border-radius:10px;background:#111827;border:1px solid #ddd;padding:16px;color:white"><div style="font:800 20px Inter">YOUR NAME</div><div style="font-size:9px;margin-top:8px;opacity:.75">CREATIVE PORTFOLIO</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#7c3aed 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">Creative</h3><p class="muted">Bold dark header + violet accent + visual sidebar</p><button class="btn">Use Template</button></div><div class="template" data-template="Minimal"><div style="height:125px;border-radius:10px;background:#fff;border:1px solid #ddd;padding:16px;color:#172033"><div style="font:800 20px Inter">YOUR NAME</div><div style="font-size:9px;margin-top:8px;opacity:.75">MINIMAL EXECUTIVE</div><div style="height:42px;margin-top:14px;background:linear-gradient(90deg,#e5e7eb 28%,transparent 28%);opacity:.9"></div></div><h3 style="margin-top:18px">Minimal</h3><p class="muted">Clean typography + generous whitespace + sharp rules</p><button class="btn">Use Template</button></div>
@@ -115,17 +163,17 @@
 </main></div><div class="toast" id="toast"></div>
 <script>
 const fields=['name','title','email','phone','location','portfolio','template','headline','summary','skills','languages','achievements','certifications','projects','photo','color','font','experiences','educations','sectionState','sectionOrder','pageSpacing','headerSpacing','photoPlacement'];
-const defaultData={template:'Modern',color:'#334155',font:'Inter',experiences:[],educations:[],sectionState:{achievements:true,certifications:true,projects:true},sectionOrder:['summary','experience','achievements','projects'],pageSpacing:34,headerSpacing:42,photoPlacement:'right'};
+const defaultData={template:'Modern',color:'#334155',font:'Inter',experiences:[],educations:[],sectionState:{achievements:true,certifications:true,projects:true},sectionOrder:['summary','experience','achievements','projects'],pageSpacing:34,headerSpacing:42,photoPlacement:'right',elementStyles:{}};
 const $=id=>document.getElementById(id);
 function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
 function go(id){const section=$(id);if(!section)return;document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));section.classList.add('active');document.querySelectorAll('[data-go]').forEach(b=>b.classList.toggle('active',b.dataset.go===id));if(id==='preview')renderCV('cvPaper');if(id==='cv')renderCV('builderPaper');window.scrollTo(0,0)}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',function(e){e.preventDefault();go(this.dataset.go)}));
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function baseData(){return {...defaultData,experiences:[],educations:[],sectionState:{...defaultData.sectionState}}}
-function data(){const o=baseData();fields.forEach(f=>{const el=$(f);if(el)o[f]=f==='experiences'||f==='educations'||f==='sectionState'?o[f]:String(el.value||'')});o.experiences=getExperiences();o.educations=getEducations();o.sectionState={achievements:$('achievementsWrap')?.style.display!=='none',certifications:$('certificationsWrap')?.style.display!=='none',projects:$('projectsWrap')?.style.display!=='none'};o.photo=photoData||'';o.color=selectedColor||o.color;o.font=$('font')?.value||o.font;o.pageSpacing=Number($('pageSpacing')?.value||34);o.headerSpacing=Number($('headerSpacing')?.value||42);o.photoPlacement=$('photoPlacement')?.value||'right';o.sectionOrder=[...sectionOrder];return o}
+function data(){const o=baseData();fields.forEach(f=>{const el=$(f);if(el)o[f]=f==='experiences'||f==='educations'||f==='sectionState'?o[f]:String(el.value||'')});o.experiences=getExperiences();o.educations=getEducations();o.sectionState={achievements:$('achievementsWrap')?.style.display!=='none',certifications:$('certificationsWrap')?.style.display!=='none',projects:$('projectsWrap')?.style.display!=='none'};o.photo=photoData||'';o.color=selectedColor||o.color;o.font=$('font')?.value||o.font;o.pageSpacing=Number($('pageSpacing')?.value||34);o.headerSpacing=Number($('headerSpacing')?.value||42);o.photoPlacement=$('photoPlacement')?.value||'right';o.sectionOrder=[...sectionOrder];o.elementStyles={...elementStyles};return o}
 function saveStorage(key,value){try{localStorage.setItem(key,value)}catch(e){}try{sessionStorage.setItem(key,value)}catch(e){}}
 function readStorage(key){try{const v=localStorage.getItem(key);if(v)return v}catch(e){}try{const v=sessionStorage.getItem(key);if(v)return v}catch(e){}return null}
-let photoData='',selectedColor='#334155',sectionOrder=[...defaultData.sectionOrder];
+let photoData='',selectedColor='#334155',sectionOrder=[...defaultData.sectionOrder],elementStyles={},selectedEditKey='';
 function addExperience(item={}){const list=$('experienceList');const el=document.createElement('div');el.className='repeat-item';el.innerHTML='<div class="repeat-head"><strong>Experience</strong><button type="button" class="btn secondary remove-repeat">Remove</button></div><div class="mini-grid"><div class="field"><label>Company</label><input data-k="company" value="'+esc(item.company)+'" placeholder="Company name"></div><div class="field"><label>Position</label><input data-k="position" value="'+esc(item.position)+'" placeholder="Job title"></div><div class="field"><label>Start Date</label><input data-k="start" value="'+esc(item.start)+'" placeholder="Jan 2024"></div><div class="field"><label>End Date</label><input data-k="end" value="'+esc(item.end)+'" placeholder="Present"></div><div class="field"><label>Location</label><input data-k="location" value="'+esc(item.location)+'" placeholder="Karachi, Pakistan"></div><div class="field" style="grid-column:1/-1"><label>Description / Achievements</label><textarea data-k="description" placeholder="Responsibilities, tools and measurable results...">'+esc(item.description)+'</textarea></div></div>';list.appendChild(el);el.querySelector('.remove-repeat').onclick=()=>{el.remove();liveRender()};el.querySelectorAll('input,textarea').forEach(x=>x.addEventListener('input',liveRender));}
 function addEducation(item={}){const list=$('educationList');const el=document.createElement('div');el.className='repeat-item';el.innerHTML='<div class="repeat-head"><strong>Education</strong><button type="button" class="btn secondary remove-repeat">Remove</button></div><div class="mini-grid"><div class="field"><label>Qualification</label><input data-k="degree" value="'+esc(item.degree)+'" placeholder="Diploma / Bachelor"></div><div class="field"><label>Institute</label><input data-k="school" value="'+esc(item.school)+'" placeholder="Institute name"></div><div class="field"><label>Year</label><input data-k="year" value="'+esc(item.year)+'" placeholder="2024"></div><div class="field"><label>Location</label><input data-k="location" value="'+esc(item.location)+'" placeholder="Karachi"></div></div>';list.appendChild(el);el.querySelector('.remove-repeat').onclick=()=>{el.remove();liveRender()};el.querySelectorAll('input,textarea').forEach(x=>x.addEventListener('input',liveRender));}
 function getRepeats(id){return [...document.querySelectorAll('#'+id+' .repeat-item')].map(el=>{const o={};el.querySelectorAll('[data-k]').forEach(x=>o[x.dataset.k]=x.value);return o})}
@@ -135,7 +183,7 @@ function applySections(s){['achievements','certifications','projects'].forEach(k
 function setPhoto(src){photoData=src||'';const img=$('photoThumb');if(img){img.src=photoData;img.classList.toggle('show',!!photoData)};liveRender()}
 function renderOrderList(){const list=$('orderList');if(!list)return;const names={summary:'Professional Profile',experience:'Experience',achievements:'Key Achievements',projects:'Selected Projects'};list.innerHTML=sectionOrder.map((k,i)=>'<div class="order-item"><span>☷ '+names[k]+'</span><span><button type="button" data-up="'+k+'">↑</button> <button type="button" data-down="'+k+'">↓</button></span></div>').join('');list.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>moveSection(b.dataset.up,-1));list.querySelectorAll('[data-down]').forEach(b=>b.onclick=()=>moveSection(b.dataset.down,1))}
 function moveSection(key,dir){const i=sectionOrder.indexOf(key),j=i+dir;if(i<0||j<0||j>=sectionOrder.length)return;[sectionOrder[i],sectionOrder[j]]=[sectionOrder[j],sectionOrder[i]];renderOrderList();liveRender()}
-function initFromData(d){fields.forEach(f=>{const el=$(f);if(el&&typeof d[f]==='string')el.value=d[f]});selectedColor=d.color||'#334155';photoData=d.photo||'';sectionOrder=Array.isArray(d.sectionOrder)&&d.sectionOrder.length?d.sectionOrder.filter(x=>defaultData.sectionOrder.includes(x)): [...defaultData.sectionOrder];while(sectionOrder.length<defaultData.sectionOrder.length)defaultData.sectionOrder.forEach(x=>{if(!sectionOrder.includes(x))sectionOrder.push(x)});if($('pageSpacing'))$('pageSpacing').value=d.pageSpacing||34;if($('headerSpacing'))$('headerSpacing').value=d.headerSpacing||42;if($('photoPlacement'))$('photoPlacement').value=d.photoPlacement||'right';setPhoto(photoData);if($('colorOptions'))$('colorOptions').querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color.toLowerCase()===selectedColor.toLowerCase()));if($('customColor'))$('customColor').value=selectedColor;$('experienceList').innerHTML='';$('educationList').innerHTML='';(d.experiences||[]).forEach(addExperience);(d.educations||[]).forEach(addEducation);renderOrderList();if(!$('experienceList').children.length)addExperience();if(!$('educationList').children.length)addEducation();applySections(d.sectionState||defaultData.sectionState);liveRender();updateDash()}
+function initFromData(d){fields.forEach(f=>{const el=$(f);if(el&&typeof d[f]==='string')el.value=d[f]});selectedColor=d.color||'#334155';photoData=d.photo||'';elementStyles=d.elementStyles||{};sectionOrder=Array.isArray(d.sectionOrder)&&d.sectionOrder.length?d.sectionOrder.filter(x=>defaultData.sectionOrder.includes(x)): [...defaultData.sectionOrder];while(sectionOrder.length<defaultData.sectionOrder.length)defaultData.sectionOrder.forEach(x=>{if(!sectionOrder.includes(x))sectionOrder.push(x)});if($('pageSpacing'))$('pageSpacing').value=d.pageSpacing||34;if($('headerSpacing'))$('headerSpacing').value=d.headerSpacing||42;if($('photoPlacement'))$('photoPlacement').value=d.photoPlacement||'right';setPhoto(photoData);if($('colorOptions'))$('colorOptions').querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color.toLowerCase()===selectedColor.toLowerCase()));if($('customColor'))$('customColor').value=selectedColor;$('experienceList').innerHTML='';$('educationList').innerHTML='';(d.experiences||[]).forEach(addExperience);(d.educations||[]).forEach(addEducation);renderOrderList();if(!$('experienceList').children.length)addExperience();if(!$('educationList').children.length)addEducation();applySections(d.sectionState||defaultData.sectionState);liveRender();updateDash()}
 function load(){try{const raw=readStorage('careerpilot_cv');if(!raw){addExperience();addEducation();updateDash();liveRender();return}initFromData(JSON.parse(raw));if($('saveStatus'))$('saveStatus').textContent='✓ Saved CV loaded from this device'}catch(e){addExperience();addEducation();updateDash();liveRender()}}
 function save(){try{const d=data();const raw=JSON.stringify(d);saveStorage('careerpilot_cv',raw);updateDash();if($('saveStatus'))$('saveStatus').textContent='✓ CV saved on this device';toast('CV saved on this device');return true}catch(e){if($('saveStatus'))$('saveStatus').textContent='Could not save on this browser.';toast('Save failed');return false}}
 function updateDash(){const d=data();let n=0;['name','title','email','phone','location','summary','skills'].forEach(f=>{if(String(d[f]||'').trim())n++});if($('profileStatus'))$('profileStatus').textContent=Math.round(n/7*100)+'%';if($('templateStatus'))$('templateStatus').textContent=d.template||'Modern';if($('matchStatus'))$('matchStatus').textContent=localStorage.getItem('careerpilot_matches')||'0'}
@@ -143,7 +191,100 @@ function jobBlocks(d){return (d.experiences||[]).filter(x=>x.company||x.position
 }
 function educationBlocks(d){return (d.educations||[]).filter(x=>x.degree||x.school||x.year).map(x=>'<div class="cv-experience"><div class="cv-job-head"><div><div class="cv-job-role">'+esc(x.degree||'Qualification')+'</div><div class="cv-job-company">'+esc(x.school||'Institute')+'</div></div><div class="cv-job-date">'+esc(x.year||'')+'</div></div>'+(x.location?'<div class="cv-job-location">'+esc(x.location)+'</div>':'')+'</div>').join('')}
 function section(title,text,kind='text'){if(!text)return '';return '<div class="cv-section"><h2>'+title+'</h2><div class="cv-text">'+esc(text)+'</div></div>'}
-function renderCV(target='cvPaper'){const d=data();const tpl=d.template||'Modern';const cls=tpl==='Professional'?'cv-professional':tpl==='ATS-Friendly'?'cv-ats':tpl==='Elegant'?'cv-elegant':tpl==='Creative'?'cv-creative':tpl==='Minimal'?'cv-minimal':'cv-modern';const contact=[d.email,d.phone,d.location,d.portfolio].filter(Boolean).map(esc).join('<span>•</span>');const skills=d.skills.split(/[,\n]+/).map(x=>x.trim()).filter(Boolean).map(x=>'<div class="cv-skill"><span>'+esc(x)+'</span><i></i></div>').join('');const side=(skills?'<div class="cv-section"><h2>Core Skills</h2><div class="cv-skills">'+skills+'</div></div>':'')+(d.languages?section('Languages',d.languages):'')+(d.educations?.length?'<div class="cv-section"><h2>Education</h2>'+educationBlocks(d)+'</div>':'')+(d.certifications&&d.sectionState.certifications?section('Certifications',d.certifications):'');const blocks={summary:d.summary?section('Professional Profile',d.summary):'',experience:d.experiences?.length?'<div class="cv-section"><h2>Experience</h2>'+jobBlocks(d)+'</div>':'',achievements:d.achievements&&d.sectionState.achievements?section('Key Achievements',d.achievements):'',projects:d.projects&&d.sectionState.projects?section('Selected Projects',d.projects):''};let main='';d.sectionOrder.forEach(k=>{if(blocks[k])main+=blocks[k]});const photoClass=d.photoPlacement==='left'?'photo-left':d.photoPlacement==='center'?'photo-center':'photo-right';const accent=d.color||'#334155';const photoBorder=accent==='#ffffff'?'#d1d5db':accent;const paper='<div class="cv '+cls+'" style="--accent:'+esc(accent)+';font-family:'+esc(d.font)+',Arial,sans-serif"><div class="cv-header" style="border-color:'+esc(accent)+';padding-top:'+Number(d.headerSpacing)+'px"><img class="cv-photo '+(d.photo?'show ':'')+photoClass+'" src="'+esc(d.photo)+'" style="border-color:'+esc(photoBorder)+'"><div class="cv-kicker" style="color:'+esc(accent)+'">'+esc(d.headline||d.title||'Professional Resume')+'</div><h1>'+esc(d.name||'Your Name')+'</h1><div class="role" style="color:'+esc(accent)+'">'+esc(d.title||'Professional Title')+'</div><div class="cv-contact">'+(contact||'email@example.com • Phone • City, Country')+'</div></div><div class="cv-body"><aside class="cv-side" style="padding-top:'+Number(d.pageSpacing)+'px">'+side+'</aside><div class="cv-main" style="padding-top:'+Number(d.pageSpacing)+'px;padding-bottom:'+Number(d.pageSpacing)+'px">'+(main||'<div class="cv-section"><h2>Professional Profile</h2><div class="cv-text">Start filling your details to build your CV.</div></div>')+'</div></div></div>';if($(target))$(target).innerHTML=paper;const root=$(target)?.firstElementChild;if(root){root.style.setProperty('--accent',accent);root.querySelectorAll('.cv-section h2').forEach(x=>x.style.color=accent);root.querySelectorAll('.cv-skill').forEach(x=>{x.style.background=accent==='#ffffff'?'#f3f4f6':accent+'18';x.style.color=accent==='#ffffff'?'#111827':accent});if(tpl==='Creative')root.querySelector('.cv-header')?.style.setProperty('border-bottom-color',accent)}}
+function styleAttr(key){
+  const s=elementStyles[key]||{};
+  const x=Number(s.x||0),y=Number(s.y||0);
+  return 'transform:translate('+x+'px,'+y+'px);'+(s.color?'color:'+esc(s.color)+';':'')+(s.size?'font-size:'+Number(s.size)+'px;':'')+(s.weight?'font-weight:'+esc(s.weight)+';':'')+(s.align?'text-align:'+esc(s.align)+';':'');
+}
+function editText(key,text,extra=''){
+  return ' data-edit="'+key+'" contenteditable="true" spellcheck="false" data-bind="'+key+'" style="'+styleAttr(key)+'"'+extra+'>'+esc(text||'')+'</div>';
+}
+function renderCV(target='cvPaper'){
+ const d=data(),tpl=d.template||'Modern';
+ const cls=tpl==='Professional'?'cv-professional':tpl==='ATS-Friendly'?'cv-ats':tpl==='Elegant'?'cv-elegant':tpl==='Creative'?'cv-creative':tpl==='Minimal'?'cv-minimal':'cv-modern';
+ const contact=[d.email,d.phone,d.location,d.portfolio].filter(Boolean).map(esc).join('<span>•</span>');
+ const skills=d.skills.split(/[,\n]+/).map(x=>x.trim()).filter(Boolean).map((x,i)=>'<div class="cv-skill" data-edit="skill-'+i+'" contenteditable="true" spellcheck="false" data-bind="skills">'+esc(x)+'</div>').join('');
+ const side=(skills?'<div class="cv-section"><h2>Core Skills</h2><div class="cv-skills">'+skills+'</div></div>':'')+
+   (d.languages?section('Languages',d.languages):'')+
+   (d.educations?.length?'<div class="cv-section"><h2>Education</h2>'+educationBlocks(d)+'</div>':'')+
+   (d.certifications&&d.sectionState.certifications?section('Certifications',d.certifications):'');
+ const blocks={
+   summary:d.summary?'<div class="cv-section"><h2>Professional Profile</h2><div class="cv-text" data-edit="summary" contenteditable="true" spellcheck="false" data-bind="summary" style="'+styleAttr('summary')+'">'+esc(d.summary)+'</div></div>':'',
+   experience:d.experiences?.length?'<div class="cv-section"><h2>Experience</h2>'+jobBlocks(d)+'</div>':'',
+   achievements:d.achievements&&d.sectionState.achievements?section('Key Achievements',d.achievements):'',
+   projects:d.projects&&d.sectionState.projects?section('Selected Projects',d.projects):''
+ };
+ let main='';d.sectionOrder.forEach(k=>{if(blocks[k])main+=blocks[k]});
+ const photoClass=d.photoPlacement==='left'?'photo-left':d.photoPlacement==='center'?'photo-center':'photo-right';
+ const accent=d.color||'#334155',photoBorder=accent==='#ffffff'?'#d1d5db':accent;
+ const paper='<div class="cv '+cls+'" style="--accent:'+esc(accent)+';font-family:'+esc(d.font)+',Arial,sans-serif">'+
+ '<div class="cv-header" style="border-color:'+esc(accent)+';padding-top:'+Number(d.headerSpacing)+'px">'+
+ (d.photo?'<img class="cv-photo show '+photoClass+'" data-edit="photo" src="'+esc(d.photo)+'" style="border-color:'+esc(photoBorder)+';'+styleAttr('photo')+'">':'')+
+ '<div class="cv-kicker" data-edit="headline" contenteditable="true" spellcheck="false" data-bind="headline" style="color:'+esc(accent)+';'+styleAttr('headline')+'">'+esc(d.headline||d.title||'Professional Resume')+'</div>'+
+ '<h1 data-edit="name" contenteditable="true" spellcheck="false" data-bind="name" style="'+styleAttr('name')+'">'+esc(d.name||'Your Name')+'</h1>'+
+ '<div class="role" data-edit="title" contenteditable="true" spellcheck="false" data-bind="title" style="color:'+esc(accent)+';'+styleAttr('title')+'">'+esc(d.title||'Professional Title')+'</div>'+
+ '<div class="cv-contact">'+(contact||'email@example.com • Phone • City, Country')+'</div></div>'+
+ '<div class="cv-body"><aside class="cv-side" style="padding-top:'+Number(d.pageSpacing)+'px">'+side+'</aside>'+
+ '<div class="cv-main" style="padding-top:'+Number(d.pageSpacing)+'px;padding-bottom:'+Number(d.pageSpacing)+'px">'+(main||'<div class="cv-section"><h2>Professional Profile</h2><div class="cv-text">Start filling your details to build your CV.</div></div>')+'</div></div></div>';
+ if($(target))$(target).innerHTML=paper;
+ const root=$(target)?.firstElementChild;
+ if(root){
+   root.style.setProperty('--accent',accent);
+   root.querySelectorAll('.cv-section h2').forEach(x=>x.style.color=accent);
+   root.querySelectorAll('.cv-skill').forEach(x=>{x.style.borderLeftColor=accent});
+   root.querySelectorAll('[data-edit]').forEach(x=>{
+     if(x.dataset.edit===selectedEditKey)x.classList.add('edit-selected');
+   });
+ }
+}
+
+function selectEditable(el){
+  if(!el)return;
+  selectedEditKey=el.dataset.edit||'';
+  document.querySelectorAll('.cv [data-edit].edit-selected').forEach(x=>x.classList.remove('edit-selected'));
+  el.classList.add('edit-selected');
+  $('selectedElementName').textContent=selectedEditKey||'Selected element';
+  const s=elementStyles[selectedEditKey]||{};
+  $('elementTextColor').value=s.color||'#172033';
+  $('elementFontSize').value=s.size||Math.round(parseFloat(getComputedStyle(el).fontSize)||16);
+  $('toggleBold').classList.toggle('active',s.weight==='800');
+}
+function applyElementChange(){
+  if(!selectedEditKey)return;
+  elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),color:$('elementTextColor').value,size:Number($('elementFontSize').value)||16};
+  renderCV('builderPaper');
+}
+function moveSelected(dir){
+  if(!selectedEditKey)return;
+  const s=elementStyles[selectedEditKey]||{x:0,y:0};
+  const step=4;
+  if(dir==='up')s.y=(s.y||0)-step;if(dir==='down')s.y=(s.y||0)+step;if(dir==='left')s.x=(s.x||0)-step;if(dir==='right')s.x=(s.x||0)+step;
+  elementStyles[selectedEditKey]=s;renderCV('builderPaper');toast('Element moved');
+}
+document.addEventListener('click',e=>{
+  const el=e.target.closest('#builderPaper .cv [data-edit]');
+  if(el){e.stopPropagation();selectEditable(el)}
+});
+document.addEventListener('dblclick',e=>{
+  const el=e.target.closest('#builderPaper .cv [data-edit]');
+  if(el){el.focus();document.execCommand('selectAll',false,null)}
+});
+document.addEventListener('input',e=>{
+  const el=e.target.closest('#builderPaper .cv [data-edit][data-bind]');
+  if(!el)return;
+  const key=el.dataset.bind, value=el.innerText;
+  if($(key)){$(key).value=value;return}
+  if(key==='skills'){$('skills').value=[...document.querySelectorAll('#builderPaper .cv .cv-skill')].map(x=>x.innerText.trim()).filter(Boolean).join(', ')}
+});
+$('elementTextColor').addEventListener('input',applyElementChange);
+$('elementFontSize').addEventListener('input',applyElementChange);
+$('toggleBold').onclick=()=>{if(!selectedEditKey)return;const s=elementStyles[selectedEditKey]||{};s.weight=s.weight==='800'?'400':'800';elementStyles[selectedEditKey]=s;renderCV('builderPaper')};
+$('alignLeft').onclick=()=>{if(!selectedEditKey)return;elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),align:'left'};renderCV('builderPaper')};
+$('alignCenter').onclick=()=>{if(!selectedEditKey)return;elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),align:'center'};renderCV('builderPaper')};
+$('alignRight').onclick=()=>{if(!selectedEditKey)return;elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),align:'right'};renderCV('builderPaper')};
+document.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>moveSelected(b.dataset.move));
+$('resetElement').onclick=()=>{if(!selectedEditKey)return;delete elementStyles[selectedEditKey];renderCV('builderPaper');toast('Element reset')};
+
 function liveRender(){try{renderCV('builderPaper');updateDash()}catch(e){}}
 $('saveCv').addEventListener('click',save);$('saveCvBottom').addEventListener('click',save);$('previewBtn').onclick=()=>go('preview');
 $('addExperience').onclick=()=>{addExperience();liveRender()};$('addEducation').onclick=()=>{addEducation();liveRender()};
