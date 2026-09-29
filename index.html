@@ -341,6 +341,9 @@ function renderCV(target='cvPaper'){
    root.querySelectorAll('[data-edit]').forEach(x=>{
      if(x.dataset.edit===selectedEditKey)x.classList.add('edit-selected');
    });
+   const rebound=selectedEditKey?root.querySelector('[data-edit="'+CSS.escape(String(selectedEditKey))+'"]'):null;
+   if(rebound)selectedEditEl=rebound;
+   bindEditableElements(root);
  }
 }
 
@@ -386,30 +389,28 @@ function moveSelected(dir){
   if(dir==='up')s.y=(s.y||0)-step;if(dir==='down')s.y=(s.y||0)+step;if(dir==='left')s.x=(s.x||0)-step;if(dir==='right')s.x=(s.x||0)+step;
   elementStyles[selectedEditKey]=s;renderCV('builderPaper');toast('Element moved');
 }
-function getBuilderEditTarget(node){
-  if(!node)return null;
-  let el=node.nodeType===1?node:node.parentElement;
-  while(el&&el!==document.body){
-    if(el.matches&&el.matches('#builderPaper .cv [data-edit]'))return el;
-    el=el.parentElement;
-  }
-  return null;
+function bindEditableElements(root){
+  if(!root)return;
+  root.querySelectorAll('[data-edit]').forEach(el=>{
+    el.addEventListener('pointerdown',e=>{
+      if(editorMode==='move')return;
+      selectEditable(el);
+      e.stopPropagation();
+    });
+    el.addEventListener('click',e=>{
+      if(editorMode==='move')return;
+      selectEditable(el);
+      e.stopPropagation();
+    });
+    el.addEventListener('dblclick',e=>{
+      if(editorMode==='move')return;
+      selectEditable(el);
+      el.focus();
+      try{document.execCommand('selectAll',false,null)}catch(err){}
+      e.stopPropagation();
+    });
+  });
 }
-document.addEventListener('pointerdown',e=>{
-  if(editorMode==='move')return;
-  const el=getBuilderEditTarget(e.target);
-  if(!el)return;
-  selectEditable(el);
-  e.stopPropagation();
-});
-document.addEventListener('click',e=>{
-  const el=getBuilderEditTarget(e.target);
-  if(el){selectEditable(el);e.stopPropagation()}
-});
-document.addEventListener('dblclick',e=>{
-  const el=getBuilderEditTarget(e.target);
-  if(el){selectEditable(el);el.focus();document.execCommand('selectAll',false,null);e.stopPropagation()}
-});
 let editorSaveTimer;
 document.addEventListener('input',e=>{
   const el=e.target.closest('#builderPaper .cv [data-edit][data-bind]');
