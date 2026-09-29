@@ -342,7 +342,7 @@ function renderCV(target='cvPaper'){
    root.querySelectorAll('[data-edit]').forEach(x=>{
      if(x.dataset.edit===selectedEditKey)x.classList.add('edit-selected');
    });
-   const rebound=selectedEditKey?document.getElementById('cv-edit-'+String(selectedEditKey).replace(/[^a-zA-Z0-9_-]/g,'-')):null;
+   const rebound=selectedEditId?document.getElementById(selectedEditId):null;
    if(rebound){selectedEditEl=rebound;rebound.setAttribute('data-editor-selected','true');rebound.classList.add('edit-selected')}
    bindEditableElements(root);
  }
@@ -350,10 +350,13 @@ function renderCV(target='cvPaper'){
 
 function selectEditable(el){
   if(!el||!el.dataset.edit)return;
+  const exactId=String(el.id||el.dataset.editorId||'');
+  if(!exactId)return;
+  selectedEditId=exactId;
   selectedEditKey=String(el.dataset.edit);
-  selectedEditId='cv-edit-'+selectedEditKey.replace(/[^a-zA-Z0-9_-]/g,'-');
-  const builder=document.querySelector('#builderPaper .cv [data-editor-id="'+CSS.escape(selectedEditId)+'"]');
-  selectedEditEl=builder||el;
+  const builder=document.getElementById(selectedEditId);
+  selectedEditEl=(builder&&builder.closest('#builderPaper'))?builder:null;
+  if(!selectedEditEl)return;
   document.querySelectorAll('#builderPaper .cv [data-editor-selected="true"]').forEach(x=>x.removeAttribute('data-editor-selected'));
   if(selectedEditEl){selectedEditEl.setAttribute('data-editor-selected','true');selectedEditEl.classList.add('edit-selected')}
   const label=(el.innerText||el.textContent||'').trim().replace(/\s+/g,' ').slice(0,32);
@@ -368,10 +371,10 @@ function selectEditable(el){
 function rgbToHex(rgb){const m=String(rgb).match(/\d+/g);if(!m||m.length<3)return null;return '#'+m.slice(0,3).map(n=>Number(n).toString(16).padStart(2,'0')).join('')}
 function applyElementChange(){
   const key=String(selectedEditKey||'');
-  if(!key)return;
-  const id='cv-edit-'+key.replace(/[^a-zA-Z0-9_-]/g,'-');
-  const el=document.querySelector('#builderPaper .cv [data-editor-id="'+CSS.escape(id)+'"]');
-  if(!el)return;
+  const id=String(selectedEditId||'');
+  if(!key||!id)return;
+  const el=document.getElementById(id);
+  if(!el||!el.closest('#builderPaper .cv'))return;
   selectedEditEl=el;
   const s={...(elementStyles[key]||{})};
   const color=$('elementTextColor')?.value||'#172033';
