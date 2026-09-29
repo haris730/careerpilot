@@ -314,9 +314,9 @@ function renderCV(target='cvPaper'){
  '<div class="cv-header" style="border-color:'+esc(accent)+';padding-top:'+Number(d.headerSpacing)+'px">'+
  (d.photo?'<img class="cv-photo show '+photoClass+'" data-edit="photo" src="'+esc(d.photo)+'" style="border-color:'+esc(photoBorder)+';'+styleAttr('photo')+'">':'')+
  (showHeadline?'<div class="cv-kicker" data-edit="headline" contenteditable="true" spellcheck="false" data-bind="headline" style="color:'+esc(accent)+';'+styleAttr('headline')+'">'+esc(headlineText)+'</div>':'')+
- '<h1 data-edit="name" contenteditable="true" spellcheck="false" data-bind="name" style="'+styleAttr('name')+'">'+esc(d.name||'Your Name')+'</h1>'+
- '<div class="role" data-edit="title" contenteditable="true" spellcheck="false" data-bind="title" style="color:'+esc(accent)+';'+styleAttr('title')+'">'+esc(titleText||'Professional Title')+'</div>'+
- '<div class="cv-contact" data-edit="contact" contenteditable="true" spellcheck="false" data-bind="contact" style="'+styleAttr('contact')+'">'+(contact||'email@example.com • Phone • City, Country')+'</div></div>'+
+ '<h1 id="cv-edit-name" data-edit="name" contenteditable="true" spellcheck="false" data-bind="name" style="'+styleAttr('name')+'">'+esc(d.name||'Your Name')+'</h1>'+
+ '<div id="cv-edit-title" class="role" data-edit="title" contenteditable="true" spellcheck="false" data-bind="title" style="color:'+esc(accent)+';'+styleAttr('title')+'">'+esc(titleText||'Professional Title')+'</div>'+
+ '<div id="cv-edit-contact" class="cv-contact" data-edit="contact" contenteditable="true" spellcheck="false" data-bind="contact" style="'+styleAttr('contact')+'">'+(contact||'email@example.com • Phone • City, Country')+'</div></div>'+
  '<div class="cv-body"><aside class="cv-side" style="padding-top:'+Number(d.pageSpacing)+'px">'+side+'</aside>'+
  '<div class="cv-main" style="padding-top:'+Number(d.pageSpacing)+'px;padding-bottom:'+Number(d.pageSpacing)+'px">'+(main||'<div class="cv-section"><h2>Professional Profile</h2><div class="cv-text">Start filling your details to build your CV.</div></div>')+'</div></div></div>';
  if($(target))$(target).innerHTML=paper;
@@ -330,7 +330,7 @@ function renderCV(target='cvPaper'){
    });
    root.querySelectorAll('[data-edit]').forEach(x=>{
      const key=String(x.dataset.edit||''),s=elementStyles[key]||{};
-     x.setAttribute('data-editor-id','cv-edit-'+key.replace(/[^a-zA-Z0-9_-]/g,'-'));
+     const editorId='cv-edit-'+key.replace(/[^a-zA-Z0-9_-]/g,'-');x.setAttribute('id',editorId);x.setAttribute('data-editor-id',editorId);
      if(s.color)x.style.setProperty('color',s.color,'important');
      if(s.size)x.style.setProperty('font-size',Number(s.size)+'px','important');
      if(s.font)x.style.setProperty('font-family',s.font+',Arial,sans-serif','important');
@@ -342,7 +342,7 @@ function renderCV(target='cvPaper'){
    root.querySelectorAll('[data-edit]').forEach(x=>{
      if(x.dataset.edit===selectedEditKey)x.classList.add('edit-selected');
    });
-   const rebound=selectedEditKey?root.querySelector('[data-editor-id="'+CSS.escape('cv-edit-'+String(selectedEditKey).replace(/[^a-zA-Z0-9_-]/g,'-'))+'"]'):null;
+   const rebound=selectedEditKey?document.getElementById('cv-edit-'+String(selectedEditKey).replace(/[^a-zA-Z0-9_-]/g,'-')):null;
    if(rebound){selectedEditEl=rebound;rebound.setAttribute('data-editor-selected','true');rebound.classList.add('edit-selected')}
    bindEditableElements(root);
  }
@@ -352,7 +352,7 @@ function selectEditable(el){
   if(!el||!el.dataset.edit)return;
   selectedEditKey=String(el.dataset.edit);
   selectedEditId='cv-edit-'+selectedEditKey.replace(/[^a-zA-Z0-9_-]/g,'-');
-  const builder=document.querySelector('#builderPaper .cv [data-editor-id="'+CSS.escape(selectedEditId)+'"]');
+  const builder=document.getElementById(selectedEditId);
   selectedEditEl=builder||el;
   document.querySelectorAll('#builderPaper .cv [data-editor-selected="true"]').forEach(x=>x.removeAttribute('data-editor-selected'));
   if(selectedEditEl){selectedEditEl.setAttribute('data-editor-selected','true');selectedEditEl.classList.add('edit-selected')}
@@ -395,7 +395,7 @@ function moveSelected(dir){
   elementStyles[selectedEditKey]=s;renderCV('builderPaper');toast('Element moved');
 }
 function bindEditableElements(root){
-  if(!root)return;
+  if(!root || !root.closest('#builderPaper'))return;
   root.querySelectorAll('[data-edit]').forEach(el=>{
     if(el.dataset.boundEditor==='1')return;
     el.dataset.boundEditor='1';
