@@ -194,7 +194,7 @@ function section(title,text,kind='text'){if(!text)return '';return '<div class="
 function styleAttr(key){
   const s=elementStyles[key]||{};
   const x=Number(s.x||0),y=Number(s.y||0);
-  return 'transform:translate('+x+'px,'+y+'px);'+(s.color?'color:'+esc(s.color)+';':'')+(s.size?'font-size:'+Number(s.size)+'px;':'')+(s.weight?'font-weight:'+esc(s.weight)+';':'')+(s.align?'text-align:'+esc(s.align)+';':'');
+  return 'transform:translate('+x+'px,'+y+'px);'+(s.color?'color:'+esc(s.color)+';':'')+(s.size?'font-size:'+Number(s.size)+'px;':'')+(s.font?'font-family:'+esc(s.font)+',Arial,sans-serif;':'')+(s.weight?'font-weight:'+esc(s.weight)+';':'')+(s.align?'text-align:'+esc(s.align)+';':'');
 }
 function editText(key,text,extra=''){
   return ' data-edit="'+key+'" contenteditable="true" spellcheck="false" data-bind="'+key+'" style="'+styleAttr(key)+'"'+extra+'>'+esc(text||'')+'</div>';
@@ -247,11 +247,12 @@ function selectEditable(el){
   const s=elementStyles[selectedEditKey]||{};
   $('elementTextColor').value=s.color||'#172033';
   $('elementFontSize').value=s.size||Math.round(parseFloat(getComputedStyle(el).fontSize)||16);
+  $('elementFontFamily').value=s.font||'Inter';
   $('toggleBold').classList.toggle('active',s.weight==='800');
 }
 function applyElementChange(){
   if(!selectedEditKey)return;
-  elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),color:$('elementTextColor').value,size:Number($('elementFontSize').value)||16};
+  elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),color:$('elementTextColor').value,size:Number($('elementFontSize').value)||16,font:$('elementFontFamily').value};
   renderCV('builderPaper');
 }
 function moveSelected(dir){
@@ -297,6 +298,7 @@ document.addEventListener('input',e=>{
 });
 $('elementTextColor').addEventListener('input',applyElementChange);
 $('elementFontSize').addEventListener('input',applyElementChange);
+$('elementFontFamily').addEventListener('change',applyElementChange);
 $('toggleBold').onclick=()=>{if(!selectedEditKey)return;const s=elementStyles[selectedEditKey]||{};s.weight=s.weight==='800'?'400':'800';elementStyles[selectedEditKey]=s;renderCV('builderPaper')};
 $('alignLeft').onclick=()=>{if(!selectedEditKey)return;elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),align:'left'};renderCV('builderPaper')};
 $('alignCenter').onclick=()=>{if(!selectedEditKey)return;elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),align:'center'};renderCV('builderPaper')};
