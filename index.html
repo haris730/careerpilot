@@ -91,10 +91,30 @@
 #builderPaper .cv .cv-section h2[data-edit]{line-height:1.15 !important;margin-top:0;}
 #builderPaper .cv .cv-text[data-edit],#cvPaper .cv .cv-text[data-edit]{line-height:1.55 !important;}
 #builderPaper .cv .cv-skill[data-edit]{line-height:1.35 !important;}
+
+.job-search-grid{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:18px}
+.job-search-panel{background:#fff;border:1px solid #e7eaf0;border-radius:18px;padding:20px;box-shadow:0 8px 25px #11182708}
+.job-search-panel h3{margin:0 0 14px;font-size:16px}
+.job-search-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.job-results{display:flex;flex-direction:column;gap:12px}
+.job-card{background:#fff;border:1px solid #e7eaf0;border-radius:16px;padding:16px;box-shadow:0 6px 18px #11182708}
+.job-card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.job-card h3{margin:0;font-size:15px;color:#172033}
+.job-company{font-size:12px;font-weight:700;color:#4f46e5;margin-top:5px}
+.job-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.job-meta span{background:#f1f5f9;color:#475569;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:700}
+.job-source{font-size:10px;font-weight:800;color:#64748b}
+.job-card p{font-size:12px;line-height:1.55;color:#64748b;margin:10px 0}
+.source-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}
+.source-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;color:#334155;padding:10px 11px;border-radius:10px;font-size:11px;font-weight:800}
+.source-btn:hover{border-color:#c7d2fe;background:#eef2ff;color:#4338ca}
+.job-empty{padding:35px 20px;text-align:center;border:1px dashed #cbd5e1;border-radius:16px;color:#64748b;background:#fff}
+.job-note{font-size:11px;color:#64748b;line-height:1.55;margin-top:10px}
+@media(max-width:900px){.job-search-grid{grid-template-columns:1fr}.source-grid{grid-template-columns:1fr}}
 </style></head>
 <body>
 <div class="app"><aside class="sidebar"><div class="brand">Career<span>Pilot</span></div><nav class="nav">
-<button class="active" data-go="dashboard">🏠 Dashboard</button><button data-go="cv">📄 CV Builder</button><button data-go="templates">🎨 Templates</button><button data-go="match">🎯 Job Match</button><button data-go="cover">✉️ Cover Letter</button><button data-go="interview">💬 Interview Prep</button></nav></aside>
+<button class="active" data-go="dashboard">🏠 Dashboard</button><button data-go="cv">📄 CV Builder</button><button data-go="templates">🎨 Templates</button><button data-go="jobsearch">🔎 Job Search</button><button data-go="match">🎯 Job Match</button><button data-go="cover">✉️ Cover Letter</button><button data-go="interview">💬 Interview Prep</button></nav></aside>
 <main class="main">
 <section id="dashboard" class="section active"><div class="top"><div><h1>Welcome to CareerPilot</h1><div class="muted" style="margin-top:5px">Your career toolkit, all in one place.</div></div><span class="badge">Free MVP v1</span></div><div class="hero"><h2>Build a CV that gets noticed.</h2><p>Create a professional CV, match it with job descriptions and prepare for interviews — quickly and privately in your browser.</p><div class="actions"><button class="btn light" data-go="cv">✨ Build My CV</button><button class="btn" style="background:#ffffff20;border:1px solid #ffffff30" data-go="match">🎯 Match a Job</button></div></div><div class="grid"><div class="card statcard"><div class="stat-icon">📄</div><div class="muted">CV Profile</div><div class="stat" id="profileStatus">0%</div><div class="muted">Complete your details</div></div><div class="card statcard"><div class="stat-icon">🎨</div><div class="muted">CV Template</div><div class="stat" id="templateStatus">Modern</div><div class="muted">Selected design</div></div><div class="card statcard"><div class="stat-icon">🎯</div><div class="muted">Job Matches</div><div class="stat" id="matchStatus">0</div><div class="muted">Analyses saved locally</div></div><div class="card statcard"><div class="stat-icon">🔒</div><div class="muted">Your Data</div><div class="stat">Local</div><div class="muted">Stored in your browser</div></div></div><div class="quick"><div class="card" data-go="cv"><div style="font-size:22px">📄</div><h3>Create your CV</h3><div class="muted">Add your experience, skills and education.</div></div><div class="card" data-go="templates"><div style="font-size:22px">🎨</div><h3>Choose a design</h3><div class="muted">Modern, Professional or ATS-Friendly.</div></div><div class="card" data-go="interview"><div style="font-size:22px">💬</div><h3>Prepare for interviews</h3><div class="muted">Practice common interview questions.</div></div></div></section>
 <section id="cv" class="section">
@@ -178,6 +198,39 @@
 <div class="template" data-template="Creative"><div class="mini-cv mini-creative"><div class="m-head"><div class="m-name">YOUR NAME</div><div class="m-role">VISUAL DESIGNER</div></div><div class="m-col"><div class="m-side"><div class="m-tag"></div><div class="m-tag"></div><div class="m-tag"></div></div><div class="m-main"><b>SELECTED WORK</b><div class="m-line"></div><div class="m-line"></div><div class="m-line"></div></div></div><div class="m-accent"></div></div><h3>Creative Studio</h3><p class="muted">Dark portfolio direction with strong type, visual rhythm and lime accent.</p><button class="btn">Use Template</button></div>
 <div class="template" data-template="Minimal"><div class="mini-cv mini-minimal"><div class="m-head"><div class="m-name">YOUR NAME</div><div class="m-role">STRATEGY / OPERATIONS</div></div><div class="m-col"><div class="m-main"><b>EXPERIENCE</b><div class="m-line"></div><div class="m-line"></div><b>EDUCATION</b><div class="m-line"></div></div></div></div><h3>Minimal Executive</h3><p class="muted">Quiet premium layout, strong grid, crisp rules and generous breathing room.</p><button class="btn">Use Template</button></div>
 </div></section>
+
+<section id="jobsearch" class="section">
+  <div class="top"><div><h1>Job Search</h1><div class="muted" style="margin-top:5px">Search jobs legally through official job platforms and approved integrations.</div></div><span class="badge">Official Sources</span></div>
+  <div class="hero" style="margin-bottom:18px">
+    <h2>Find your next job.</h2>
+    <p>Search by country, city, job title and work preferences. CareerPilot keeps the application on the original job platform or employer website.</p>
+  </div>
+  <div class="job-search-grid">
+    <div class="job-search-panel">
+      <h3>Search filters</h3>
+      <div class="field"><label>Job title / keyword</label><input id="jobSearchKeyword" placeholder="Graphic Designer, Flutter Developer..."></div>
+      <div class="field" style="margin-top:10px"><label>Country</label><select id="jobSearchCountry">
+        <option value="">Any country</option><option>Pakistan</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Qatar</option><option>Germany</option><option>Poland</option><option>Romania</option><option>Latvia</option><option>United Kingdom</option><option>United States</option><option>Canada</option><option>Australia</option><option>Netherlands</option><option>France</option><option>Italy</option><option>Spain</option><option>Other</option>
+      </select></div>
+      <div class="field" style="margin-top:10px"><label>City / region</label><input id="jobSearchLocation" placeholder="Karachi, Berlin, Dubai..."></div>
+      <div class="formgrid" style="margin-top:10px">
+        <div class="field"><label>Job type</label><select id="jobSearchType"><option value="">Any type</option><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Internship</option><option>Temporary</option></select></div>
+        <div class="field"><label>Work mode</label><select id="jobSearchMode"><option value="">Any mode</option><option>On-site</option><option>Hybrid</option><option>Remote</option></select></div>
+      </div>
+      <div class="formgrid" style="margin-top:10px">
+        <div class="field"><label>Experience</label><select id="jobSearchExperience"><option value="">Any level</option><option>Entry level</option><option>Mid-Senior level</option><option>Senior level</option><option>Director</option></select></div>
+        <div class="field"><label>Posted</label><select id="jobSearchDate"><option value="">Any time</option><option value="1">Past 24 hours</option><option value="7">Past week</option><option value="30">Past month</option></select></div>
+      </div>
+      <div class="job-search-actions"><button class="btn" id="searchOfficialJobs">🔎 Search official sites</button><button class="btn secondary" id="clearJobSearch">Reset</button></div>
+      <div class="job-note">LinkedIn and Indeed searches open on their official websites. In-app API results can be enabled later with approved Adzuna/Jooble credentials; no scraping or bypassing is used.</div>
+    </div>
+    <div class="job-search-panel">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><h3 style="margin:0">Job sources</h3><span id="jobSearchCount" class="muted">Ready</span></div>
+      <div id="jobSourceButtons" class="source-grid"></div>
+      <div id="jobResults" class="job-results" style="margin-top:16px"><div class="job-empty">Enter a job title and choose a location, then search the official job platforms.</div></div>
+    </div>
+  </div>
+</section>
 <section id="match" class="section"><div class="top"><h1>Job Match</h1></div><div class="card"><div class="field"><label>Paste Job Description</label><textarea id="jobText" style="min-height:240px" placeholder="Paste the job description here..."></textarea></div><div class="actions"><button class="btn" id="analyzeJob">Analyze Job</button></div></div><div id="matchResult" class="card" style="margin-top:16px;display:none"></div></section>
 <section id="cover" class="section"><div class="top"><h1>Cover Letter</h1></div><div class="card"><p class="muted">Free local MVP generator. Enter a company and role to create a professional starting draft.</p><div class="formgrid"><div class="field"><label>Company</label><input id="company" placeholder="Company name"></div><div class="field"><label>Role</label><input id="role" placeholder="Job title"></div></div><div class="actions"><button class="btn" id="makeCover">Generate Draft</button></div><div class="field" style="margin-top:16px"><textarea id="coverOutput" style="min-height:300px" placeholder="Your cover letter will appear here..."></textarea></div></div></section>
 <section id="interview" class="section"><div class="top"><h1>Interview Prep</h1></div><div class="grid"><div class="card"><h3>Tell me about yourself.</h3><p class="muted">Give a 60–90 second summary focused on your recent experience, relevant skills and the role you want.</p></div><div class="card"><h3>Why should we hire you?</h3><p class="muted">Connect 2–3 strengths to the employer's requirements and give a short example.</p></div><div class="card"><h3>What is your biggest achievement?</h3><p class="muted">Use Situation → Action → Result and include measurable impact when possible.</p></div><div class="card"><h3>Why do you want this job?</h3><p class="muted">Show that you understand the role and explain how it matches your skills and goals.</p></div></div></section>
@@ -409,6 +462,51 @@ $('downloadBuilderPdf').onclick=()=>downloadPdf('builderPaper');
 function downloadPdf(target){renderCV(target);const paper=$(target);paper.classList.add('pdf-mode');html2pdf().set({margin:0,filename:'CareerPilot-CV.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},pagebreak:{mode:['css','legacy']},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(paper).save().finally(()=>paper.classList.remove('pdf-mode'))}
 document.querySelectorAll('.template').forEach(t=>t.querySelector('button').onclick=()=>{ $('template').value=t.dataset.template;liveRender();save();go('cv');toast(t.dataset.template+' template selected')});
 $('pdfBtn').onclick=()=>downloadPdf('cvPaper');
+
+function buildJobSearchUrls(){
+  const q=String($('jobSearchKeyword')?.value||'').trim();
+  const country=String($('jobSearchCountry')?.value||'').trim();
+  const loc=String($('jobSearchLocation')?.value||'').trim();
+  const type=String($('jobSearchType')?.value||'').trim();
+  const mode=String($('jobSearchMode')?.value||'').trim();
+  const exp=String($('jobSearchExperience')?.value||'').trim();
+  const date=String($('jobSearchDate')?.value||'').trim();
+  const parts=[q,loc,country,type,mode,exp].filter(Boolean);
+  const query=parts.join(' ');
+  const enc=s=>encodeURIComponent(String(s||''));
+  const urls=[];
+  urls.push({name:'LinkedIn Jobs',url:'https://www.linkedin.com/jobs/search/?keywords='+enc(q)+'&location='+enc(loc||country)+(date?'&f_TPR=r'+(Number(date)*86400):'')});
+  urls.push({name:'Indeed',url:'https://www.indeed.com/jobs?q='+enc(query)+(loc||country?'&l='+enc(loc||country):'')});
+  urls.push({name:'Adzuna',url:'https://www.adzuna.com/search?q='+enc(q||query)+(loc||country?'&loc='+enc(loc||country):'')});
+  urls.push({name:'Jooble',url:'https://jooble.org/?q='+enc(q||query)+(loc||country?'&l='+enc(loc||country):'')});
+  urls.push({name:'Google job search',url:'https://www.google.com/search?q='+enc((q||'jobs')+' '+(loc||country)+' jobs')});
+  return urls;
+}
+function renderJobSources(){
+  const urls=buildJobSearchUrls();
+  const box=$('jobSourceButtons');
+  if(!box)return;
+  box.innerHTML=urls.map(x=>'<button class="source-btn" data-job-url="'+esc(x.url)+'"><span>'+esc(x.name)+'</span><span>↗</span></button>').join('');
+  box.querySelectorAll('[data-job-url]').forEach(b=>b.onclick=()=>window.open(b.dataset.jobUrl,'_blank','noopener,noreferrer'));
+  $('jobSearchCount').textContent=urls.length+' official search routes';
+}
+function runJobSearch(){
+  const q=String($('jobSearchKeyword')?.value||'').trim();
+  const country=String($('jobSearchCountry')?.value||'').trim();
+  const loc=String($('jobSearchLocation')?.value||'').trim();
+  const type=String($('jobSearchType')?.value||'').trim();
+  const mode=String($('jobSearchMode')?.value||'').trim();
+  const exp=String($('jobSearchExperience')?.value||'').trim();
+  if(!q && !country && !loc){toast('Enter a job title or location first');return}
+  renderJobSources();
+  const terms=[q,loc,country,type,mode,exp].filter(Boolean);
+  $('jobResults').innerHTML='<div class="job-card"><div class="job-card-top"><div><h3>Search prepared</h3><div class="job-company">CareerPilot official-source search</div></div><span class="job-source">LEGAL ROUTE</span></div><p>Your search is ready. Choose a source above to open the matching results directly on that platform. CareerPilot does not scrape or copy restricted job data.</p><div class="job-meta">'+terms.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div>';
+  $('jobSearchCount').textContent='Search ready';
+  try{localStorage.setItem('careerpilot_last_job_search',JSON.stringify({q:q,country:country,location:loc,type:type,mode:mode,experience:exp}))}catch(e){}
+}
+$('searchOfficialJobs')?.addEventListener('click',runJobSearch);
+$('clearJobSearch')?.addEventListener('click',()=>{['jobSearchKeyword','jobSearchLocation'].forEach(id=>{if($(id))$(id).value=''});['jobSearchCountry','jobSearchType','jobSearchMode','jobSearchExperience','jobSearchDate'].forEach(id=>{if($(id))$(id).selectedIndex=0});renderJobSources();$('jobResults').innerHTML='<div class="job-empty">Enter a job title and choose a location, then search the official job platforms.</div>'});
+['jobSearchKeyword','jobSearchLocation','jobSearchCountry','jobSearchType','jobSearchMode','jobSearchExperience','jobSearchDate'].forEach(id=>$(id)?.addEventListener('input',renderJobSources));
 $('analyzeJob').onclick=()=>{const job=$('jobText').value.toLowerCase();const skillText=data().skills.toLowerCase();if(!job.trim()){toast('Paste a job description first');return}const keywords=['photoshop','illustrator','canva','figma','capcut','video editing','graphic design','social media','ecommerce','shopify','amazon','marketing','communication','excel','javascript','react','flutter','sales','customer service','project management','seo','wordpress','adobe'];const found=keywords.filter(k=>job.includes(k));const matched=found.filter(k=>skillText.includes(k));const missing=found.filter(k=>!skillText.includes(k));const score=found.length?Math.round(matched.length/found.length*100):0;$('matchResult').style.display='block';$('matchResult').innerHTML=`<div class="score">${score}%</div><p class="muted">Based on skills found in your current CV versus common job keywords.</p><div class="progress"><div style="width:${score}%"></div></div><h3>Matched</h3><div class="chips">${(matched.length?matched:['No direct matches yet']).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</div><h3>Potentially Missing</h3><div class="chips">${(missing.length?missing:['No obvious missing keywords']).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</div>`;localStorage.setItem('careerpilot_matches',String(Number(localStorage.getItem('careerpilot_matches')||0)+1));updateDash()};
 $('makeCover').onclick=()=>{const d=data(),company=$('company').value||'your company',role=$('role').value||d.title||'the position';$('coverOutput').value=`Dear Hiring Manager,
 
