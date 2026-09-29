@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CareerPilot — AI CV Builder</title>
+<style>
+:root{--bg:#f3f4f6;--pn:#fff;--tx:#1f2937;--mu:#6b7280;--bd:#e5e7eb;--in:#fff;--pr:#1d4ed8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111827;--pn:#1f2937;--tx:#f3f4f6;--mu:#9ca3af;--bd:#374151;--in:#111827;--pr:#60a5fa}}
+:root[data-theme="dark"]{--bg:#111827;--pn:#1f2937;--tx:#f3f4f6;--mu:#9ca3af;--bd:#374151;--in:#111827;--pr:#60a5fa}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:var(--tx)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;background:var(--pn);border-bottom:1px solid var(--bd)}
+.brand{font-weight:700;font-size:17px}.brand small{color:var(--mu);font-weight:500;margin-left:6px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{border:1px solid var(--bd);background:var(--pn);border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover{border-color:var(--pr)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--pr);outline-offset:1px}
+button.pri{background:var(--pr);border-color:var(--pr);color:#fff}
+.app{flex:1;min-height:0;display:grid;grid-template-columns:390px 1fr}
+.side{background:var(--pn);border-right:1px solid var(--bd);overflow:auto;padding:0 16px 24px}
+.tabs{display:flex;gap:4px;position:sticky;top:0;background:var(--pn);padding:12px 0 8px;z-index:2}
+.tabs button{flex:1;padding:7px 4px;font-size:13px}.tabs button.on{background:var(--pr);border-color:var(--pr);color:#fff}
+.pane{display:none}.pane.on{display:block}
+h4{margin:18px 0 6px;font-size:14px}
+label{display:block;margin:8px 0;font-size:12px;color:var(--mu)}
+input:not([type=checkbox]):not([type=color]),select,textarea{display:block;width:100%;margin-top:3px;padding:7px 9px;border:1px solid var(--bd);border-radius:7px;background:var(--in)}
+textarea{resize:vertical}input[type=color]{display:block;width:100%;height:36px;margin-top:3px;border:1px solid var(--bd);border-radius:7px;background:var(--in);padding:2px}
+.card{border:1px solid var(--bd);border-radius:10px;padding:4px 12px 10px;margin:8px 0}
+.ch{display:flex;justify-content:space-between;align-items:center;margin-top:8px}.ch button{padding:3px 9px;font-size:12px}
+.add{width:100%;margin-top:6px;border-style:dashed}
+.seg{display:flex;gap:4px}.seg button{flex:1}.seg button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chk{display:flex;gap:8px;align-items:center;color:var(--tx);font-size:13px}
+#selName{padding:8px 10px;background:var(--bg);border-radius:8px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;word-break:break-all}
+.stage{overflow:auto;padding:20px 12px}
+#fit{margin:0 auto}
+#paper{width:794px;min-height:1123px;background:#fff;color:#1f2937;font-size:13px;line-height:1.45;transform-origin:top left;box-shadow:0 2px 18px rgba(0,0,0,.18);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.hd{padding:38px 40px 20px;border-bottom:4px solid var(--ac)}
+.nm{font-size:34px;font-weight:800;letter-spacing:-.5px;color:#111;line-height:1.15}
+.tt{font-size:16px;font-weight:600;color:var(--ac);margin-top:2px}
+.ct{display:flex;flex-wrap:wrap;gap:2px 20px;margin-top:10px;font-size:12px;color:#4b5563}
+.bd{display:grid;grid-template-columns:245px 1fr;min-height:900px}
+.lc{padding:24px 22px 24px 40px;background:color-mix(in srgb,var(--ac) 7%,transparent)}
+.rc{padding:24px 40px 24px 30px}
+#paper section{margin-bottom:18px}
+#paper h3{margin:0 0 8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);border-bottom:1px solid color-mix(in srgb,var(--ac) 35%,transparent);padding-bottom:4px}
+.li{margin-bottom:3px}.bl{border-left:2px solid var(--ac);padding-left:8px;margin-bottom:6px}
+.it{margin-bottom:12px}.row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 10px}.dt{display:flex;gap:4px;color:#6b7280;font-size:12px}
+.pos{font-weight:700;font-size:14px}.co{color:var(--ac);font-weight:600}.mt{color:#6b7280;font-size:12px}
+.el{display:block;white-space:pre-wrap;outline:none;cursor:text;min-width:1ch}
+.el:hover{outline:1px dashed #94a3b8}.el.sel{outline:2px solid #2563eb;outline-offset:2px}
+.el:empty::before{content:attr(data-ph);color:#9ca3af}
+#toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+#toast.on{opacity:1}
+@media(max-width:900px){body{display:block;height:auto}.app{display:block}.side{border-right:0;border-bottom:1px solid var(--bd);max-height:none}}
+@media print{
+@page{size:A4;margin:0}
+html,body{height:auto;background:#fff}
+.top,.side,#toast{display:none!important}
+.app{display:block}.stage{padding:0;overflow:visible}
+#fit{width:auto!important;height:auto!important;margin:0}
+#paper{transform:none!important;box-shadow:none;width:210mm;min-height:297mm}
+.el:hover,.el.sel{outline:none}.el:empty{display:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">CareerPilot<small>AI CV Builder</small></div>
+  <div class="btns"><button id="bSave">Save CV</button><button id="bLoad">Load CV</button><button id="bPrint" class="pri">Print / Export PDF</button></div>
+</header>
+<div class="app">
+  <aside class="side" id="side">
+    <nav class="tabs"><button data-tab="content" class="on">Content</button><button data-tab="style">Selected Element</button><button data-tab="tpl">Template</button></nav>
+    <div class="pane on" id="p-content"></div>
+    <div class="pane" id="p-style">
+      <h4>Selected element</h4>
+      <div id="selName"></div>
+      <label>Text color<input type="color" id="sColor"></label>
+      <label>Font size (px)<input type="number" id="sSize" min="6" max="90"></label>
+      <label>Font family<select id="sFont"></select></label>
+      <label class="chk"><input type="checkbox" id="sBold"> Bold</label>
+      <label>Text alignment</label>
+      <div class="seg" id="sAlign"><button data-a="left">Left</button><button data-a="center">Center</button><button data-a="right">Right</button></div>
+      <div class="g2"><label>Move X (px)<input type="number" id="sX" step="2" value="0"></label><label>Move Y (px)<input type="number" id="sY" step="2" value="0"></label></div>
+      <button id="sReset" class="add">Reset styling</button>
+    </div>
+    <div class="pane" id="p-tpl">
+      <h4>Template settings</h4>
+      <label>Accent color<input type="color" id="tAc"></label>
+      <label>Background<select id="tBg"></select></label>
+      <label>Font<select id="tFf"></select></label>
+    </div>
+  </aside>
+  <main class="stage" id="stage"><div id="fit"><div id="paper"></div></div></main>
+</div>
+<div id="toast"></div>
+<script>
+(function(){
+'use strict';
+const $=i=>document.getElementById(i),KEY='careerpilot_cv_builder_v2';
+const FONTS=[['','Template default'],['Inter,Segoe UI,Arial,sans-serif','Modern sans'],['Georgia,serif','Georgia'],['Arial,Helvetica,sans-serif','Arial'],['Trebuchet MS,sans-serif','Trebuchet'],['Times New Roman,serif','Times'],['Courier New,monospace','Courier']];
+const BGS=[['#ffffff','White'],['#fffaf0','Warm ivory'],['#f3f4f6','Light gray'],['#f2f7ff','Soft blue']];
+const F=[['name','Full Name'],['title','Professional Title'],['email','Email'],['phone','Phone'],['location','Location'],['link','Portfolio / LinkedIn']];
+const L=[['summary','Professional Summary'],['skills','Skills (one per line)'],['languages','Languages (one per line)'],['achievements','Achievements (one per line)'],['certs','Certifications (one per line)'],['projects','Projects (one per line)']];
+const LISTS=['skills','languages','achievements','certs','projects'];
+const XF=[['position','Job Title'],['company','Company'],['start','Start Date'],['end','End Date'],['location','Location']];
+const DF=[['degree','Degree / Qualification'],['institute','Institute'],['year','Year'],['location','Location']];
+const dflt=()=>({d:{name:'Muhammad Haris',title:'Digital Marketing Specialist',email:'name@example.com',phone:'+00 000 0000000',location:'City, Country',link:'linkedin.com/in/yourname',
+summary:'Results-driven professional with hands-on experience in online marketing and e-commerce. Skilled at turning ideas into measurable growth and comfortable working with international teams and remote clients.',
+skills:['Digital Marketing','Content Creation','Graphic Design','Video Editing','E-commerce Operations'],languages:['English – Professional','Urdu – Native'],
+achievements:['Grew an online store from zero to consistent monthly sales','Built and managed several income streams in parallel'],certs:['E-commerce Professional Course'],
+projects:['Personal brand website – design and launch','YouTube channel – content strategy and editing'],
+exp:[{position:'Marketing Specialist',company:'Company Name',start:'2023',end:'Present',location:'City, Country',description:'• Planned and ran campaigns that increased traffic and sales.\n• Designed creatives and short videos for social platforms.'}],
+edu:[{degree:'Bachelor of Commerce',institute:'University Name',year:'2022',location:'City, Country'}]},st:{},t:{ac:'#1f4e79',bg:'#ffffff',ff:FONTS[1][0]}});
+let S=dflt(),sel=null;
+const paper=$('paper'),sColor=$('sColor'),sSize=$('sSize'),sFont=$('sFont'),sBold=$('sBold'),sX=$('sX'),sY=$('sY'),tAc=$('tAc'),tBg=$('tBg'),tFf=$('tFf');
+FONTS.forEach(([v,l])=>{sFont.add(new Option(l,v));if(v)tFf.add(new Option(l,v))});
+BGS.forEach(([v,l])=>tBg.add(new Option(l,v)));
+const get=p=>p.split('.').reduce((o,k)=>o&&o[k],S.d);
+const set=(p,v)=>{const k=p.split('.'),l=k.pop();k.reduce((o,x)=>o[x],S.d)[l]=v};
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),1800)};
+const hex=c=>'#'+(c.match(/\d+/g)||[0,0,0]).slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join('');
+
+/* ---------- sidebar ---------- */
+$('p-content').innerHTML='<h4>Personal details</h4>'+F.map(([p,l])=>`<label>${l}<input data-p="${p}"></label>`).join('')+
+L.map(([p,l])=>`<label>${l}<textarea data-p="${p}" rows="${p==='summary'?5:3}"></textarea></label>`).join('')+
+'<h4>Experience</h4><div id="expL"></div><button class="add" data-add="exp">+ Add Experience</button><h4>Education</h4><div id="eduL"></div><button class="add" data-add="edu">+ Add Education</button>';
+function fillSide(){document.querySelectorAll('#side [data-p]').forEach(i=>{if(i===document.activeElement)return;const v=get(i.dataset.p);i.value=Array.isArray(v)?v.join('\n'):(v==null?'':v)})}
+function dyn(){
+  const card=(k,i,fs,t,x)=>`<div class="card"><div class="ch"><b>${t} ${i+1}</b><button data-rm="${k}.${i}">Remove</button></div>${fs.map(([f,l])=>`<label>${l}<input data-p="${k}.${i}.${f}"></label>`).join('')}${x}</div>`;
+  $('expL').innerHTML=S.d.exp.map((x,i)=>card('exp',i,XF,'Experience',`<label>Description<textarea rows="4" data-p="exp.${i}.description"></textarea></label>`)).join('');
+  $('eduL').innerHTML=S.d.edu.map((x,i)=>card('edu',i,DF,'Education','')).join('');
+  fillSide();
+}
+function tab(n){document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===n));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+n))}
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));
+
+/* ---------- preview ---------- */
+const E=(id,p,t,c,ph,m)=>`<div id="${id}" class="el ${c}" data-p="${p}" data-ph="${ph}"${m?' data-m="1"':''} contenteditable="true" spellcheck="false">${esc(t)}</div>`;
+const H=(k,t)=>`<h3><span id="cv-h-${k}" class="el">${t}</span></h3>`;
+function render(){
+  const d=S.d;
+  const list=(k,h,key,c)=>d[k].length?`<section>${H(key,h)}${d[k].map((x,i)=>E(`cv-${key}-${i}`,`${k}.${i}`,x,c,'Item')).join('')}</section>`:'';
+  const exp=d.exp.length?`<section>${H('experience','Experience')}${d.exp.map((x,i)=>{const q=f=>`exp.${i}.${f}`,id=f=>`cv-exp-${i}-${f}`;
+    return `<div class="it"><div class="row">${E(id('position'),q('position'),x.position,'pos','Job title')}<div class="dt">${E(id('start'),q('start'),x.start,'','Start')}<span>–</span>${E(id('end'),q('end'),x.end,'','End')}</div></div><div class="row">${E(id('company'),q('company'),x.company,'co','Company')}${E(id('location'),q('location'),x.location,'mt','Location')}</div>${E(id('description'),q('description'),x.description,'','Description',1)}</div>`}).join('')}</section>`:'';
+  const edu=d.edu.length?`<section>${H('education','Education')}${d.edu.map((x,i)=>{const q=f=>`edu.${i}.${f}`,id=f=>`cv-edu-${i}-${f}`;
+    return `<div class="it">${E(id('degree'),q('degree'),x.degree,'pos','Degree')}${E(id('institute'),q('institute'),x.institute,'co','Institute')}<div class="row mt">${E(id('year'),q('year'),x.year,'','Year')}${E(id('location'),q('location'),x.location,'','Location')}</div></div>`}).join('')}</section>`:'';
+  paper.innerHTML=`<div class="hd">${E('cv-name','name',d.name,'nm','Full name')}${E('cv-title','title',d.title,'tt','Professional title')}<div class="ct">${E('cv-email','email',d.email,'','Email')}${E('cv-phone','phone',d.phone,'','Phone')}${E('cv-location','location',d.location,'','Location')}${E('cv-link','link',d.link,'','Portfolio / LinkedIn')}</div></div>
+<div class="bd"><div class="lc">${list('skills','Skills','skills','li')}${list('languages','Languages','languages','li')}${edu}${list('certs','Certifications','certs','li')}</div>
+<div class="rc"><section>${H('summary','Professional Summary')}${E('cv-summary','summary',d.summary,'','Write a short summary',1)}</section>${exp}${list('achievements','Achievements','achievements','bl')}${list('projects','Projects','projects','bl')}</div></div>`;
+  paper.querySelectorAll('.el').forEach(applyStyle);
+  const e=sel&&$(sel);if(e)e.classList.add('sel');else if(sel){sel=null;loadPanel()}
+  fit();
+}
+function applyStyle(el){
+  const s=S.st[el.id];el.style.cssText='';if(!s)return;
+  if(s.c)el.style.color=s.c;if(s.z)el.style.fontSize=s.z+'px';if(s.f)el.style.fontFamily=s.f;if(s.w)el.style.fontWeight=s.w;if(s.a)el.style.textAlign=s.a;
+  if(s.x||s.y){el.style.position='relative';el.style.left=(s.x||0)+'px';el.style.top=(s.y||0)+'px'}
+}
+function fit(){const sc=Math.min(1,($('stage').clientWidth-24)/794);paper.style.transform=`scale(${sc})`;$('fit').style.width=794*sc+'px';$('fit').style.height=paper.offsetHeight*sc+'px'}
+function applyT(){paper.style.setProperty('--ac',S.t.ac);paper.style.background=S.t.bg;paper.style.fontFamily=S.t.ff;tAc.value=S.t.ac;tBg.value=S.t.bg;tFf.value=S.t.ff}
+
+/* ---------- selection & element styling (keyed by unique element id) ---------- */
+function loadPanel(){
+  const el=sel&&$(sel);
+  if(!el){sel=null;$('selName').textContent='Nothing selected. Click any text in the CV.';return}
+  const cs=getComputedStyle(el),s=S.st[sel]||{};
+  $('selName').textContent=sel;
+  sColor.value=hex(cs.color);sSize.value=Math.round(parseFloat(cs.fontSize));sFont.value=s.f||'';sBold.checked=+cs.fontWeight>=600;sX.value=s.x||0;sY.value=s.y||0;
+  const a=cs.textAlign==='center'||cs.textAlign==='right'?cs.textAlign:'left';
+  document.querySelectorAll('#sAlign button').forEach(b=>b.classList.toggle('on',b.dataset.a===a));
+}
+function select(id){document.querySelectorAll('.el.sel').forEach(x=>x.classList.remove('sel'));sel=id;$(id).classList.add('sel');loadPanel();tab('style')}
+function setSt(k,v){
+  if(!sel){toast('Click an element in the CV first');return}
+  (S.st[sel]=S.st[sel]||{})[k]=v;applyStyle($(sel));
+}
+paper.addEventListener('click',e=>{const el=e.target.closest('.el');if(el&&el.id&&el.id!==sel)select(el.id)});
+paper.addEventListener('input',e=>{const el=e.target.closest('.el');if(!el||!el.dataset.p)return;set(el.dataset.p,el.innerText.replace(/\n$/,''));fillSide();fit()});
+paper.addEventListener('keydown',e=>{const el=e.target.closest('.el');if(el&&e.key==='Enter'&&!el.dataset.m){e.preventDefault();el.blur()}});
+paper.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,(e.clipboardData||window.clipboardData).getData('text/plain'))});
+sColor.addEventListener('input',()=>setSt('c',sColor.value));
+sSize.addEventListener('input',()=>setSt('z',+sSize.value||0));
+sFont.addEventListener('change',()=>setSt('f',sFont.value));
+sBold.addEventListener('change',()=>setSt('w',sBold.checked?'700':'400'));
+sX.addEventListener('input',()=>setSt('x',+sX.value||0));
+sY.addEventListener('input',()=>setSt('y',+sY.value||0));
+$('sReset').addEventListener('click',()=>{if(!sel){toast('Click an element in the CV first');return}delete S.st[sel];applyStyle($(sel));loadPanel()});
+$('sAlign').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setSt('a',b.dataset.a);loadPanel()});
+
+/* ---------- sidebar data + dynamic sections ---------- */
+$('side').addEventListener('input',e=>{const p=e.target.dataset&&e.target.dataset.p;if(!p)return;let v=e.target.value;if(LISTS.includes(p))v=v.split('\n').filter(s=>s.trim());set(p,v);render()});
+function shift(pre,idx){
+  const n={},re=new RegExp('^cv-'+pre+'-(\\d+)-(.*)$');
+  for(const k in S.st){const m=k.match(re);if(!m){n[k]=S.st[k];continue}const i=+m[1];if(i===idx)continue;n[i>idx?`cv-${pre}-${i-1}-${m[2]}`:k]=S.st[k]}
+  S.st=n;
+}
+$('side').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.add==='exp'){S.d.exp.push({position:'New Position',company:'Company',start:'2024',end:'Present',location:'Location',description:'Describe your responsibilities and achievements.'});dyn();render()}
+  if(b.dataset.add==='edu'){S.d.edu.push({degree:'Degree / Qualification',institute:'Institute',year:'Year',location:'Location'});dyn();render()}
+  if(b.dataset.rm){const[k,i]=b.dataset.rm.split('.');S.d[k].splice(+i,1);shift(k,+i);dyn();render()}
+});
+tAc.addEventListener('input',()=>{S.t.ac=tAc.value;applyT()});
+tBg.addEventListener('change',()=>{S.t.bg=tBg.value;applyT()});
+tFf.addEventListener('change',()=>{S.t.ff=tFf.value;applyT();fit()});
+
+/* ---------- save / load / print ---------- */
+function load(quiet){
+  try{
+    const r=localStorage.getItem(KEY);
+    if(!r){if(!quiet)toast('No saved CV found');return}
+    const o=JSON.parse(r),b=dflt();
+    S={d:Object.assign(b.d,o.d),st:o.st||{},t:Object.assign(b.t,o.t)};sel=null;
+    dyn();applyT();render();loadPanel();if(!quiet)toast('CV loaded');
+  }catch(err){toast('Could not load the saved CV')}
+}
+$('bSave').addEventListener('click',()=>{try{localStorage.setItem(KEY,JSON.stringify(S));toast('CV saved')}catch(err){toast('Saving is blocked in this browser')}});
+$('bLoad').addEventListener('click',()=>load(false));
+$('bPrint').addEventListener('click',()=>window.print());
+window.addEventListener('resize',fit);
+if(window.ResizeObserver)new ResizeObserver(fit).observe(paper);
+
+dyn();applyT();render();loadPanel();load(true);
+})();
+</script>
+</body>
+</html>
