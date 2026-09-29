@@ -352,7 +352,7 @@ function selectEditable(el){
   if(!el||!el.dataset.edit)return;
   selectedEditKey=String(el.dataset.edit);
   selectedEditId='cv-edit-'+selectedEditKey.replace(/[^a-zA-Z0-9_-]/g,'-');
-  const builder=document.getElementById(selectedEditId);
+  const builder=document.querySelector('#builderPaper .cv [data-editor-id="'+CSS.escape(selectedEditId)+'"]');
   selectedEditEl=builder||el;
   document.querySelectorAll('#builderPaper .cv [data-editor-selected="true"]').forEach(x=>x.removeAttribute('data-editor-selected'));
   if(selectedEditEl){selectedEditEl.setAttribute('data-editor-selected','true');selectedEditEl.classList.add('edit-selected')}
@@ -395,28 +395,32 @@ function moveSelected(dir){
   elementStyles[selectedEditKey]=s;renderCV('builderPaper');toast('Element moved');
 }
 function bindEditableElements(root){
-  if(!root || !root.closest('#builderPaper'))return;
-  root.querySelectorAll('[data-edit]').forEach(el=>{
-    if(el.dataset.boundEditor==='1')return;
-    el.dataset.boundEditor='1';
-    el.addEventListener('pointerdown',e=>{
-      if(editorMode==='move')return;
-      selectEditable(el);
-      e.stopPropagation();
-    });
-    el.addEventListener('click',e=>{
-      if(editorMode==='move')return;
-      selectEditable(el);
-      e.stopPropagation();
-    });
-    el.addEventListener('dblclick',e=>{
-      if(editorMode==='move')return;
-      selectEditable(el);
-      el.focus();
-      try{document.execCommand('selectAll',false,null)}catch(err){}
-      e.stopPropagation();
-    });
-  });
+  const builder=document.getElementById('builderPaper');
+  if(!builder || builder.dataset.editorDelegated==='1')return;
+  builder.dataset.editorDelegated='1';
+  builder.addEventListener('pointerdown',e=>{
+    if(editorMode==='move')return;
+    const el=e.target.closest('#builderPaper .cv [data-edit]');
+    if(!el || !builder.contains(el))return;
+    selectEditable(el);
+    e.stopPropagation();
+  },true);
+  builder.addEventListener('click',e=>{
+    if(editorMode==='move')return;
+    const el=e.target.closest('#builderPaper .cv [data-edit]');
+    if(!el || !builder.contains(el))return;
+    selectEditable(el);
+    e.stopPropagation();
+  },true);
+  builder.addEventListener('dblclick',e=>{
+    if(editorMode==='move')return;
+    const el=e.target.closest('#builderPaper .cv [data-edit]');
+    if(!el || !builder.contains(el))return;
+    selectEditable(el);
+    el.focus();
+    try{document.execCommand('selectAll',false,null)}catch(err){}
+    e.stopPropagation();
+  },true);
 }
 let editorSaveTimer;
 document.addEventListener('input',e=>{
