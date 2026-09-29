@@ -177,7 +177,7 @@
   <div class="editor-tools">
     <button type="button" class="tool-btn primary-tool" id="editModeBtn">✎ Edit</button>
     <button type="button" class="tool-btn" id="moveModeBtn">↕ Move</button>
-    <label>Text Color <input id="elementTextColor" type="color" value="#172033"></label>
+    <label>Selected Text Color <input id="elementTextColor" type="color" value="#172033"></label>
     <label>Font <select id="elementFontFamily"><option>Inter</option><option>Georgia</option><option>Arial</option><option>Trebuchet MS</option></select></label>
     <label>Size <input id="elementFontSize" type="number" min="8" max="96" value="16"></label>
     <button type="button" class="tool-btn" id="toggleBold"><b>B</b></button>
@@ -273,7 +273,8 @@ function section(title,text,key='text'){
   return '<div class="cv-section"><h2 data-edit="'+k+'-heading" contenteditable="true" spellcheck="false" data-bind="'+k+'-heading" style="'+styleAttr(k+'-heading')+'">'+esc(title)+'</h2><div class="cv-text" data-edit="'+k+'" contenteditable="true" spellcheck="false" data-bind="'+k+'" style="'+styleAttr(k)+'">'+esc(text)+'</div></div>';
 }
 function styleAttr(key){
-  const s=elementStyles[key]||{};
+  const exactId='cv-edit-'+String(key||'').replace(/[^a-zA-Z0-9_-]/g,'-');
+  const s=elementStyles[exactId]||elementStyles[key]||{};
   const x=Number(s.x||0),y=Number(s.y||0),size=Number(s.size||0);
   const isBody=/^(summary|languages|certifications|key-achievements|selected-projects)$/.test(key)||/-description$/.test(key);
   const isHeading=/-heading$/.test(key)||key==='headline'||key==='name'||key==='title'||key==='contact';
@@ -472,7 +473,7 @@ document.addEventListener('pointerdown',e=>{
   const el=e.target.closest('#builderPaper .cv [data-edit]');
   if(!el||editorMode!=='move')return;
   selectEditable(el);
-  const s=elementStyles[selectedEditKey]||{x:0,y:0};
+  const s=elementStyles[selectedEditId]||elementStyles[selectedEditKey]||{x:0,y:0};
   dragState={el,id:selectedEditId,startX:e.clientX,startY:e.clientY,baseX:Number(s.x||0),baseY:Number(s.y||0)};
   el.setPointerCapture?.(e.pointerId);e.preventDefault();
 });
