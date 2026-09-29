@@ -359,28 +359,25 @@ function selectEditable(el){
 }
 function rgbToHex(rgb){const m=String(rgb).match(/\d+/g);if(!m||m.length<3)return null;return '#'+m.slice(0,3).map(n=>Number(n).toString(16).padStart(2,'0')).join('')}
 function applyElementChange(){
-  if(!selectedEditKey)return;
-  const key=String(selectedEditKey);
-  const s={...(elementStyles[key]||{})};
-  const color=$('elementTextColor')?.value||'';
-  const size=Number($('elementFontSize')?.value)||16;
-  const font=$('elementFontFamily')?.value||'Inter';
-  if(color)s.color=color;
-  s.size=size;
-  s.font=font;
-  elementStyles[key]=s;
+  const key=String(selectedEditKey||'');
+  if(!key)return;
   const root=$('builderPaper')?.querySelector('.cv');
-  if(root){
-    const el=[...root.querySelectorAll('[data-edit]')].find(x=>x.dataset.edit===key);
-    if(el){
-      el.style.setProperty('color',s.color||'#172033','important');
-      el.style.setProperty('font-size',size+'px','important');
-      el.style.setProperty('font-family',font+',Arial,sans-serif','important');
-      if(s.weight)el.style.setProperty('font-weight',s.weight,'important');
-      if(s.align)el.style.setProperty('text-align',s.align,'important');
-    }
-  }
-  clearTimeout(styleSaveTimer); styleSaveTimer=setTimeout(autoSaveEditor,250);
+  const el=root?[...root.querySelectorAll('[data-edit]')].find(x=>String(x.dataset.edit||'')===key):null;
+  if(!el)return;
+  const s={...(elementStyles[key]||{})};
+  const color=$('elementTextColor')?.value||'#172033';
+  const size=Math.max(8,Math.min(96,Number($('elementFontSize')?.value)||16));
+  const font=$('elementFontFamily')?.value||'Inter';
+  s.color=color;s.size=size;s.font=font;
+  elementStyles[key]=s;
+  el.style.setProperty('color',color,'important');
+  el.style.setProperty('font-size',size+'px','important');
+  el.style.setProperty('font-family',font+',Arial,sans-serif','important');
+  if(s.weight)el.style.setProperty('font-weight',s.weight,'important');
+  if(s.align)el.style.setProperty('text-align',s.align,'important');
+  root.querySelectorAll('[data-edit].edit-selected').forEach(x=>{if(x!==el)x.classList.remove('edit-selected')});
+  el.classList.add('edit-selected');
+  clearTimeout(styleSaveTimer);styleSaveTimer=setTimeout(autoSaveEditor,250);
 }
 function moveSelected(dir){
   if(!selectedEditKey)return;
@@ -389,13 +386,29 @@ function moveSelected(dir){
   if(dir==='up')s.y=(s.y||0)-step;if(dir==='down')s.y=(s.y||0)+step;if(dir==='left')s.x=(s.x||0)-step;if(dir==='right')s.x=(s.x||0)+step;
   elementStyles[selectedEditKey]=s;renderCV('builderPaper');toast('Element moved');
 }
+function getBuilderEditTarget(node){
+  if(!node)return null;
+  let el=node.nodeType===1?node:node.parentElement;
+  while(el&&el!==document.body){
+    if(el.matches&&el.matches('#builderPaper .cv [data-edit]'))return el;
+    el=el.parentElement;
+  }
+  return null;
+}
+document.addEventListener('pointerdown',e=>{
+  if(editorMode==='move')return;
+  const el=getBuilderEditTarget(e.target);
+  if(!el)return;
+  selectEditable(el);
+  e.stopPropagation();
+});
 document.addEventListener('click',e=>{
-  const el=e.target.closest('#builderPaper .cv [data-edit]');
-  if(el){e.stopPropagation();selectEditable(el)}
+  const el=getBuilderEditTarget(e.target);
+  if(el){selectEditable(el);e.stopPropagation()}
 });
 document.addEventListener('dblclick',e=>{
-  const el=e.target.closest('#builderPaper .cv [data-edit]');
-  if(el){el.focus();document.execCommand('selectAll',false,null)}
+  const el=getBuilderEditTarget(e.target);
+  if(el){selectEditable(el);el.focus();document.execCommand('selectAll',false,null);e.stopPropagation()}
 });
 let editorSaveTimer;
 document.addEventListener('input',e=>{
