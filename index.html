@@ -29,8 +29,8 @@ Key responsibilities and achievements"></textarea></div><div class="field"><labe
 <script>
 const fields=['name','title','email','phone','location','template','summary','experience','education','skills','languages','projects'];
 const $=id=>document.getElementById(id);function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
-function go(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.go===id));if(id==='preview')renderCV();window.scrollTo(0,0)}
-document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+function go(id){const section=$(id);if(!section)return;document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));section.classList.add('active');document.querySelectorAll('[data-go]').forEach(b=>b.classList.toggle('active',b.dataset.go===id));if(id==='preview')renderCV();window.scrollTo(0,0)}
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',function(e){e.preventDefault();go(this.dataset.go)}));
 function data(){const o={};fields.forEach(f=>{const el=$(f);if(el)o[f]=String(el.value||'')});return o}function saveStorage(key,value){try{localStorage.setItem(key,value)}catch(e){}try{sessionStorage.setItem(key,value)}catch(e){}}function readStorage(key){try{const v=localStorage.getItem(key);if(v)return v}catch(e){}try{const v=sessionStorage.getItem(key);if(v)return v}catch(e){}return null}function load(){try{const raw=readStorage('careerpilot_cv');if(!raw){updateDash();return}const d=JSON.parse(raw);fields.forEach(f=>{const el=$(f);if(el&&Object.prototype.hasOwnProperty.call(d,f))el.value=String(d[f]??'')});if($('saveStatus'))$('saveStatus').textContent='✓ Saved CV loaded from this device';updateDash()}catch(e){if($('saveStatus'))$('saveStatus').textContent='Saved data could not be loaded on this browser.'}}
 function save(){try{const d=data();const raw=JSON.stringify(d);saveStorage('careerpilot_cv',raw);updateDash();if($('saveStatus'))$('saveStatus').textContent='✓ CV saved on this device';toast('CV saved on this device');return true}catch(e){if($('saveStatus'))$('saveStatus').textContent='Could not save on this browser. Please allow local storage.';toast('Save failed');return false}}
 function updateDash(){const d=data();let n=0;['name','title','email','phone','location','summary','experience','education','skills'].forEach(f=>{if(d[f].trim())n++});$('profileStatus').textContent=Math.round(n/9*100)+'%';$('templateStatus').textContent=d.template||'Modern';$('matchStatus').textContent=localStorage.getItem('careerpilot_matches')||'0'}
@@ -50,5 +50,5 @@ Thank you for your time and consideration. I look forward to hearing from you.
 
 Sincerely,
 ${d.name||'Your Name'}`};
-fields.forEach(f=>$(f)?.addEventListener('input',updateDash));load();
+fields.forEach(f=>$(f)?.addEventListener('input',updateDash));document.addEventListener('DOMContentLoaded',load);if(document.readyState!=='loading')load();
 </script></body></html>
