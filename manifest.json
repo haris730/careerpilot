@@ -1,0 +1,10 @@
+{
+  "name": "CareerPilot — AI Career Suite",
+  "short_name": "CareerPilot",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0a0c11",
+  "theme_color": "#0a0c11",
+  "description": "Professional CV builder and global career assistant.",
+  "categories": ["business", "productivity", "education"]
+}
