@@ -247,7 +247,7 @@ function baseData(){return {...defaultData,experiences:[],educations:[],sectionS
 function data(){const o=baseData();fields.forEach(f=>{const el=$(f);if(el)o[f]=f==='experiences'||f==='educations'||f==='sectionState'?o[f]:String(el.value||'')});o.experiences=getExperiences();o.educations=getEducations();o.sectionState={achievements:$('achievementsWrap')?.style.display!=='none',certifications:$('certificationsWrap')?.style.display!=='none',projects:$('projectsWrap')?.style.display!=='none'};o.photo=photoData||'';o.color=selectedColor||o.color;o.font=$('font')?.value||o.font;o.pageSpacing=Number($('pageSpacing')?.value||34);o.headerSpacing=Number($('headerSpacing')?.value||42);o.photoPlacement=$('photoPlacement')?.value||'right';o.sectionOrder=[...sectionOrder];o.elementStyles={...elementStyles};return o}
 function saveStorage(key,value){try{localStorage.setItem(key,value)}catch(e){}try{sessionStorage.setItem(key,value)}catch(e){}}
 function readStorage(key){try{const v=localStorage.getItem(key);if(v)return v}catch(e){}try{const v=sessionStorage.getItem(key);if(v)return v}catch(e){}return null}
-let photoData='',selectedColor='#334155',sectionOrder=[...defaultData.sectionOrder],elementStyles={},selectedEditKey='';
+let photoData='',selectedColor='#334155',sectionOrder=[...defaultData.sectionOrder],elementStyles={},selectedEditKey='',selectedEditEl=null;
 function addExperience(item={}){const list=$('experienceList');const el=document.createElement('div');el.className='repeat-item';el.innerHTML='<div class="repeat-head"><strong>Experience</strong><button type="button" class="btn secondary remove-repeat">Remove</button></div><div class="mini-grid"><div class="field"><label>Company</label><input data-k="company" value="'+esc(item.company)+'" placeholder="Company name"></div><div class="field"><label>Position</label><input data-k="position" value="'+esc(item.position)+'" placeholder="Job title"></div><div class="field"><label>Start Date</label><input data-k="start" value="'+esc(item.start)+'" placeholder="Jan 2024"></div><div class="field"><label>End Date</label><input data-k="end" value="'+esc(item.end)+'" placeholder="Present"></div><div class="field"><label>Location</label><input data-k="location" value="'+esc(item.location)+'" placeholder="Karachi, Pakistan"></div><div class="field" style="grid-column:1/-1"><label>Description / Achievements</label><textarea data-k="description" placeholder="Responsibilities, tools and measurable results...">'+esc(item.description)+'</textarea></div></div>';list.appendChild(el);el.querySelector('.remove-repeat').onclick=()=>{el.remove();liveRender()};el.querySelectorAll('input,textarea').forEach(x=>x.addEventListener('input',liveRender));}
 function addEducation(item={}){const list=$('educationList');const el=document.createElement('div');el.className='repeat-item';el.innerHTML='<div class="repeat-head"><strong>Education</strong><button type="button" class="btn secondary remove-repeat">Remove</button></div><div class="mini-grid"><div class="field"><label>Qualification</label><input data-k="degree" value="'+esc(item.degree)+'" placeholder="Diploma / Bachelor"></div><div class="field"><label>Institute</label><input data-k="school" value="'+esc(item.school)+'" placeholder="Institute name"></div><div class="field"><label>Year</label><input data-k="year" value="'+esc(item.year)+'" placeholder="2024"></div><div class="field"><label>Location</label><input data-k="location" value="'+esc(item.location)+'" placeholder="Karachi"></div></div>';list.appendChild(el);el.querySelector('.remove-repeat').onclick=()=>{el.remove();liveRender()};el.querySelectorAll('input,textarea').forEach(x=>x.addEventListener('input',liveRender));}
 function getRepeats(id){return [...document.querySelectorAll('#'+id+' .repeat-item')].map(el=>{const o={};el.querySelectorAll('[data-k]').forEach(x=>o[x.dataset.k]=x.value);return o})}
@@ -345,11 +345,13 @@ function renderCV(target='cvPaper'){
 }
 
 function selectEditable(el){
-  if(!el)return;
-  selectedEditKey=el.dataset.edit||'';
+  if(!el||!el.dataset.edit)return;
+  selectedEditEl=el;
+  selectedEditKey=String(el.dataset.edit);
   document.querySelectorAll('#builderPaper .cv [data-edit].edit-selected').forEach(x=>x.classList.remove('edit-selected'));
   el.classList.add('edit-selected');
-  $('selectedElementName').textContent=selectedEditKey||'Selected element';
+  const label=(el.innerText||el.textContent||'').trim().replace(/\s+/g,' ').slice(0,32);
+  $('selectedElementName').textContent=(selectedEditKey==='name'?'Name':selectedEditKey)+' — '+(label||'Selected');
   const s=elementStyles[selectedEditKey]||{};
   const computed=getComputedStyle(el);
   $('elementTextColor').value=s.color||rgbToHex(computed.color)||'#172033';
@@ -359,24 +361,22 @@ function selectEditable(el){
 }
 function rgbToHex(rgb){const m=String(rgb).match(/\d+/g);if(!m||m.length<3)return null;return '#'+m.slice(0,3).map(n=>Number(n).toString(16).padStart(2,'0')).join('')}
 function applyElementChange(){
-  const key=String(selectedEditKey||'');
+  if(!selectedEditEl||!document.contains(selectedEditEl))return;
+  const key=String(selectedEditEl.dataset.edit||'');
   if(!key)return;
-  const root=$('builderPaper')?.querySelector('.cv');
-  const el=root?[...root.querySelectorAll('[data-edit]')].find(x=>String(x.dataset.edit||'')===key):null;
-  if(!el)return;
   const s={...(elementStyles[key]||{})};
   const color=$('elementTextColor')?.value||'#172033';
   const size=Math.max(8,Math.min(96,Number($('elementFontSize')?.value)||16));
   const font=$('elementFontFamily')?.value||'Inter';
   s.color=color;s.size=size;s.font=font;
   elementStyles[key]=s;
-  el.style.setProperty('color',color,'important');
-  el.style.setProperty('font-size',size+'px','important');
-  el.style.setProperty('font-family',font+',Arial,sans-serif','important');
-  if(s.weight)el.style.setProperty('font-weight',s.weight,'important');
-  if(s.align)el.style.setProperty('text-align',s.align,'important');
-  root.querySelectorAll('[data-edit].edit-selected').forEach(x=>{if(x!==el)x.classList.remove('edit-selected')});
-  el.classList.add('edit-selected');
+  selectedEditEl.style.setProperty('color',color,'important');
+  selectedEditEl.style.setProperty('font-size',size+'px','important');
+  selectedEditEl.style.setProperty('font-family',font+',Arial,sans-serif','important');
+  if(s.weight)selectedEditEl.style.setProperty('font-weight',s.weight,'important');
+  if(s.align)selectedEditEl.style.setProperty('text-align',s.align,'important');
+  document.querySelectorAll('#builderPaper .cv [data-edit].edit-selected').forEach(x=>{if(x!==selectedEditEl)x.classList.remove('edit-selected')});
+  selectedEditEl.classList.add('edit-selected');
   clearTimeout(styleSaveTimer);styleSaveTimer=setTimeout(autoSaveEditor,250);
 }
 function moveSelected(dir){
