@@ -101,9 +101,9 @@ body[data-v=cv]:not(.prev) .fab{display:block}.fab{position:fixed;right:16px;bot
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media print{@page{size:A4;margin:0}html,body{background:#fff!important;height:auto}.top,.side,.editor,.ctb,#esel,.mnav,.fab,#toast{display:none!important}.shell{display:block;padding:0}.canvas{display:block!important;background:none;border:0;box-shadow:none;overflow:visible;height:auto}.stage{padding:0;overflow:visible}#fit{width:auto!important;height:auto!important}#paper{transform:none!important;box-shadow:none;width:210mm;min-height:297mm}.el:hover,.el.sel{outline:none}.el:empty{display:none}}
-</style>
+.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.dstat{padding:14px}.dstat b{display:block;font-size:22px;margin-top:5px}.dstat small,.dash-head p,.quick small,.portal small{color:var(--mu)}.quick-grid,.portal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.quick{display:flex;align-items:center;gap:10px;text-align:left;padding:14px}.qi{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:rgba(99,102,241,.15);font-size:19px}.portal-grid{grid-template-columns:repeat(3,1fr)}.portal{padding:12px}.portal b{display:block;margin-bottom:4px}.portal small{display:block;min-height:34px}.progress{height:6px;background:rgba(255,255,255,.08);border-radius:9px;overflow:hidden;margin-top:7px}.progress i{display:block;height:100%;width:58%;background:var(--g)}@media(max-width:900px){.dashboard-grid{grid-template-columns:repeat(2,1fr)}.portal-grid{grid-template-columns:1fr 1fr}}@media(max-width:767px){.dashboard-grid,.quick-grid,.portal-grid{grid-template-columns:1fr}.dash-head{display:block}.dash-head button{margin-top:10px}}\n</style>
 </head>
-<body data-v="cv">
+<body data-v="home">
 <header class="top">
   <div class="br"><b>CAREERPILOT</b><small>AI CAREER SUITE</small></div>
   <div class="ct2">CV Builder</div>
@@ -113,7 +113,7 @@ body[data-v=cv]:not(.prev) .fab{display:block}.fab{position:fixed;right:16px;bot
 <div class="shell">
   <nav class="side glass" id="nav" aria-label="Main"></nav>
   <section class="editor" id="ed">
-    <div class="view" id="v-home"></div><div class="view on" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div><div class="view" id="v-jobs"></div><div class="view" id="v-cvs"></div>
+    <div class="view on" id="v-home"></div><div class="view" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div><div class="view" id="v-jobs"></div><div class="view" id="v-cvs"></div>
   </section>
   <main class="canvas">
     <div class="ctb glass"><button class="mo" data-v="cv">Edit</button><button id="zm" aria-label="Zoom out">−</button><span id="zv">100%</span><button id="zp" aria-label="Zoom in">+</button><button id="zf">Fit</button><button class="mo" data-v="design">Design</button><button class="mo" id="bX2">Export</button></div>
@@ -187,7 +187,33 @@ $('bP').onclick=()=>prev(!document.body.classList.contains('prev'));$('fab').onc
 $('bS').onclick=()=>{toast(persist()?'CV saved':'Saving is blocked in this browser');$('stt').textContent='✓ Saved just now'};
 $('bX').onclick=$('bX2').onclick=()=>window.print();
 
-$('v-home').innerHTML='<div class="card pad"><h2 style="margin:0 0 6px">Build Your Career. One Smart CV at a Time.</h2><p class="hint">Welcome back, <b data-n></b>. Your CV is saved automatically in this browser.</p><div class="row"><button class="pri" data-v="cv">Continue editing</button><button data-v="design">Design</button></div></div>';
+$('v-home').innerHTML=\`
+<div class="dash-head"><div><div class="ey">CAREERPILOT DASHBOARD</div><h2 style="margin:3px 0">Build your career in one place.</h2><p>CVs, professional templates, global jobs and career tools.</p></div><button class="pri" data-v="cv">✎ Build / Edit CV</button></div>
+<div class="dashboard-grid">
+<div class="card dstat"><span>📄</span><b>1</b><small>CV created</small></div>
+<div class="card dstat"><span>🎨</span><b>4+</b><small>CV templates</small></div>
+<div class="card dstat"><span>🌍</span><b>5</b><small>Job platforms</small></div>
+<div class="card dstat"><span>📊</span><b>58%</b><small>CV profile ready</small><div class="progress"><i></i></div></div>
+</div>
+<div class="card pad" style="margin-top:12px"><div class="ey">QUICK ACTIONS</div><h3 style="margin:4px 0 10px">What do you want to do?</h3><div class="quick-grid">
+<button class="quick" data-v="cv"><span class="qi">✎</span><span><b>Create / Edit CV</b><small>Build an ATS-friendly CV</small></span></button>
+<button class="quick" data-v="cvs"><span class="qi">▤</span><span><b>My CVs</b><small>Manage your CV versions</small></span></button>
+<button class="quick" data-v="design"><span class="qi">▦</span><span><b>CV Templates</b><small>Modern, executive, minimal and creative</small></span></button>
+<button class="quick" data-v="jobs"><span class="qi">🌐</span><span><b>Search Global Jobs</b><small>Find opportunities worldwide</small></span></button>
+</div></div>
+<div class="card pad" style="margin-top:12px"><div class="ey">GLOBAL JOBS</div><h3 style="margin:4px 0 10px">Start your job search</h3><div class="portal-grid">
+<div class="portal"><b>LinkedIn Jobs</b><small>Worldwide professional jobs</small><a href="https://www.linkedin.com/jobs/" target="_blank" rel="noopener noreferrer"><button>Search ↗</button></a></div>
+<div class="portal"><b>Indeed</b><small>Keyword and location search</small><a href="https://www.indeed.com/" target="_blank" rel="noopener noreferrer"><button>Search ↗</button></a></div>
+<div class="portal"><b>EURES</b><small>European jobs and mobility</small><a href="https://eures.europa.eu/" target="_blank" rel="noopener noreferrer"><button>Search ↗</button></a></div>
+<div class="portal"><b>Glassdoor</b><small>Jobs and company information</small><a href="https://www.glassdoor.com/Job/" target="_blank" rel="noopener noreferrer"><button>Search ↗</button></a></div>
+<div class="portal"><b>Jobs.com.pk</b><small>Pakistan opportunities</small><a href="https://www.jobs.com.pk/" target="_blank" rel="noopener noreferrer"><button>Search ↗</button></a></div>
+</div></div>
+<div class="card pad" style="margin-top:12px"><div class="ey">CAREER TOOLS</div><h3 style="margin:4px 0 10px">Coming next</h3><div class="quick-grid">
+<button class="quick" data-soon="1"><span class="qi">◎</span><span><b>AI Job Match</b><small>Match CV with job descriptions</small></span></button>
+<button class="quick" data-soon="1"><span class="qi">✉</span><span><b>Cover Letter</b><small>Create targeted applications</small></span></button>
+<button class="quick" data-soon="1"><span class="qi">☏</span><span><b>Interview Coach</b><small>Practice interviews</small></span></button>
+<button class="quick" data-soon="1"><span class="qi">✓</span><span><b>Application Tracker</b><small>Track applications</small></span></button>
+</div></div>\`;
 $('v-profile').innerHTML='<div class="card pad"><h2 style="margin:0" data-n></h2><p class="hint">Free Plan</p><div class="row"><button data-soon="1" class="pri">Upgrade</button></div><div class="row" style="margin-top:8px"><button id="pLoad">Load saved CV</button><button id="pSave">Save CV</button></div><div class="row" style="margin-top:8px"><button id="pX">Export PDF</button></div></div>';
 $('pSave').onclick=()=>$('bS').click();$('pX').onclick=()=>window.print();
 $('pLoad').onclick=()=>{const r=ls(KEY);if(!r){toast('No saved CV found');return}try{S=norm(JSON.parse(r));sel=null;refresh();toast('CV loaded')}catch(e){toast('Could not load')}};
