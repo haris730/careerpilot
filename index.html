@@ -212,7 +212,17 @@ function section(title,text,key='text'){
 function styleAttr(key){
   const s=elementStyles[key]||{};
   const x=Number(s.x||0),y=Number(s.y||0);
-  return 'transform:translate('+x+'px,'+y+'px);'+(s.color?'color:'+esc(s.color)+';':'')+(s.size?'font-size:'+Number(s.size)+'px;':'')+(s.font?'font-family:'+esc(s.font)+',Arial,sans-serif;':'')+(s.weight?'font-weight:'+esc(s.weight)+';':'')+(s.align?'text-align:'+esc(s.align)+';':'');
+  const size=Number(s.size||0);
+  const isBody=/^(summary|languages|certifications|key-achievements|selected-projects)$/.test(key)||/-description$/.test(key);
+  const isHeading=/-heading$/.test(key)||key==='headline'||key==='name'||key==='title';
+  const line=isBody?'1.55':(isHeading?'1.15':'1.3');
+  return 'transform:translate('+x+'px,'+y+'px);'+
+    (s.color?'color:'+esc(s.color)+' !important;':'')+
+    (size?'font-size:'+size+'px !important;':'')+
+    (s.font?'font-family:'+esc(s.font)+',Arial,sans-serif !important;':'')+
+    (s.weight?'font-weight:'+esc(s.weight)+' !important;':'')+
+    (s.align?'text-align:'+esc(s.align)+' !important;':'')+
+    'line-height:'+line+' !important;';
 }
 function editText(key,text,extra=''){
   return ' data-edit="'+key+'" contenteditable="true" spellcheck="false" data-bind="'+key+'" style="'+styleAttr(key)+'"'+extra+'>'+esc(text||'')+'</div>';
@@ -222,7 +232,7 @@ function renderCV(target='cvPaper'){
  const cls=tpl==='Professional'?'cv-professional':tpl==='ATS-Friendly'?'cv-ats':tpl==='Elegant'?'cv-elegant':tpl==='Creative'?'cv-creative':tpl==='Minimal'?'cv-minimal':'cv-modern';
  const contact=[d.email,d.phone,d.location,d.portfolio].filter(Boolean).map(esc).join('<span>•</span>');
  const skills=d.skills.split(/[,\n]+/).map(x=>x.trim()).filter(Boolean).map((x,i)=>'<div class="cv-skill" data-edit="skill-'+i+'" contenteditable="true" spellcheck="false" data-bind="skill-'+i+'" style="'+styleAttr('skill-'+i)+'">'+esc(x)+'</div>').join('');
- const side=(skills?'<div class="cv-section"><h2>Core Skills</h2><div class="cv-skills">'+skills+'</div></div>':'')+
+ const side=(skills?'<div class="cv-section"><h2 data-edit="skills-heading" contenteditable="true" spellcheck="false" data-bind="skills-heading" style="'+styleAttr('skills-heading')+'">Core Skills</h2><div class="cv-skills">'+skills+'</div></div>':'')+
    (d.languages?section('Languages',d.languages,'languages'):'')+
    (d.educations?.length?'<div class="cv-section"><h2 data-edit="education-heading" contenteditable="true" spellcheck="false" data-bind="education-heading" style="'+styleAttr('education-heading')+'">Education</h2>'+educationBlocks(d)+'</div>':'')+
    (d.certifications&&d.sectionState.certifications?section('Certifications',d.certifications,'certifications'):'');
@@ -249,6 +259,7 @@ function renderCV(target='cvPaper'){
  if(root){
    root.style.setProperty('--accent',accent);
    root.querySelectorAll('.cv-section h2').forEach(x=>{const key=x.dataset.edit; if(!key || !(elementStyles[key]&&elementStyles[key].color)) x.style.color=accent;});
+   root.querySelectorAll('[data-edit]').forEach(x=>{const key=x.dataset.edit,s=elementStyles[key];if(s){if(s.color)x.style.setProperty('color',s.color,'important');if(s.size)x.style.setProperty('font-size',Number(s.size)+'px','important');if(s.font)x.style.setProperty('font-family',s.font+',Arial,sans-serif','important');if(s.weight)x.style.setProperty('font-weight',s.weight,'important');if(s.align)x.style.setProperty('text-align',s.align,'important');}});
    root.querySelectorAll('.cv-skill').forEach(x=>{x.style.borderLeftColor=accent; const key=x.dataset.edit; if(key && elementStyles[key]?.color) x.style.color=elementStyles[key].color;});
    root.querySelectorAll('[data-edit]').forEach(x=>{
      if(x.dataset.edit===selectedEditKey)x.classList.add('edit-selected');
