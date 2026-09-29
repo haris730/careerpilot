@@ -248,8 +248,8 @@ function renderCV(target='cvPaper'){
  const root=$(target)?.firstElementChild;
  if(root){
    root.style.setProperty('--accent',accent);
-   root.querySelectorAll('.cv-section h2').forEach(x=>x.style.color=accent);
-   root.querySelectorAll('.cv-skill').forEach(x=>{x.style.borderLeftColor=accent});
+   root.querySelectorAll('.cv-section h2').forEach(x=>{const key=x.dataset.edit; if(!key || !(elementStyles[key]&&elementStyles[key].color)) x.style.color=accent;});
+   root.querySelectorAll('.cv-skill').forEach(x=>{x.style.borderLeftColor=accent; const key=x.dataset.edit; if(key && elementStyles[key]?.color) x.style.color=elementStyles[key].color;});
    root.querySelectorAll('[data-edit]').forEach(x=>{
      if(x.dataset.edit===selectedEditKey)x.classList.add('edit-selected');
    });
@@ -272,11 +272,14 @@ function selectEditable(el){
 function rgbToHex(rgb){const m=String(rgb).match(/\d+/g);if(!m||m.length<3)return null;return '#'+m.slice(0,3).map(n=>Number(n).toString(16).padStart(2,'0')).join('')}
 function applyElementChange(){
   if(!selectedEditKey)return;
-  elementStyles[selectedEditKey]={...(elementStyles[selectedEditKey]||{}),color:$('elementTextColor').value,size:Number($('elementFontSize').value)||16,font:$('elementFontFamily').value};
+  const s=elementStyles[selectedEditKey]||{};
+  s.color=$('elementTextColor').value;
+  s.size=Number($('elementFontSize').value)||16;
+  s.font=$('elementFontFamily').value;
+  elementStyles[selectedEditKey]=s;
   const el=document.querySelector('#builderPaper .cv [data-edit="'+CSS.escape(selectedEditKey)+'"]');
-  if(el){el.style.color=$('elementTextColor').value;el.style.fontSize=(Number($('elementFontSize').value)||16)+'px';el.style.fontFamily=$('elementFontFamily').value+',Arial,sans-serif';}
-  renderCV('builderPaper');
-  autoSaveEditor();
+  if(el){el.style.color=s.color;el.style.fontSize=s.size+'px';el.style.fontFamily=s.font+',Arial,sans-serif';}
+  clearTimeout(styleSaveTimer); styleSaveTimer=setTimeout(autoSaveEditor,250);
 }
 function moveSelected(dir){
   if(!selectedEditKey)return;
@@ -328,7 +331,7 @@ document.addEventListener('input',e=>{
   if(key==='certifications'){$('certifications').value=value;return}
   if(key==='skills'){$('skills').value=[...document.querySelectorAll('#builderPaper .cv .cv-skill')].map(x=>x.innerText.trim()).filter(Boolean).join(', ')}
 });
-let editorMode='edit',dragState=null;
+let editorMode='edit',dragState=null,styleSaveTimer=null;
 function autoSaveEditor(){try{saveStorage('careerpilot_cv',JSON.stringify(data()))}catch(e){}}
 $('elementTextColor').addEventListener('input',applyElementChange);
 $('elementFontSize').addEventListener('input',applyElementChange);
