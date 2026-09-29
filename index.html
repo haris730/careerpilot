@@ -84,13 +84,12 @@
 .cv-creative .cv-header h1{font-size:56px;font-weight:800}
 .cv-elegant .cv-header h1{font-size:58px}
 .cv-minimal .cv-header h1{font-size:58px;font-weight:800}
-/* CV ELEMENT ISOLATION v2 */
-#builderPaper .cv [data-edit],#cvPaper .cv [data-edit]{position:relative;isolation:isolate;unicode-bidi:plaintext;}
-#builderPaper .cv .cv-section h2,#cvPaper .cv .cv-section h2{color:inherit !important;}
-#builderPaper .cv [data-edit]{line-height:1.25 !important;}
-#builderPaper .cv .cv-section h2[data-edit]{line-height:1.15 !important;margin-top:0;}
-#builderPaper .cv .cv-text[data-edit],#cvPaper .cv .cv-text[data-edit]{line-height:1.55 !important;}
-#builderPaper .cv .cv-skill[data-edit]{line-height:1.35 !important;}
+/* CV ELEMENT ISOLATION v3 */
+#builderPaper .cv [data-edit],#cvPaper .cv [data-edit]{position:relative;isolation:isolate;unicode-bidi:plaintext;color:inherit;}
+#builderPaper .cv .cv-section h2[data-edit]{margin-top:0;line-height:1.15;}
+#builderPaper .cv .cv-text[data-edit],#cvPaper .cv .cv-text[data-edit]{line-height:1.55;}
+#builderPaper .cv .cv-skill[data-edit]{line-height:1.35;}
+#builderPaper .cv [data-edit].edit-selected{outline:2px solid #4f46e5!important;outline-offset:5px;background:#4f46e50d;box-shadow:0 0 0 5px #4f46e508;}
 
 .job-search-grid{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:18px}
 .job-search-panel{background:#fff;border:1px solid #e7eaf0;border-radius:18px;padding:20px;box-shadow:0 8px 25px #11182708}
@@ -329,7 +328,15 @@ function renderCV(target='cvPaper'){
      if(saved&&saved.color) x.style.setProperty('color',saved.color,'important');
      else x.style.setProperty('color',accent,'important');
    });
-   root.querySelectorAll('[data-edit]').forEach(x=>{const key=x.dataset.edit,s=elementStyles[key];if(s){if(s.color)x.style.setProperty('color',s.color,'important');if(s.size)x.style.setProperty('font-size',Number(s.size)+'px','important');if(s.font)x.style.setProperty('font-family',s.font+',Arial,sans-serif','important');if(s.weight)x.style.setProperty('font-weight',s.weight,'important');if(s.align)x.style.setProperty('text-align',s.align,'important');}});
+   root.querySelectorAll('[data-edit]').forEach(x=>{
+     const key=String(x.dataset.edit||''),s=elementStyles[key]||{};
+     if(s.color)x.style.setProperty('color',s.color,'important');
+     if(s.size)x.style.setProperty('font-size',Number(s.size)+'px','important');
+     if(s.font)x.style.setProperty('font-family',s.font+',Arial,sans-serif','important');
+     if(s.weight)x.style.setProperty('font-weight',s.weight,'important');
+     if(s.align)x.style.setProperty('text-align',s.align,'important');
+     x.style.setProperty('line-height',/-heading$/.test(key)?'1.15':/description$|^(summary|languages|certifications|key-achievements|selected-projects)$/.test(key)?'1.55':'1.3','important');
+   });
    root.querySelectorAll('.cv-skill').forEach(x=>{x.style.borderLeftColor=accent; const key=x.dataset.edit; if(key && elementStyles[key]?.color) x.style.color=elementStyles[key].color;});
    root.querySelectorAll('[data-edit]').forEach(x=>{
      if(x.dataset.edit===selectedEditKey)x.classList.add('edit-selected');
@@ -353,16 +360,25 @@ function selectEditable(el){
 function rgbToHex(rgb){const m=String(rgb).match(/\d+/g);if(!m||m.length<3)return null;return '#'+m.slice(0,3).map(n=>Number(n).toString(16).padStart(2,'0')).join('')}
 function applyElementChange(){
   if(!selectedEditKey)return;
-  const s=elementStyles[selectedEditKey]||{};
-  s.color=$('elementTextColor').value;
-  s.size=Number($('elementFontSize').value)||16;
-  s.font=$('elementFontFamily').value;
-  elementStyles[selectedEditKey]=s;
-  const el=document.querySelector('#builderPaper .cv [data-edit="'+CSS.escape(selectedEditKey)+'"]');
-  if(el){
-    el.style.setProperty('color',s.color,'important');
-    el.style.setProperty('font-size',s.size+'px','important');
-    el.style.setProperty('font-family',s.font+',Arial,sans-serif','important');
+  const key=String(selectedEditKey);
+  const s={...(elementStyles[key]||{})};
+  const color=$('elementTextColor')?.value||'';
+  const size=Number($('elementFontSize')?.value)||16;
+  const font=$('elementFontFamily')?.value||'Inter';
+  if(color)s.color=color;
+  s.size=size;
+  s.font=font;
+  elementStyles[key]=s;
+  const root=$('builderPaper')?.querySelector('.cv');
+  if(root){
+    const el=[...root.querySelectorAll('[data-edit]')].find(x=>x.dataset.edit===key);
+    if(el){
+      el.style.setProperty('color',s.color||'#172033','important');
+      el.style.setProperty('font-size',size+'px','important');
+      el.style.setProperty('font-family',font+',Arial,sans-serif','important');
+      if(s.weight)el.style.setProperty('font-weight',s.weight,'important');
+      if(s.align)el.style.setProperty('text-align',s.align,'important');
+    }
   }
   clearTimeout(styleSaveTimer); styleSaveTimer=setTimeout(autoSaveEditor,250);
 }
