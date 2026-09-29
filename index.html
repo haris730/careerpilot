@@ -140,9 +140,12 @@ body[data-v=cv]:not(.prev) .fab{display:block}.fab{position:fixed;right:16px;bot
 <nav class="mnav" id="mnav" aria-label="Mobile"></nav>
 <button class="fab" id="fab" aria-label="Preview CV">👁</button><button class="auth-fab" id="authOpen">Sign in</button><div class="auth-modal" id="authModal"><div class="auth-box"><button class="auth-close" id="authClose">✕</button><div class="ey">CAREERPILOT ACCOUNT</div><h2 id="authTitle">Welcome back</h2><p class="hint">Save your CV and career data securely in the cloud.</p><div class="auth-tabs"><button id="tabLogin" class="on">Login</button><button id="tabSignup">Sign up</button></div><label>Email<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></label><label style="display:block;margin-top:10px">Password<input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••"></label><label id="authNameWrap" style="display:none;margin-top:10px">Full name<input id="authName" autocomplete="name" placeholder="Your name"></label><div class="auth-msg" id="authMsg"></div><button class="pri" id="authSubmit" style="width:100%">Login</button><button id="googleAuth" style="width:100%;margin-top:8px">Continue with Google</button><button id="authLogout" style="display:none;width:100%;margin-top:8px">Logout</button></div></div>
 <div id="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n<script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
 (function(){
-'use strict';\n\n
+'use strict';
+
+
 const $=i=>document.getElementById(i),Q=(s,r)=>Array.from((r||document).querySelectorAll(s)),KEY='careerpilot_cv_builder_2026',OLD='careerpilot_cv_builder_v2';
 const FONTS=[['','Template default'],['Inter,Segoe UI,Arial,sans-serif','Modern sans'],['Georgia,serif','Georgia'],['Arial,Helvetica,sans-serif','Arial'],['Trebuchet MS,sans-serif','Trebuchet'],['Times New Roman,serif','Times'],['Courier New,monospace','Courier']];
 const BGS=[['#ffffff','White'],['#fffaf0','Warm ivory'],['#f3f4f6','Light gray'],['#f2f7ff','Soft blue']];
