@@ -187,9 +187,8 @@ function initFromData(d){fields.forEach(f=>{const el=$(f);if(el&&typeof d[f]==='
 function load(){try{const raw=readStorage('careerpilot_cv');if(!raw){addExperience();addEducation();updateDash();liveRender();return}initFromData(JSON.parse(raw));if($('saveStatus'))$('saveStatus').textContent='✓ Saved CV loaded from this device'}catch(e){addExperience();addEducation();updateDash();liveRender()}}
 function save(){try{const d=data();const raw=JSON.stringify(d);saveStorage('careerpilot_cv',raw);updateDash();if($('saveStatus'))$('saveStatus').textContent='✓ CV saved on this device';toast('CV saved on this device');return true}catch(e){if($('saveStatus'))$('saveStatus').textContent='Could not save on this browser.';toast('Save failed');return false}}
 function updateDash(){const d=data();let n=0;['name','title','email','phone','location','summary','skills'].forEach(f=>{if(String(d[f]||'').trim())n++});if($('profileStatus'))$('profileStatus').textContent=Math.round(n/7*100)+'%';if($('templateStatus'))$('templateStatus').textContent=d.template||'Modern';if($('matchStatus'))$('matchStatus').textContent=localStorage.getItem('careerpilot_matches')||'0'}
-function jobBlocks(d){return (d.experiences||[]).filter(x=>x.company||x.position||x.description).map(x=>'<div class="cv-experience"><div class="cv-job-head"><div><div class="cv-job-role">'+esc(x.position||'Position')+'</div><div class="cv-job-company">'+esc(x.company||'Company')+'</div></div><div class="cv-job-date">'+esc([x.start,x.end].filter(Boolean).join(' — '))+'</div></div>'+(x.location?'<div class="cv-job-location">'+esc(x.location)+'</div>':'')+(x.description?'<div class="cv-job-desc">'+esc(x.description)+'</div>':'')+'</div>').join('');
-}
-function educationBlocks(d){return (d.educations||[]).filter(x=>x.degree||x.school||x.year).map(x=>'<div class="cv-experience"><div class="cv-job-head"><div><div class="cv-job-role">'+esc(x.degree||'Qualification')+'</div><div class="cv-job-company">'+esc(x.school||'Institute')+'</div></div><div class="cv-job-date">'+esc(x.year||'')+'</div></div>'+(x.location?'<div class="cv-job-location">'+esc(x.location)+'</div>':'')+'</div>').join('')}
+function jobBlocks(d){return (d.experiences||[]).filter(x=>x.company||x.position||x.description).map((x,i)=>'<div class="cv-experience"><div class="cv-job-head"><div><div class="cv-job-role" data-edit="exp-'+i+'-position" contenteditable="true" spellcheck="false" data-exp-index="'+i+'" data-exp-key="position" style="'+styleAttr('exp-'+i+'-position')+'">'+esc(x.position||'Position')+'</div><div class="cv-job-company" data-edit="exp-'+i+'-company" contenteditable="true" spellcheck="false" data-exp-index="'+i+'" data-exp-key="company" style="'+styleAttr('exp-'+i+'-company')+'">'+esc(x.company||'Company')+'</div></div><div class="cv-job-date" data-edit="exp-'+i+'-date" contenteditable="true" spellcheck="false" data-exp-index="'+i+'" data-exp-key="date" style="'+styleAttr('exp-'+i+'-date')+'">'+esc([x.start,x.end].filter(Boolean).join(' — '))+'</div></div>'+(x.location?'<div class="cv-job-location" data-edit="exp-'+i+'-location" contenteditable="true" spellcheck="false" data-exp-index="'+i+'" data-exp-key="location" style="'+styleAttr('exp-'+i+'-location')+'">'+esc(x.location)+'</div>':'')+(x.description?'<div class="cv-job-desc" data-edit="exp-'+i+'-description" contenteditable="true" spellcheck="false" data-exp-index="'+i+'" data-exp-key="description" style="'+styleAttr('exp-'+i+'-description')+'">'+esc(x.description)+'</div>':'')+'</div>').join('');}
+function educationBlocks(d){return (d.educations||[]).filter(x=>x.degree||x.school||x.year).map((x,i)=>'<div class="cv-experience"><div class="cv-job-head"><div><div class="cv-job-role" data-edit="edu-'+i+'-degree" contenteditable="true" spellcheck="false" data-edu-index="'+i+'" data-edu-key="degree" style="'+styleAttr('edu-'+i+'-degree')+'">'+esc(x.degree||'Qualification')+'</div><div class="cv-job-company" data-edit="edu-'+i+'-school" contenteditable="true" spellcheck="false" data-edu-index="'+i+'" data-edu-key="school" style="'+styleAttr('edu-'+i+'-school')+'">'+esc(x.school||'Institute')+'</div></div><div class="cv-job-date" data-edit="edu-'+i+'-year" contenteditable="true" spellcheck="false" data-edu-index="'+i+'" data-edu-key="year" style="'+styleAttr('edu-'+i+'-year')+'">'+esc(x.year||'')+'</div></div>'+(x.location?'<div class="cv-job-location" data-edit="edu-'+i+'-location" contenteditable="true" spellcheck="false" data-edu-index="'+i+'" data-edu-key="location" style="'+styleAttr('edu-'+i+'-location')+'">'+esc(x.location)+'</div>':'')+'</div>').join('');}
 function section(title,text,kind='text'){if(!text)return '';return '<div class="cv-section"><h2>'+title+'</h2><div class="cv-text">'+esc(text)+'</div></div>'}
 function styleAttr(key){
   const s=elementStyles[key]||{};
@@ -273,7 +272,26 @@ document.addEventListener('input',e=>{
   const el=e.target.closest('#builderPaper .cv [data-edit][data-bind]');
   if(!el)return;
   const key=el.dataset.bind, value=el.innerText;
+  if(el.dataset.expIndex!==undefined){
+    const idx=Number(el.dataset.expIndex), k=el.dataset.expKey, items=getExperiences();
+    if(items[idx]){
+      if(k==='date'){const parts=value.split(/\\s*[—-]\\s*/);items[idx].start=parts[0]||'';items[idx].end=parts.slice(1).join(' — ')||''}
+      else items[idx][k]=value;
+      const rows=[...document.querySelectorAll('#experienceList .repeat-item')], row=rows[idx];
+      if(row){const input=row.querySelector('[data-k="'+(k==='date'?'start':k)+'"]');if(input&&k!=='date')input.value=value}
+    }
+    return;
+  }
+  if(el.dataset.eduIndex!==undefined){
+    const idx=Number(el.dataset.eduIndex), k=el.dataset.eduKey, items=getEducations();
+    if(items[idx])items[idx][k]=value;
+    return;
+  }
   if($(key)){$(key).value=value;return}
+  if(key==='key-achievements'){$('achievements').value=value;return}
+  if(key==='selected-projects'){$('projects').value=value;return}
+  if(key==='languages'){$('languages').value=value;return}
+  if(key==='certifications'){$('certifications').value=value;return}
   if(key==='skills'){$('skills').value=[...document.querySelectorAll('#builderPaper .cv .cv-skill')].map(x=>x.innerText.trim()).filter(Boolean).join(', ')}
 });
 $('elementTextColor').addEventListener('input',applyElementChange);
