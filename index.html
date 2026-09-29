@@ -259,8 +259,13 @@ function renderOrderList(){const list=$('orderList');if(!list)return;const names
 function moveSection(key,dir){const i=sectionOrder.indexOf(key),j=i+dir;if(i<0||j<0||j>=sectionOrder.length)return;[sectionOrder[i],sectionOrder[j]]=[sectionOrder[j],sectionOrder[i]];renderOrderList();liveRender()}
 function initFromData(d){fields.forEach(f=>{const el=$(f);if(el&&typeof d[f]==='string')el.value=d[f]});selectedColor=d.color||'#334155';photoData=d.photo||'';elementStyles=d.elementStyles||{};sectionOrder=Array.isArray(d.sectionOrder)&&d.sectionOrder.length?d.sectionOrder.filter(x=>defaultData.sectionOrder.includes(x)): [...defaultData.sectionOrder];while(sectionOrder.length<defaultData.sectionOrder.length)defaultData.sectionOrder.forEach(x=>{if(!sectionOrder.includes(x))sectionOrder.push(x)});if($('pageSpacing'))$('pageSpacing').value=d.pageSpacing||34;if($('headerSpacing'))$('headerSpacing').value=d.headerSpacing||42;if($('photoPlacement'))$('photoPlacement').value=d.photoPlacement||'right';setPhoto(photoData);if($('colorOptions'))$('colorOptions').querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color.toLowerCase()===selectedColor.toLowerCase()));if($('customColor'))$('customColor').value=selectedColor;$('experienceList').innerHTML='';$('educationList').innerHTML='';(d.experiences||[]).forEach(addExperience);(d.educations||[]).forEach(addEducation);renderOrderList();if(!$('experienceList').children.length)addExperience();if(!$('educationList').children.length)addEducation();applySections(d.sectionState||defaultData.sectionState);liveRender();updateDash()}
 function normalizeElementStyles(){
- const bad=['heading','section-heading','all-headings','global-heading','global','text'];
- bad.forEach(k=>{if(elementStyles&&elementStyles[k])delete elementStyles[k]});
+  const old={...(elementStyles||{})},next={};
+  Object.keys(old).forEach(k=>{
+    if(!k||['heading','section-heading','all-headings','global-heading','global','text'].includes(k))return;
+    const id=k.startsWith('cv-edit-')?k:editorIdFor(k);
+    if(!next[id])next[id]=old[k];
+  });
+  elementStyles=next;
 }
 function load(){try{const raw=readStorage('careerpilot_cv');if(!raw){addExperience();addEducation();updateDash();liveRender();return}initFromData(JSON.parse(raw));normalizeElementStyles();if($('saveStatus'))$('saveStatus').textContent='✓ Saved CV loaded from this device'}catch(e){addExperience();addEducation();updateDash();liveRender()}}
 function save(){try{const d=data();const raw=JSON.stringify(d);saveStorage('careerpilot_cv',raw);updateDash();if($('saveStatus'))$('saveStatus').textContent='✓ CV saved on this device';toast('CV saved on this device');return true}catch(e){if($('saveStatus'))$('saveStatus').textContent='Could not save on this browser.';toast('Save failed');return false}}
@@ -272,9 +277,9 @@ function section(title,text,key='text'){
   const k=key||title.toLowerCase().replace(/[^a-z0-9]+/g,'-');
   return '<div class="cv-section"><h2 data-edit="'+k+'-heading" contenteditable="true" spellcheck="false" data-bind="'+k+'-heading" style="'+styleAttr(k+'-heading')+'">'+esc(title)+'</h2><div class="cv-text" data-edit="'+k+'" contenteditable="true" spellcheck="false" data-bind="'+k+'" style="'+styleAttr(k)+'">'+esc(text)+'</div></div>';
 }
+function editorIdFor(key){return 'cv-edit-'+String(key||'').replace(/[^a-zA-Z0-9_-]/g,'-');}
 function styleAttr(key){
-  const exactId='cv-edit-'+String(key||'').replace(/[^a-zA-Z0-9_-]/g,'-');
-  const s=elementStyles[exactId]||elementStyles[key]||{};
+  const id=editorIdFor(key),s=elementStyles[id]||{};
   const x=Number(s.x||0),y=Number(s.y||0),size=Number(s.size||0);
   const isBody=/^(summary|languages|certifications|key-achievements|selected-projects)$/.test(key)||/-description$/.test(key);
   const isHeading=/-heading$/.test(key)||key==='headline'||key==='name'||key==='title'||key==='contact';
@@ -351,53 +356,45 @@ function renderCV(target='cvPaper'){
 }
 
 function selectEditable(el){
-  if(!el||!el.dataset.edit)return;
-  const exactId=String(el.id||el.dataset.editorId||'');
-  if(!exactId)return;
-  selectedEditId=exactId;
+  if(!el||!el.dataset.edit||!el.dataset.editorId)return;
+  selectedEditId=String(el.dataset.editorId);
   selectedEditKey=String(el.dataset.edit);
-  const builder=document.getElementById(selectedEditId);
-  selectedEditEl=(builder&&builder.closest('#builderPaper'))?builder:null;
+  selectedEditEl=el.closest('#builderPaper')?el:null;
   if(!selectedEditEl)return;
   document.querySelectorAll('#builderPaper .cv [data-editor-selected="true"]').forEach(x=>x.removeAttribute('data-editor-selected'));
-  if(selectedEditEl){selectedEditEl.setAttribute('data-editor-selected','true');selectedEditEl.classList.add('edit-selected')}
-  const label=(el.innerText||el.textContent||'').trim().replace(/\s+/g,' ').slice(0,32);
+  selectedEditEl.setAttribute('data-editor-selected','true');
+  selectedEditEl.classList.add('edit-selected');
+  const label=(selectedEditEl.innerText||selectedEditEl.textContent||'').trim().replace(/\s+/g,' ').slice(0,32);
   $('selectedElementName').textContent=(selectedEditKey==='name'?'Name':selectedEditKey)+' — '+(label||'Selected');
-  const s=elementStyles[selectedEditId]||elementStyles[selectedEditKey]||{};
-  const computed=getComputedStyle(selectedEditEl||el);
+  const s=elementStyles[selectedEditId]||{},computed=getComputedStyle(selectedEditEl);
   $('elementTextColor').value=s.color||rgbToHex(computed.color)||'#172033';
   $('elementFontSize').value=s.size||Math.round(parseFloat(computed.fontSize)||16);
   $('elementFontFamily').value=s.font||computed.fontFamily.replace(/,.*/,'').replace(/["']/g,'')||'Inter';
   $('toggleBold').classList.toggle('active',s.weight==='800'||computed.fontWeight==='800'||computed.fontWeight==='bold');
 }
-function rgbToHex(rgb){const m=String(rgb).match(/\d+/g);if(!m||m.length<3)return null;return '#'+m.slice(0,3).map(n=>Number(n).toString(16).padStart(2,'0')).join('')}
 function applyElementChange(){
-  const key=String(selectedEditKey||'');
-  const id=String(selectedEditId||'');
-  if(!key||!id)return;
-  const el=document.getElementById(id);
-  if(!el||!el.closest('#builderPaper .cv'))return;
+  const id=String(selectedEditId||''); if(!id)return;
+  const el=document.querySelector('#builderPaper .cv [data-editor-id="'+CSS.escape(id)+'"]');
+  if(!el)return;
   selectedEditEl=el;
-  const s={...(elementStyles[id]||elementStyles[key]||{})};
-  const color=$('elementTextColor')?.value||'#172033';
-  const size=Math.max(8,Math.min(96,Number($('elementFontSize')?.value)||16));
-  const font=$('elementFontFamily')?.value||'Inter';
-  s.color=color;s.size=size;s.font=font;elementStyles[id]=s;
-  el.style.setProperty('color',color,'important');
-  el.style.setProperty('font-size',size+'px','important');
-  el.style.setProperty('font-family',font+',Arial,sans-serif','important');
-  if(s.weight)el.style.setProperty('font-weight',s.weight,'important');
-  if(s.align)el.style.setProperty('text-align',s.align,'important');
+  const s={...(elementStyles[id]||{})};
+  s.color=$('elementTextColor')?.value||'#172033';
+  s.size=Math.max(8,Math.min(96,Number($('elementFontSize')?.value)||16));
+  s.font=$('elementFontFamily')?.value||'Inter';
+  elementStyles[id]=s;
+  el.style.setProperty('color',s.color,'important');
+  el.style.setProperty('font-size',s.size+'px','important');
+  el.style.setProperty('font-family',s.font+',Arial,sans-serif','important');
   el.setAttribute('data-editor-selected','true');
   el.classList.add('edit-selected');
   clearTimeout(styleSaveTimer);styleSaveTimer=setTimeout(autoSaveEditor,250);
 }
 function moveSelected(dir){
-  if(!selectedEditId)return;
-  const s=elementStyles[selectedEditId]||elementStyles[selectedEditKey]||{x:0,y:0};
+  const id=String(selectedEditId||''); if(!id)return;
+  const s={...(elementStyles[id]||{}),x:Number(elementStyles[id]?.x||0),y:Number(elementStyles[id]?.y||0)};
   const step=4;
-  if(dir==='up')s.y=(s.y||0)-step;if(dir==='down')s.y=(s.y||0)+step;if(dir==='left')s.x=(s.x||0)-step;if(dir==='right')s.x=(s.x||0)+step;
-  elementStyles[selectedEditId]=s;renderCV('builderPaper');toast('Element moved');
+  if(dir==='up')s.y-=step;if(dir==='down')s.y+=step;if(dir==='left')s.x-=step;if(dir==='right')s.x+=step;
+  elementStyles[id]=s;renderCV('builderPaper');toast('Element moved');
 }
 function bindEditableElements(root){
   const builder=document.getElementById('builderPaper');
@@ -473,7 +470,7 @@ document.addEventListener('pointerdown',e=>{
   const el=e.target.closest('#builderPaper .cv [data-edit]');
   if(!el||editorMode!=='move')return;
   selectEditable(el);
-  const s=elementStyles[selectedEditId]||elementStyles[selectedEditKey]||{x:0,y:0};
+  const s=elementStyles[selectedEditId]||elementStyles[selectedEditId]||{x:0,y:0};
   dragState={el,id:selectedEditId,startX:e.clientX,startY:e.clientY,baseX:Number(s.x||0),baseY:Number(s.y||0)};
   el.setPointerCapture?.(e.pointerId);e.preventDefault();
 });
@@ -484,12 +481,12 @@ document.addEventListener('pointermove',e=>{
   const s=elementStyles[dragState.id];dragState.el.style.transform='translate('+s.x+'px,'+s.y+'px)';
 });
 document.addEventListener('pointerup',()=>{if(dragState){dragState=null;renderCV('builderPaper');autoSaveEditor()}});
-$('toggleBold').onclick=()=>{if(!selectedEditId)return;const s={...(elementStyles[selectedEditId]||elementStyles[selectedEditKey]||{})};s.weight=s.weight==='800'?'400':'800';elementStyles[selectedEditId]=s;renderCV('builderPaper');autoSaveEditor()};
-$('alignLeft').onclick=()=>{if(!selectedEditId)return;elementStyles[selectedEditId]={...(elementStyles[selectedEditId]||elementStyles[selectedEditKey]||{}),align:'left'};renderCV('builderPaper');autoSaveEditor()};
-$('alignCenter').onclick=()=>{if(!selectedEditId)return;elementStyles[selectedEditId]={...(elementStyles[selectedEditId]||elementStyles[selectedEditKey]||{}),align:'center'};renderCV('builderPaper');autoSaveEditor()};
-$('alignRight').onclick=()=>{if(!selectedEditId)return;elementStyles[selectedEditId]={...(elementStyles[selectedEditId]||elementStyles[selectedEditKey]||{}),align:'right'};renderCV('builderPaper');autoSaveEditor()};
+$('toggleBold').onclick=()=>{if(!selectedEditId)return;const s={...(elementStyles[selectedEditId]||elementStyles[selectedEditId]||{})};s.weight=s.weight==='800'?'400':'800';elementStyles[selectedEditId]=s;renderCV('builderPaper');autoSaveEditor()};
+$('alignLeft').onclick=()=>{if(!selectedEditId)return;elementStyles[selectedEditId]={...(elementStyles[selectedEditId]||elementStyles[selectedEditId]||{}),align:'left'};renderCV('builderPaper');autoSaveEditor()};
+$('alignCenter').onclick=()=>{if(!selectedEditId)return;elementStyles[selectedEditId]={...(elementStyles[selectedEditId]||elementStyles[selectedEditId]||{}),align:'center'};renderCV('builderPaper');autoSaveEditor()};
+$('alignRight').onclick=()=>{if(!selectedEditId)return;elementStyles[selectedEditId]={...(elementStyles[selectedEditId]||elementStyles[selectedEditId]||{}),align:'right'};renderCV('builderPaper');autoSaveEditor()};
 document.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>moveSelected(b.dataset.move));
-$('resetElement').onclick=()=>{if(!selectedEditId)return;delete elementStyles[selectedEditId];delete elementStyles[selectedEditKey];renderCV('builderPaper');autoSaveEditor();toast('Element reset')};
+$('resetElement').onclick=()=>{if(!selectedEditId)return;delete elementStyles[selectedEditId];delete elementStyles[selectedEditId];renderCV('builderPaper');autoSaveEditor();toast('Element reset')};
 
 function liveRender(){try{renderCV('builderPaper');updateDash()}catch(e){}}
 $('saveCv').addEventListener('click',save);$('saveCvBottom').addEventListener('click',save);$('previewBtn').onclick=()=>go('preview');
