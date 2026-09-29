@@ -193,7 +193,11 @@ function save(){try{const d=data();const raw=JSON.stringify(d);saveStorage('care
 function updateDash(){const d=data();let n=0;['name','title','email','phone','location','summary','skills'].forEach(f=>{if(String(d[f]||'').trim())n++});if($('profileStatus'))$('profileStatus').textContent=Math.round(n/7*100)+'%';if($('templateStatus'))$('templateStatus').textContent=d.template||'Modern';if($('matchStatus'))$('matchStatus').textContent=localStorage.getItem('careerpilot_matches')||'0'}
 function jobBlocks(d){return (d.experiences||[]).filter(x=>x.company||x.position||x.description).map((x,i)=>'<div class="cv-experience"><div class="cv-job-head"><div><div class="cv-job-role" data-edit="exp-'+i+'-position" contenteditable="true" spellcheck="false" data-exp-index="'+i+'" data-exp-key="position" style="'+styleAttr('exp-'+i+'-position')+'">'+esc(x.position||'Position')+'</div><div class="cv-job-company" data-edit="exp-'+i+'-company" contenteditable="true" spellcheck="false" data-exp-index="'+i+'" data-exp-key="company" style="'+styleAttr('exp-'+i+'-company')+'">'+esc(x.company||'Company')+'</div></div><div class="cv-job-date" data-edit="exp-'+i+'-date" contenteditable="true" spellcheck="false" data-exp-index="'+i+'" data-exp-key="date" style="'+styleAttr('exp-'+i+'-date')+'">'+esc([x.start,x.end].filter(Boolean).join(' — '))+'</div></div>'+(x.location?'<div class="cv-job-location" data-edit="exp-'+i+'-location" contenteditable="true" spellcheck="false" data-exp-index="'+i+'" data-exp-key="location" style="'+styleAttr('exp-'+i+'-location')+'">'+esc(x.location)+'</div>':'')+(x.description?'<div class="cv-job-desc" data-edit="exp-'+i+'-description" contenteditable="true" spellcheck="false" data-exp-index="'+i+'" data-exp-key="description" style="'+styleAttr('exp-'+i+'-description')+'">'+esc(x.description)+'</div>':'')+'</div>').join('');}
 function educationBlocks(d){return (d.educations||[]).filter(x=>x.degree||x.school||x.year).map((x,i)=>'<div class="cv-experience"><div class="cv-job-head"><div><div class="cv-job-role" data-edit="edu-'+i+'-degree" contenteditable="true" spellcheck="false" data-edu-index="'+i+'" data-edu-key="degree" style="'+styleAttr('edu-'+i+'-degree')+'">'+esc(x.degree||'Qualification')+'</div><div class="cv-job-company" data-edit="edu-'+i+'-school" contenteditable="true" spellcheck="false" data-edu-index="'+i+'" data-edu-key="school" style="'+styleAttr('edu-'+i+'-school')+'">'+esc(x.school||'Institute')+'</div></div><div class="cv-job-date" data-edit="edu-'+i+'-year" contenteditable="true" spellcheck="false" data-edu-index="'+i+'" data-edu-key="year" style="'+styleAttr('edu-'+i+'-year')+'">'+esc(x.year||'')+'</div></div>'+(x.location?'<div class="cv-job-location" data-edit="edu-'+i+'-location" contenteditable="true" spellcheck="false" data-edu-index="'+i+'" data-edu-key="location" style="'+styleAttr('edu-'+i+'-location')+'">'+esc(x.location)+'</div>':'')+'</div>').join('');}
-function section(title,text,kind='text'){if(!text)return '';return '<div class="cv-section"><h2>'+title+'</h2><div class="cv-text">'+esc(text)+'</div></div>'}
+function section(title,text,key='text'){
+  if(!text)return '';
+  const k=key||title.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  return '<div class="cv-section"><h2 data-edit="'+k+'-heading" contenteditable="true" spellcheck="false" data-bind="'+k+'-heading" style="'+styleAttr(k+'-heading')+'">'+esc(title)+'</h2><div class="cv-text" data-edit="'+k+'" contenteditable="true" spellcheck="false" data-bind="'+k+'" style="'+styleAttr(k)+'">'+esc(text)+'</div></div>';
+}
 function styleAttr(key){
   const s=elementStyles[key]||{};
   const x=Number(s.x||0),y=Number(s.y||0);
@@ -206,16 +210,16 @@ function renderCV(target='cvPaper'){
  const d=data(),tpl=d.template||'Modern';
  const cls=tpl==='Professional'?'cv-professional':tpl==='ATS-Friendly'?'cv-ats':tpl==='Elegant'?'cv-elegant':tpl==='Creative'?'cv-creative':tpl==='Minimal'?'cv-minimal':'cv-modern';
  const contact=[d.email,d.phone,d.location,d.portfolio].filter(Boolean).map(esc).join('<span>•</span>');
- const skills=d.skills.split(/[,\n]+/).map(x=>x.trim()).filter(Boolean).map((x,i)=>'<div class="cv-skill" data-edit="skill-'+i+'" contenteditable="true" spellcheck="false" data-bind="skills">'+esc(x)+'</div>').join('');
+ const skills=d.skills.split(/[,\n]+/).map(x=>x.trim()).filter(Boolean).map((x,i)=>'<div class="cv-skill" data-edit="skill-'+i+'" contenteditable="true" spellcheck="false" data-bind="skills" style="'+styleAttr('skill-'+i)+'">'+esc(x)+'</div>').join('');
  const side=(skills?'<div class="cv-section"><h2>Core Skills</h2><div class="cv-skills">'+skills+'</div></div>':'')+
-   (d.languages?section('Languages',d.languages):'')+
+   (d.languages?section('Languages',d.languages,'languages'):'')+
    (d.educations?.length?'<div class="cv-section"><h2>Education</h2>'+educationBlocks(d)+'</div>':'')+
-   (d.certifications&&d.sectionState.certifications?section('Certifications',d.certifications):'');
+   (d.certifications&&d.sectionState.certifications?section('Certifications',d.certifications,'certifications'):'');
  const blocks={
    summary:d.summary?'<div class="cv-section"><h2>Professional Profile</h2><div class="cv-text" data-edit="summary" contenteditable="true" spellcheck="false" data-bind="summary" style="'+styleAttr('summary')+'">'+esc(d.summary)+'</div></div>':'',
    experience:d.experiences?.length?'<div class="cv-section"><h2>Experience</h2>'+jobBlocks(d)+'</div>':'',
-   achievements:d.achievements&&d.sectionState.achievements?section('Key Achievements',d.achievements):'',
-   projects:d.projects&&d.sectionState.projects?section('Selected Projects',d.projects):''
+   achievements:d.achievements&&d.sectionState.achievements?section('Key Achievements',d.achievements,'key-achievements'):'',
+   projects:d.projects&&d.sectionState.projects?section('Selected Projects',d.projects,'selected-projects'):''
  };
  let main='';d.sectionOrder.forEach(k=>{if(blocks[k])main+=blocks[k]});
  const photoClass=d.photoPlacement==='left'?'photo-left':d.photoPlacement==='center'?'photo-center':'photo-right';
@@ -226,7 +230,7 @@ function renderCV(target='cvPaper'){
  '<div class="cv-kicker" data-edit="headline" contenteditable="true" spellcheck="false" data-bind="headline" style="color:'+esc(accent)+';'+styleAttr('headline')+'">'+esc(d.headline||d.title||'Professional Resume')+'</div>'+
  '<h1 data-edit="name" contenteditable="true" spellcheck="false" data-bind="name" style="'+styleAttr('name')+'">'+esc(d.name||'Your Name')+'</h1>'+
  '<div class="role" data-edit="title" contenteditable="true" spellcheck="false" data-bind="title" style="color:'+esc(accent)+';'+styleAttr('title')+'">'+esc(d.title||'Professional Title')+'</div>'+
- '<div class="cv-contact">'+(contact||'email@example.com • Phone • City, Country')+'</div></div>'+
+ '<div class="cv-contact" data-edit="contact" contenteditable="true" spellcheck="false" data-bind="contact" style="'+styleAttr('contact')+'">'+(contact||'email@example.com • Phone • City, Country')+'</div></div>'+
  '<div class="cv-body"><aside class="cv-side" style="padding-top:'+Number(d.pageSpacing)+'px">'+side+'</aside>'+
  '<div class="cv-main" style="padding-top:'+Number(d.pageSpacing)+'px;padding-bottom:'+Number(d.pageSpacing)+'px">'+(main||'<div class="cv-section"><h2>Professional Profile</h2><div class="cv-text">Start filling your details to build your CV.</div></div>')+'</div></div></div>';
  if($(target))$(target).innerHTML=paper;
@@ -278,8 +282,10 @@ document.addEventListener('dblclick',e=>{
   const el=e.target.closest('#builderPaper .cv [data-edit]');
   if(el){el.focus();document.execCommand('selectAll',false,null)}
 });
+let editorSaveTimer;
 document.addEventListener('input',e=>{
   const el=e.target.closest('#builderPaper .cv [data-edit][data-bind]');
+  if(el){clearTimeout(editorSaveTimer);editorSaveTimer=setTimeout(()=>autoSaveEditor(),500);}
   if(!el)return;
   const key=el.dataset.bind, value=el.innerText;
   if(el.dataset.expIndex!==undefined){
