@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0c11">
+<meta name="description" content="CareerPilot — professional CV builder and global career assistant.">
+<link rel="manifest" href="manifest.json">
 <title>CareerPilot — AI Career Suite</title>
 <style>
 :root{--bg:#0a0c11;--gl:rgba(255,255,255,.055);--gb:rgba(255,255,255,.1);--tx:#f1f5f9;--mu:#94a3b8;--g:linear-gradient(135deg,#3b82f6,#8b5cf6);--sh:0 10px 30px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.4);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
@@ -110,7 +113,7 @@ body[data-v=cv]:not(.prev) .fab{display:block}.fab{position:fixed;right:16px;bot
 <div class="shell">
   <nav class="side glass" id="nav" aria-label="Main"></nav>
   <section class="editor" id="ed">
-    <div class="view" id="v-home"></div><div class="view on" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div>
+    <div class="view" id="v-home"></div><div class="view on" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div><div class="view" id="v-jobs"></div><div class="view" id="v-cvs"></div>
   </section>
   <main class="canvas">
     <div class="ctb glass"><button class="mo" data-v="cv">Edit</button><button id="zm" aria-label="Zoom out">−</button><span id="zv">100%</span><button id="zp" aria-label="Zoom in">+</button><button id="zf">Fit</button><button class="mo" data-v="design">Design</button><button class="mo" id="bX2">Export</button></div>
@@ -174,9 +177,9 @@ function restore(){S=norm(JSON.parse(H[hi]));sel=null;refresh();persist();$('stt
 $('bU').onclick=()=>{if(hi>0){hi--;restore()}};$('bR').onclick=()=>{if(hi<H.length-1){hi++;restore()}};
 
 /* ---------- shell: nav + views ---------- */
-const NAV=[['home','⌂','Dashboard'],['cv','✎','CV Builder'],[0,'▤','My CVs'],['design','▦','Templates'],[0,'◎','Job Match'],[0,'✉','Cover Letter'],[0,'☏','Interview Prep'],[0,'⚙','Settings']];
+const NAV=[['home','⌂','Dashboard'],['cv','✎','CV Builder'],['cvs','▤','My CVs'],['design','▦','Templates'],['jobs','🌐','Global Jobs'],[0,'◎','Job Match'],[0,'✉','Cover Letter'],[0,'☏','Interview Prep'],[0,'⚙','Settings']];
 $('nav').innerHTML=NAV.map(([v,i,l])=>`<button class="nb" ${v?`data-v="${v}"`:'data-soon="1"'}><i>${i}</i><span>${l}</span>${v?'':'<em>COMING SOON</em>'}</button>`).join('')+'<div class="usr"><div><b data-n></b><small>Free Plan</small></div><button data-soon="1" class="pri">Upgrade</button></div>';
-$('mnav').innerHTML=[['home','⌂','Home'],['cv','✎','CV'],['design','▦','Templates'],['profile','☺','Profile']].map(([v,i,l])=>`<button data-v="${v}"><i>${i}</i>${l}</button>`).join('');
+$('mnav').innerHTML=[['home','⌂','Home'],['cv','✎','CV'],['jobs','🌐','Jobs'],['design','▦','Templates']].map(([v,i,l])=>`<button data-v="${v}"><i>${i}</i>${l}</button>`).join('');
 function go(v){document.body.dataset.v=v;document.body.classList.remove('prev');Q('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));Q('#nav [data-v],#mnav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));requestAnimationFrame(fit)}
 function prev(on){document.body.classList.toggle('prev',on);requestAnimationFrame(fit)}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-v],[data-soon]');if(!b)return;if(b.dataset.soon)toast('Coming soon');else go(b.dataset.v)});
@@ -189,6 +192,25 @@ $('v-profile').innerHTML='<div class="card pad"><h2 style="margin:0" data-n></h2
 $('pSave').onclick=()=>$('bS').click();$('pX').onclick=()=>window.print();
 $('pLoad').onclick=()=>{const r=ls(KEY);if(!r){toast('No saved CV found');return}try{S=norm(JSON.parse(r));sel=null;refresh();toast('CV loaded')}catch(e){toast('Could not load')}};
 
+/* ---------- global jobs + saved CV views ---------- */
+const JOBS=[
+ ['LinkedIn Jobs','Millions of jobs and people hiring.','https://www.linkedin.com/jobs/','Worldwide'],
+ ['Indeed','Global job search with keyword and location search.','https://www.indeed.com/','Worldwide'],
+ ['Glassdoor Jobs','Jobs plus company and workplace information.','https://www.glassdoor.com/Job/','Worldwide'],
+ ['EURES','Official European job portal and mobility services.','https://eures.europa.eu/','Europe'],
+ ['Jobs.com.pk','Pakistan-focused jobs portal.','https://www.jobs.com.pk/','Pakistan']
+];
+$('v-jobs').innerHTML='<div class="card pad"><div class="ey" style="margin-bottom:5px">GLOBAL JOB SEARCH</div><h2 style="margin:0 0 6px">Find your next opportunity</h2><p class="hint">CareerPilot connects you to established job platforms. Job listings and applications remain on the original provider website.</p><div class="row"><input id="jobQ" placeholder="Job title, skill or keyword" style="margin:0"><input id="jobLoc" placeholder="Country or Remote" style="margin:0"></div></div><div id="jobCards"></div>';
+function renderJobs(){
+  const q=($('jobQ')?.value||'').toLowerCase(),loc=($('jobLoc')?.value||'').toLowerCase();
+  const rows=JOBS.filter(x=>(!q||x[0].toLowerCase().includes(q)||x[1].toLowerCase().includes(q)||x[3].toLowerCase().includes(q))&&(!loc||x[3].toLowerCase().includes(loc)||x[1].toLowerCase().includes(loc)));
+  $('jobCards').innerHTML=rows.map(x=>'<div class="card pad" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div class="ey">'+x[3].toUpperCase()+'</div><h3 style="margin:3px 0 5px">'+x[0]+'</h3><div class="hint">'+x[1]+'</div></div><a href="'+x[2]+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button class="pri">Open Jobs ↗</button></a></div></div>').join('')||'<div class="card pad"><div class="hint">No matching source found. Try another keyword or country.</div></div>';
+}
+$('v-jobs').addEventListener('input',renderJobs);renderJobs();
+
+$('v-cvs').innerHTML='<div class="card pad"><div class="ey">MY CVs</div><h2 style="margin:4px 0">Saved on this device</h2><p class="hint">Your current CV is stored locally in this browser. Cloud account sync will be added in a later phase.</p><div class="card pad" style="background:rgba(0,0,0,.18);box-shadow:none"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><b data-n></b><div class="hint" data-t="title"></div></div><span class="st">✓ Local save</span></div><div class="row" style="margin-top:10px"><button class="pri" data-v="cv">Edit CV</button><button id="cvsExport">Export PDF</button></div></div></div>';
+$('cvsExport').onclick=()=>window.print();
+
 /* ---------- editor cards ---------- */
 const card=(t,b,o)=>`<details class="card"${o?' open':''}><summary>${t}</summary><div class="cb">${b}</div></details>`;
 $('v-cv').innerHTML=card('Personal information',F.map(([p,l,ic])=>`<label>${l}<div class="fw"><i>${ic}</i><input data-p="${p}"${p==='email'?' type="email" aria-invalid="false"':''}></div></label>`).join(''),1)+
@@ -199,7 +221,7 @@ card('Education','<div id="eduL"></div><button data-add="edu" style="width:100%"
 card('Achievements','<label>One per line<textarea rows="3" data-p="achievements"></textarea></label>')+
 card('Certifications','<label>One per line<textarea rows="3" data-p="certs"></textarea></label>')+
 card('Projects','<label>One per line<textarea rows="3" data-p="projects"></textarea></label>');
-function txt(){Q('#ed [data-t]').forEach(e=>e.textContent=get(e.dataset.t)||'—');Q('[data-n]').forEach(e=>e.textContent=S.d.name)}
+function txt(){Q('#ed [data-t]').forEach(e=>e.textContent=get(e.dataset.t)||'—');Q('[data-n]').forEach(e=>e.textContent=S.d.name);Q('[data-t="title"]').forEach(e=>e.textContent=S.d.title||'—')}
 function chips(){$('chips').innerHTML=S.d.skills.map((s,i)=>`<span class="chip" draggable="true" data-i="${i}"><b aria-hidden="true">⋮⋮</b>${esc(s)}<button data-sk="${i}" aria-label="Remove ${esc(s)}">×</button></span>`).join('')}
 function fillSide(){Q('#ed [data-p]').forEach(i=>{if(i===document.activeElement)return;const v=get(i.dataset.p);i.value=Array.isArray(v)?v.join('\n'):v==null?'':v});txt();chips()}
 function dyn(open){
@@ -318,6 +340,7 @@ $('sx').onclick=()=>{Q('.el.sel').forEach(x=>x.classList.remove('sel'));sel=null
 
 function refresh(){dyn();applyT();render();loadPanel();go(document.body.dataset.v)}
 refresh();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 })();
 </script>
 </body>
