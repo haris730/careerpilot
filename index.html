@@ -105,10 +105,19 @@ input[type=range]{width:100%}
 body.prev .shell{grid-template-columns:230px 0 1fr}body.prev .editor{display:none}
 @media(max-width:1199px){.shell{grid-template-columns:68px 360px 1fr}.side{align-items:center}.side span,.side em,.usr>div{display:none}.usr{padding:6px}body.prev .shell{grid-template-columns:68px 0 1fr}}
 @media(max-width:767px){
+/* Mobile performance + touch UX */
+html{scroll-behavior:auto;-webkit-text-size-adjust:100%}
 body{display:block;height:auto}.top{position:sticky;top:0;z-index:20;background:rgba(10,12,17,.85);backdrop-filter:blur(12px);padding:8px 14px}.ct2,.ac button:not(#bS),.st em{display:none}
 .shell{display:block;padding:0 12px 96px}.side{display:none}.editor{overflow:visible}.canvas{display:none;height:calc(100dvh - 150px);min-height:420px}body.prev .canvas{display:flex}.mo{display:inline-block}
 .stage{padding:16px 8px 40px}
 #esel{position:fixed;left:0;right:0;top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));width:auto;transform:translateY(115%);border-radius:20px 20px 0 0;max-height:46vh;overflow:auto;z-index:40}#esel.on{transform:none}
+.top,.mnav{backdrop-filter:none;-webkit-backdrop-filter:none}
+.shell{padding-left:10px;padding-right:10px}
+.view{min-width:0}
+.card,.ai-panel{border-radius:14px}
+button{min-height:42px}
+input,select,textarea{min-height:44px;font-size:16px}
+.quick,.portal,.dstat{min-height:64px}
 .mnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:45;background:rgba(15,18,25,.94);backdrop-filter:blur(16px);border-top:1px solid var(--gb);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
 .mnav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11px;color:var(--mu)}.mnav button.on{color:#fff}.mnav i{font-style:normal;font-size:18px}
 body[data-v=cv]:not(.prev) .fab{display:block}.fab{position:fixed;right:16px;bottom:calc(78px + env(safe-area-inset-bottom,0px));width:54px;height:54px;border-radius:50%;background:var(--g);border:0;box-shadow:0 10px 24px rgba(99,102,241,.5);z-index:40;font-size:20px}
