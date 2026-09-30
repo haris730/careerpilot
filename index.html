@@ -253,13 +253,13 @@ const F=[['name','Full Name','👤'],['title','Professional Title','💼'],['ema
 const XF=[['position','Job Title'],['company','Company'],['start','Start Date'],['end','End Date'],['location','Location']];
 const DF=[['degree','Degree / Qualification'],['institute','Institute'],['year','Year'],['location','Location']];
 const LISTS=['skills','languages','achievements','certs','projects'];
-const dflt=()=>({d:{name:'Muhammad Haris',title:'Digital Marketing Specialist',email:'name@example.com',phone:'+00 000 0000000',location:'City, Country',link:'linkedin.com/in/yourname',
-summary:'Results-driven professional with hands-on experience in online marketing and e-commerce. Skilled at turning ideas into measurable growth and comfortable working with international teams and remote clients.',
-skills:['Digital Marketing','Content Creation','Graphic Design','Video Editing','E-commerce Operations'],languages:['English – Professional','Urdu – Native'],
-achievements:['Grew an online store from zero to consistent monthly sales','Built and managed several income streams in parallel'],certs:['E-commerce Professional Course'],
-projects:['Personal brand website – design and launch','YouTube channel – content strategy and editing'],
-exp:[{position:'Marketing Specialist',company:'Company Name',start:'2023',end:'Present',location:'City, Country',description:'• Planned and ran campaigns that increased traffic and sales.\n• Designed creatives and short videos for social platforms.'}],
-edu:[{degree:'Bachelor of Commerce',institute:'University Name',year:'2022',location:'City, Country'}]},st:{},t:{ac:'#1f4e79',bg:'#ffffff',ff:FONTS[1][0],tpl:'mo',lay:'2',mg:40,sp:18,cw:245,gp:0}});
+const dflt=()=>({d:{name:'Muhammad Haris',title:'Graphic Designer & E-commerce Specialist',email:'muhammad.haris@example.com',phone:'+92 300 0000000',location:'Karachi, Pakistan',link:'linkedin.com/in/muhammadharis-design/',
+summary:'Creative and results-oriented Graphic Designer and E-commerce Specialist with hands-on experience creating digital content, e-commerce creatives, social media designs, and short-form videos. Skilled in combining design, content, and AI-powered tools to support online businesses and digital brands. Comfortable working with remote teams and international clients.',
+skills:['Graphic Design','E-commerce','Content Creation','Video Editing','Social Media Design','Canva & Adobe Photoshop','AI Productivity Tools','Digital Marketing'],languages:['English – Professional','Urdu – Native'],
+achievements:['Created digital creatives for multiple online business projects','Developed e-commerce websites and product-focused digital experiences','Built a portfolio combining graphic design, e-commerce, and AI-assisted workflows'],certs:['E-commerce Professional Certificate · 2024'],
+projects:['E-commerce Store Website – responsive online store experience','Personal Portfolio Website – professional project showcase','Social Media Content System – reusable graphics and short-form video content'],
+exp:[{position:'Graphic Designer & E-commerce Specialist',company:'Digital Creative Studio',start:'2024',end:'Present',location:'Karachi, Pakistan',description:'• Created social media graphics, promotional creatives, and digital marketing materials.\n• Designed e-commerce product visuals for online stores and marketplaces.\n• Edited short-form videos for social media campaigns.\n• Used AI-powered tools to improve creative workflows and content production.'}],
+edu:[{degree:'Bachelor of Commerce',institute:'Karachi Business Institute',year:'2022',location:'Karachi, Pakistan'}]},st:{},t:{ac:'#1f4e79',bg:'#ffffff',ff:FONTS[1][0],tpl:'mo',lay:'2',mg:40,sp:18,cw:245,gp:0}});
 const mk=k=>k.replace('cv-link','cv-portfolio').replace(/^cv-h-(\w+)$/,'cv-$1-heading').replace(/^cv-skills-(\d)/,'cv-skill-$1').replace('-institute','-school');
 function norm(o){const b=dflt(),st={};for(const k in (o.st||{}))st[mk(k)]=o.st[k];return{d:Object.assign(b.d,o.d),st,t:Object.assign(b.t,o.t)}}
 const ls=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
