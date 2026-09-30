@@ -46,6 +46,11 @@ function buildPrompt(body) {
   if (task === 'summary') {
     return rules.join('\\n') + '\\nTask: Write a professional 3-4 sentence CV summary based only on the supplied background. Do not invent years of experience or achievements.\\nCV context:\\n' + cv + '\\nInput:\\n' + input;
   }
+  if (task === 'letter') {
+    const role = String(body.role || '').slice(0, 300);
+    const company = String(body.company || '').slice(0, 300);
+    return rules.join('\\n') + '\\nTask: Write a concise, professional one-page cover letter for the target role. Use the CV context and job description to emphasize relevant existing experience. Address the employer professionally without inventing a hiring manager name. Include a greeting, 3-4 short paragraphs, and a professional closing.\\nTarget role:\\n' + role + '\\nCompany:\\n' + company + '\\nCV context:\\n' + cv + '\\nJob description:\\n' + job;
+  }
   return rules.join('\\n') + '\\nTask: Tailor the supplied CV content to the job description. Return a concise revised version that naturally emphasizes relevant existing skills and experience. Do not add missing qualifications.\\nCV context:\\n' + cv + '\\nCV content:\\n' + input + '\\nJob description:\\n' + job;
 }
 
@@ -61,9 +66,10 @@ export default {
       if (rateLimited(ip)) return json({ error: 'Hourly AI limit reached. Please try again later.' }, 429);
       let body;
       try { body = await request.json(); } catch { return json({ error: 'Invalid JSON request.' }, 400); }
-      if (!['bullet','summary','tailor'].includes(body.task)) return json({ error: 'Invalid AI task.' }, 400);
-      if (!String(body.input || '').trim()) return json({ error: 'Input is required.' }, 400);
+      if (!['bullet','summary','tailor','letter'].includes(body.task)) return json({ error: 'Invalid AI task.' }, 400);
+      if (body.task !== 'letter' && !String(body.input || '').trim()) return json({ error: 'Input is required.' }, 400);
       if (body.task === 'tailor' && !String(body.jobDescription || '').trim()) return json({ error: 'Job description is required for tailoring.' }, 400);
+      if (body.task === 'letter' && (!String(body.role || '').trim() || !String(body.jobDescription || '').trim())) return json({ error: 'Job title and job description are required.' }, 400);
       try {
         const result = await env.AI.run(MODEL, { prompt: buildPrompt(body), max_tokens: 700, temperature: 0.35 });
         const text = typeof result === 'string' ? result : (result?.response || result?.text || result?.output_text || '');
