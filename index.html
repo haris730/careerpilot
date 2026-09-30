@@ -348,7 +348,9 @@ $('nav').innerHTML=NAV.map(([v,i,l])=>`<button class="nb" ${v?`data-v="${v}"`:'d
 $('mnav').innerHTML=`<button data-v="cv"><i>✎</i><small>Edit</small></button><button data-action="preview"><i>◉</i><small>Preview</small></button><button data-v="design"><i>◈</i><small>Design</small></button><button data-v="design" data-templates="1"><i>▦</i><small>Templates</small></button><button data-action="export"><i>⇩</i><small>Export</small></button>`;
 function go(v){document.body.dataset.v=v;document.body.classList.remove('prev');Q('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));Q('#nav [data-v],#mnav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));requestAnimationFrame(fit)}
 function prev(on){document.body.classList.toggle('prev',on);requestAnimationFrame(fit)}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-v],[data-soon],[data-action]');if(!b)return;if(b.dataset.soon)toast('Coming soon');else if(b.dataset.action==='preview')prev(true);else if(b.dataset.action==='export')exportPDF();else go(b.dataset.v)});
+function normalizeCareerTools(){Q('.quick').forEach(b=>{const t=b.textContent.replace(/\\s+/g,' ').trim();const map=[['AI Job Match','match'],['Cover Letter','letter'],['Interview Coach','interview'],['Application Tracker','tracker']];const hit=map.find(([name])=>t.includes(name));if(hit){b.dataset.v=hit[1];delete b.dataset.soon;}})}
+normalizeCareerTools();
+document.addEventListener('click',e=>{const b=e.target.closest('[data-v],[data-soon],[data-action]');if(!b)return;if(b.dataset.action==='preview')prev(true);else if(b.dataset.action==='export')exportPDF();else if(b.dataset.v)go(b.dataset.v);else if(b.dataset.soon)toast('Coming soon');});
 $('bP').onclick=()=>prev(!document.body.classList.contains('prev'));$('fab').onclick=()=>prev(true);
 $('bS').onclick=()=>{syncActiveLibrary();persist();scheduleCloudSave();toast('CV saved')};
 function exportPDF(){
