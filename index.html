@@ -7,6 +7,11 @@
 <meta name="description" content="CareerPilot — professional CV builder and global career assistant.">
 <link rel="manifest" href="manifest.json">
 <title>CareerPilot — AI Career Suite</title>
+<!-- CareerPilot premium font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
 :root{--bg:#0a0c11;--gl:rgba(255,255,255,.055);--gb:rgba(255,255,255,.1);--tx:#f1f5f9;--mu:#94a3b8;--g:linear-gradient(135deg,#3b82f6,#8b5cf6);--sh:0 10px 30px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.4);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -130,13 +135,62 @@ body[data-v=cv]:not(.prev) .fab{display:block}.fab{position:fixed;right:16px;bot
 .cv-card-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
 .cv-empty{text-align:center;padding:28px 18px}
 @media(max-width:767px){.cv-grid{grid-template-columns:1fr}.cv-manager-head{display:block}.cv-manager-actions{margin-top:10px}.cv-card-actions button{flex:1}}
-</style></head>
+</style>
+<style id="careerpilot-phase1">
+:root{
+ --cp-bg:#0a0c11;--cp-surface:rgba(255,255,255,.055);--cp-surface-2:rgba(255,255,255,.075);--cp-border:rgba(255,255,255,.10);--cp-text:#f1f5f9;--cp-muted:#94a3b8;--cp-accent:#3b82f6;--cp-violet:#8b5cf6;
+ --cp-gradient:linear-gradient(135deg,#3b82f6,#8b5cf6);--cp-radius-sm:10px;--cp-radius-md:14px;--cp-radius-lg:18px;--cp-radius-xl:22px;
+ --cp-space-1:4px;--cp-space-2:8px;--cp-space-3:12px;--cp-space-4:16px;--cp-space-5:20px;--cp-space-6:24px;
+ --cp-shadow:0 18px 50px rgba(0,0,0,.35);--cp-fast:180ms;--cp-normal:280ms;--cp-slow:380ms;
+}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;transition:background var(--cp-normal) ease,color var(--cp-normal) ease}
+button,input,select,textarea{font-family:inherit}
+button{min-height:40px;touch-action:manipulation}
+button:active{transform:scale(.97)}
+.glass,.card,.canvas,.side{border-radius:var(--cp-radius-lg)}
+.top{min-height:58px;border-bottom:1px solid var(--cp-border)}
+.cp-theme{width:42px;height:42px;padding:0;display:grid;place-items:center;border-radius:12px;font-size:17px}
+body.light{--bg:#f5f7fb;--gl:rgba(255,255,255,.78);--gb:rgba(15,23,42,.11);--tx:#111827;--mu:#64748b;--sh:0 14px 38px rgba(15,23,42,.10);background:radial-gradient(900px 500px at 8% -10%,rgba(99,102,241,.12),transparent),#f5f7fb}
+body.light .top{background:rgba(255,255,255,.82);backdrop-filter:blur(16px)}
+body.light .canvas{background:#e8edf5}
+body.light .side button.nb{color:#334155}
+body.light .side button.on{color:#fff}
+body.light input:not([type=checkbox]):not([type=color]):not([type=range]),body.light select,body.light textarea{background:rgba(255,255,255,.9);color:#111827}
+body.light .mnav{background:rgba(255,255,255,.92);color:#111827}
+body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
+.cp-sheet-handle{width:42px;height:5px;border-radius:99px;background:#64748b;opacity:.55;margin:8px auto 2px;touch-action:none}
+@media(max-width:767px){
+ body{overflow-x:hidden}
+ .top{padding-left:12px;padding-right:12px}
+ .top .ct2{display:none}
+ .top .ac{gap:4px}.top .ac .st{display:none}.top .ac button#bU,.top .ac button#bR,.top .ac button#bP{display:none}
+ .cp-theme{display:grid!important}
+ .shell{padding-left:8px;padding-right:8px}
+ .editor{padding:0;min-width:0}
+ .view.on{animation:cpMobileIn var(--cp-normal) ease both}
+ @keyframes cpMobileIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+ .mnav{height:auto;min-height:64px;padding:7px 6px calc(7px + env(safe-area-inset-bottom,0px));gap:3px}
+ .mnav button{min-height:48px;border-radius:12px;padding:5px 3px;justify-content:center}
+ .mnav button.on{background:rgba(99,102,241,.12)}
+ .mnav i{font-size:17px;line-height:20px}
+ .mnav small{font-size:10px}
+ body[data-v=design] .editor{overflow:visible}
+ body[data-v=design] #v-design.on{position:fixed;left:8px;right:8px;bottom:calc(68px + env(safe-area-inset-bottom,0px));z-index:44;max-height:min(72dvh,620px);overflow:auto;margin:0;padding:0 4px 10px;background:rgba(15,18,25,.96);border:1px solid var(--gb);border-radius:20px 20px 12px 12px;box-shadow:0 -20px 60px rgba(0,0,0,.42);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+ body.light[data-v=design] #v-design.on{background:rgba(255,255,255,.96)}
+ body[data-v=design] #v-design.on .tabs{position:sticky;top:0;z-index:2;padding:4px 4px 8px;margin:0;background:inherit}
+ .mobile-sheet-close{position:absolute;right:10px;top:10px;width:38px;height:38px;border-radius:50%;z-index:3}
+ #v-design .mobile-sheet-inner{padding:0 8px 8px}
+}
+@media(min-width:768px){.mobile-sheet-close,.cp-sheet-handle{display:none!important}}
+@media(prefers-reduced-motion:reduce){body{transition:none!important}.view.on{animation:none!important}}
+</style>
+</head>
 </head>
 <body data-v="home">
 <header class="top">
   <div class="br"><b>CAREERPILOT</b><small>AI CAREER SUITE</small></div>
   <div class="ct2">CV Builder</div>
-  <div class="ac"><span class="st" role="status"><i></i><em id="stt">✓ Saved just now</em></span>
+  <div class="ac"><button id="themeToggle" class="cp-theme" aria-label="Switch theme" title="Switch theme">☾</button><span class="st" role="status"><i></i><em id="stt">✓ Saved just now</em></span>
     <button id="bU" aria-label="Undo">↶</button><button id="bR" aria-label="Redo">↷</button><button id="bP">Preview</button><button id="bS">Save</button><button id="bX" class="pri">Export PDF</button></div>
 </header>
 <div class="shell">
@@ -219,13 +273,24 @@ function sync(){$('stt').textContent='Saving…';clearTimeout(tm);tm=setTimeout(
 function restore(){S=norm(JSON.parse(H[hi]));sel=null;refresh();persist();$('stt').textContent='✓ Saved just now'}
 $('bU').onclick=()=>{if(hi>0){hi--;restore()}};$('bR').onclick=()=>{if(hi<H.length-1){hi++;restore()}};
 
+
+/* ---------- phase 1 theme ---------- */
+(function initTheme(){
+ const saved=ls('careerpilot_theme_2026');
+ if(saved==='light')document.body.classList.add('light');
+ const btn=$('themeToggle');
+ const paint=()=>{const light=document.body.classList.contains('light');btn.textContent=light?'☀':'☾';btn.setAttribute('aria-label',light?'Switch to dark theme':'Switch to light theme');btn.title=light?'Switch to dark theme':'Switch to light theme';document.querySelector('meta[name=theme-color]')?.setAttribute('content',light?'#f5f7fb':'#0a0c11')};
+ paint();
+ btn.onclick=()=>{document.body.classList.toggle('light');localStorage.setItem('careerpilot_theme_2026',document.body.classList.contains('light')?'light':'dark');paint()};
+})();
+
 /* ---------- shell: nav + views ---------- */
 const NAV=[['home','⌂','Dashboard'],['cv','✎','CV Builder'],['cvs','▤','My CVs'],['design','▦','Templates'],['jobs','🌐','Global Jobs'],['match','◎','Job Match'],['letter','✉','Cover Letter'],['interview','☏','Interview Prep'],[0,'⚙','Settings']];
 $('nav').innerHTML=NAV.map(([v,i,l])=>`<button class="nb" ${v?`data-v="${v}"`:'data-soon="1"'}><i>${i}</i><span>${l}</span>${v?'':'<em>COMING SOON</em>'}</button>`).join('')+'<div class="usr"><div><b data-n></b><small>Free Plan</small></div><button data-soon="1" class="pri">Upgrade</button></div>';
-$('mnav').innerHTML=[['home','⌂','Home'],['cv','✎','CV'],['jobs','🌐','Jobs'],['design','▦','Templates']].map(([v,i,l])=>`<button data-v="${v}"><i>${i}</i>${l}</button>`).join('');
+$('mnav').innerHTML=`<button data-v="cv"><i>✎</i><small>Edit</small></button><button data-action="preview"><i>◉</i><small>Preview</small></button><button data-v="design"><i>◈</i><small>Design</small></button><button data-v="design" data-templates="1"><i>▦</i><small>Templates</small></button><button data-action="export"><i>⇩</i><small>Export</small></button>`;
 function go(v){document.body.dataset.v=v;document.body.classList.remove('prev');Q('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));Q('#nav [data-v],#mnav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));requestAnimationFrame(fit)}
 function prev(on){document.body.classList.toggle('prev',on);requestAnimationFrame(fit)}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-v],[data-soon]');if(!b)return;if(b.dataset.soon)toast('Coming soon');else go(b.dataset.v)});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-v],[data-soon],[data-action]');if(!b)return;if(b.dataset.soon)toast('Coming soon');else if(b.dataset.action==='preview')prev(true);else if(b.dataset.action==='export')exportPDF();else go(b.dataset.v)});
 $('bP').onclick=()=>prev(!document.body.classList.contains('prev'));$('fab').onclick=()=>prev(true);
 $('bS').onclick=()=>{syncActiveLibrary();persist();scheduleCloudSave();toast('CV saved')};
 function exportPDF(){
@@ -474,6 +539,19 @@ $('v-design').innerHTML=`<div class="tabs" role="tablist">${['Templates','Colors
 <div class="dp card pad"><div class="row">${LAY.map(([v,l])=>`<button class="lb" data-lay="${v}">${l}</button>`).join('')}</div>${RG.map(([k,l,a,b])=>`<label>${l}<input type="range" data-l="${k}" min="${a}" max="${b}"></label>`).join('')}</div>`;
 FONTS.forEach(([v,l])=>{$('sFont').add(new Option(l,v));if(v)$('tFf').add(new Option(l,v))});
 BGS.forEach(([v,l])=>$('tBg').add(new Option(l,v)));
+
+/* ---------- mobile design sheet ---------- */
+const designView=$('v-design');
+if(designView){
+ const grip=document.createElement('div');grip.className='cp-sheet-handle';grip.setAttribute('aria-label','Drag design panel');
+ const close=document.createElement('button');close.className='mobile-sheet-close';close.textContent='×';close.setAttribute('aria-label','Close design panel');close.onclick=()=>go('cv');
+ designView.prepend(close);designView.prepend(grip);
+ let sy=0,dy=0,drag=false;
+ grip.addEventListener('pointerdown',e=>{drag=true;sy=e.clientY;grip.setPointerCapture?.(e.pointerId);designView.style.transition='none'});
+ grip.addEventListener('pointermove',e=>{if(!drag)return;dy=Math.max(0,e.clientY-sy);designView.style.transform='translateY('+dy+'px)'});
+ grip.addEventListener('pointerup',()=>{if(!drag)return;drag=false;designView.style.transition='';if(dy>100){designView.style.transform='';go('cv')}else designView.style.transform='';dy=0});
+}
+
 $('v-design').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.dt!=null){Q('[data-dt]').forEach(x=>x.classList.toggle('on',x===b));Q('#v-design .dp').forEach((x,i)=>x.classList.toggle('on',i===+b.dataset.dt))}
