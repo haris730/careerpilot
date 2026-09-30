@@ -58,7 +58,7 @@ input[type=range]{width:100%}
 .tabs{display:flex;gap:6px;overflow:auto;margin-bottom:12px}.tabs button.on,.tc.on,.sc.on,.lb.on{border-color:#818cf8;box-shadow:0 0 0 2px rgba(129,140,248,.4)}
 .dp{display:none}.dp.on{display:block;animation:fi .2s}
 .car{display:flex;gap:10px;overflow:auto;scroll-snap-type:x mandatory;padding:4px}.tc{flex:0 0 130px;scroll-snap-align:start;text-align:center}
-.th{height:76px;border-radius:8px;background:#fff;padding:6px;display:grid;gap:4px;align-content:start;margin-bottom:6px}.th i{height:14px;background:var(--c);border-radius:2px}.th.s i{background:linear-gradient(135deg,var(--c),#0ea5e9)}.th s{height:6px;background:#d1d5db;border-radius:2px}
+.th{height:76px;border-radius:8px;background:#fff;padding:6px;display:grid;gap:4px;align-content:start;margin-bottom:6px}.th i{height:14px;background:var(--c);border-radius:2px}.th.s i{background:linear-gradient(135deg,var(--c),#0ea5e9)}.th.th-3{grid-template-columns:1fr 34%;}.th.th-3 i{grid-column:1/3}.th.th-4{grid-template-columns:1fr 1fr}.th.th-4 i{grid-column:1/3}.th.th-5{grid-template-columns:26% 1fr}.th s{height:6px;background:#d1d5db;border-radius:2px}
 .sw{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sc{display:flex;align-items:center;gap:8px}.sc i{width:18px;height:18px;border-radius:50%}
 .hint{color:var(--mu);font-size:12px}
 .canvas{grid-column:3;position:relative;display:flex;flex-direction:column;min-height:0;overflow:hidden;border-radius:18px;background:#0f1218;border:1px solid var(--gb);box-shadow:var(--sh)}
@@ -75,6 +75,15 @@ input[type=range]{width:100%}
 .T-ex .hd{text-align:center;border-bottom:2px solid var(--ac)}.T-ex .nm{text-transform:uppercase;letter-spacing:.08em;font-size:30px}.T-ex .ct{justify-content:center}
 .T-mi .hd{border-bottom:1px solid #d1d5db}.T-mi .nm{font-weight:600}
 .T-cr .hd{background:linear-gradient(135deg,var(--ac),color-mix(in srgb,var(--ac) 55%,#0ea5e9));border:0}.T-cr .nm,.T-cr .tt,.T-cr .ct{color:#fff}
+/* 2026 professional template families */
+.L3 .bd{grid-template-columns:1fr var(--cw)}.L3 .lc{order:2;padding-left:22px;padding-right:var(--mg)}.L3 .rc{order:1;padding-left:var(--mg);padding-right:30px}
+.L4 .hd{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;border-bottom:0;border-top:8px solid var(--ac);padding-top:18px}.L4 .ct{justify-content:flex-end;text-align:right}.T-el .nm{font-family:Georgia,serif;font-weight:700}.T-el .tt{font-style:italic}
+.L5 .bd{grid-template-columns:220px 1fr;gap:18px}.L5 .lc{padding:18px}.L5 .rc{padding:18px}.T-cmp #paper{font-size:11px}.T-cmp .hd{padding:22px 26px 14px}.T-cmp .nm{font-size:28px}.T-cmp #paper h3{font-size:11px;margin-bottom:5px}.T-cmp .it{margin-bottom:7px}.T-cmp #paper section{margin-bottom:10px}
+.T-ats .hd{border-bottom:2px solid #111}.T-ats #paper h3{color:#111;border-bottom:1px solid #111}.T-ats .tt{color:#374151}.T-ats .co{color:#111}
+.T-tech .hd{border-left:10px solid var(--ac);border-bottom:0;padding-left:26px}.T-tech #paper h3{font-family:Courier New,monospace;letter-spacing:.08em}.T-tech .pos{font-family:Courier New,monospace}
+.T-acad .hd{text-align:left;border-bottom:1px solid #9ca3af}.T-acad .nm{font-family:Georgia,serif;font-size:31px}.T-acad #paper h3{text-transform:none;letter-spacing:.02em;font-family:Georgia,serif;font-size:14px}.T-acad .bl{border-left:0;padding-left:0}
+.T-bold .hd{background:#111827;border-bottom:0;padding:34px var(--mg)}.T-bold .nm,.T-bold .tt,.T-bold .ct{color:#fff}.T-bold .lc{background:#f8fafc}
+.T-mo .hd{border-bottom:4px solid var(--ac)}.T-ex .hd{padding-bottom:16px}.T-mi .hd{padding-bottom:14px}
 #paper section{margin-bottom:var(--sp)}
 #paper h3{margin:0 0 8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);border-bottom:1px solid color-mix(in srgb,var(--ac) 35%,transparent);padding-bottom:4px}
 .li{margin-bottom:3px}.bl{border-left:2px solid var(--ac);padding-left:8px;margin-bottom:6px}.it{margin-bottom:12px}
@@ -168,7 +177,18 @@ const $=i=>document.getElementById(i),Q=(s,r)=>Array.from((r||document).querySel
 const FONTS=[['','Template default'],['Inter,Segoe UI,Arial,sans-serif','Modern sans'],['Georgia,serif','Georgia'],['Arial,Helvetica,sans-serif','Arial'],['Trebuchet MS,sans-serif','Trebuchet'],['Times New Roman,serif','Times'],['Courier New,monospace','Courier']];
 const BGS=[['#ffffff','White'],['#fffaf0','Warm ivory'],['#f3f4f6','Light gray'],['#f2f7ff','Soft blue']];
 const COL=[['Midnight','#1e3a5f'],['Ocean','#0284c7'],['Royal','#6d28d9'],['Emerald','#059669'],['Slate','#475569'],['Monochrome','#111111']];
-const TPL=[['Executive',{ac:'#1f2a44',ff:FONTS[2][0],lay:'2',tpl:'ex'}],['Modern',{ac:'#2563eb',ff:FONTS[1][0],lay:'2',tpl:'mo'}],['Minimal',{ac:'#111111',ff:FONTS[3][0],lay:'1',tpl:'mi'}],['Creative',{ac:'#7c3aed',ff:FONTS[1][0],lay:'s',tpl:'cr'}]];
+const TPL=[
+['Executive',{ac:'#1f2a44',ff:FONTS[2][0],lay:'2',tpl:'ex'}],
+['Modern',{ac:'#2563eb',ff:FONTS[1][0],lay:'2',tpl:'mo'}],
+['Minimal',{ac:'#111111',ff:FONTS[3][0],lay:'1',tpl:'mi'}],
+['Creative',{ac:'#7c3aed',ff:FONTS[1][0],lay:'s',tpl:'cr'}],
+['ATS Professional',{ac:'#0f172a',ff:FONTS[1][0],lay:'1',tpl:'ats'}],
+['Tech Focus',{ac:'#0891b2',ff:FONTS[1][0],lay:'3',tpl:'tech'}],
+['Academic',{ac:'#374151',ff:FONTS[5][0],lay:'1',tpl:'acad'}],
+['Elegant',{ac:'#9a3412',ff:FONTS[2][0],lay:'4',tpl:'el'}],
+['Compact',{ac:'#334155',ff:FONTS[3][0],lay:'5',tpl:'cmp'}],
+['Bold Sidebar',{ac:'#111827',ff:FONTS[1][0],lay:'s',tpl:'bold'}]
+];
 const F=[['name','Full Name','👤'],['title','Professional Title','💼'],['email','Email','✉️'],['phone','Phone','📞'],['location','Location','📍'],['link','Portfolio / LinkedIn','🔗']];
 const XF=[['position','Job Title'],['company','Company'],['start','Start Date'],['end','End Date'],['location','Location']];
 const DF=[['degree','Degree / Qualification'],['institute','Institute'],['year','Year'],['location','Location']];
@@ -397,7 +417,7 @@ $('ed').addEventListener('input',e=>{
 });
 
 /* ---------- design panel ---------- */
-const LAY=[['1','One Column'],['2','Two Column'],['s','Sidebar']],RG=[['mg','Margins',20,60],['sp','Section spacing',8,36],['cw','Column width',180,320],['gp','Column gap',0,40]];
+const LAY=[['1','One Column'],['2','Two Column'],['s','Sidebar'],['3','Reverse'],['4','Editorial'],['5','Compact']],RG=[['mg','Margins',20,60],['sp','Section spacing',8,36],['cw','Column width',180,320],['gp','Column gap',0,40]];
 $('v-design').innerHTML=`<div class="tabs" role="tablist">${['Templates','Colors','Typography','Layout'].map((t,i)=>`<button role="tab" data-dt="${i}" class="${i?'':'on'}">${t}</button>`).join('')}</div>
 <div class="dp on card pad"><div class="car">${TPL.map(([n,p],i)=>`<button class="tc" data-tp="${i}"><div class="th ${p.lay}" style="--c:${p.ac}"><i></i><s></s><s></s></div>${n}</button>`).join('')}</div></div>
 <div class="dp card pad"><div class="sw">${COL.map(([n,c])=>`<button class="sc" data-col="${c}"><i style="background:${c}"></i>${n}</button>`).join('')}</div><label>Custom accent color<input type="color" id="tAc"></label><label>CV background<select id="tBg"></select></label></div>
