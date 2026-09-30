@@ -103,7 +103,25 @@ body[data-v=cv]:not(.prev) .fab{display:block}.fab{position:fixed;right:16px;bot
 @media print{@page{size:A4;margin:0}html,body{background:#fff!important;height:auto}.top,.side,.editor,.ctb,#esel,.mnav,.fab,#toast{display:none!important}.shell{display:block;padding:0}.canvas{display:block!important;background:none;border:0;box-shadow:none;overflow:visible;height:auto}.stage{padding:0;overflow:visible}#fit{width:auto!important;height:auto!important}#paper{transform:none!important;box-shadow:none;width:210mm;min-height:297mm}.el:hover,.el.sel{outline:none}.el:empty{display:none}}
 .ai-panel{padding:16px}.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ai-score{font-size:38px;font-weight:800}.ai-list{margin:8px 0 0;padding-left:18px}.ai-list li{margin:6px 0}.ai-actions{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:767px){.ai-grid{grid-template-columns:1fr}}.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.dstat{padding:14px}.dstat b{display:block;font-size:22px;margin-top:5px}.dstat small,.dash-head p,.quick small,.portal small{color:var(--mu)}.quick-grid,.portal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.quick{display:flex;align-items:center;gap:10px;text-align:left;padding:14px}.qi{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:rgba(99,102,241,.15);font-size:19px}.portal-grid{grid-template-columns:repeat(3,1fr)}.portal{padding:12px}.portal b{display:block;margin-bottom:4px}.portal small{display:block;min-height:34px}.progress{height:6px;background:rgba(255,255,255,.08);border-radius:9px;overflow:hidden;margin-top:7px}.progress i{display:block;height:100%;width:58%;background:var(--g)}@media(max-width:900px){.dashboard-grid{grid-template-columns:repeat(2,1fr)}.portal-grid{grid-template-columns:1fr 1fr}}@media(max-width:767px){.dashboard-grid,.quick-grid,.portal-grid{grid-template-columns:1fr}.dash-head{display:block}.dash-head button{margin-top:10px}}\n
 .auth-fab{position:fixed;right:18px;top:14px;z-index:40}.auth-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}.auth-modal.on{display:flex}.auth-box{width:min(430px,100%);background:#10131c;border:1px solid var(--gb);border-radius:22px;padding:22px;box-shadow:var(--sh)}.auth-box h2{margin:0 0 5px}.auth-box .hint{margin:0 0 16px}.auth-tabs{display:flex;gap:8px;margin-bottom:14px}.auth-tabs button{flex:1}.auth-tabs .on{background:var(--g);color:white}.auth-msg{min-height:20px;font-size:13px;color:var(--mu);margin:10px 0}.auth-close{position:absolute;top:16px;right:16px}.account-menu{display:flex;gap:8px;align-items:center}.account-menu small{color:var(--mu)}@media(max-width:700px){.auth-fab{top:8px;right:8px}}
-</style>
+<style>
+.cv-manager-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.cv-manager-actions{display:flex;gap:8px;flex-wrap:wrap}
+.cv-manager-tools{display:flex;gap:8px;margin:12px 0}
+.cv-manager-tools input{margin:0!important;flex:1;min-width:180px}
+.cv-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cv-card{padding:16px;position:relative;overflow:hidden}
+.cv-card.active{border-color:#818cf8;box-shadow:0 0 0 2px rgba(129,140,248,.18),var(--sh)}
+.cv-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.cv-thumb{height:118px;border-radius:12px;background:#fff;color:#111;padding:12px;margin:12px 0;position:relative;overflow:hidden}
+.cv-thumb:before{content:"";display:block;width:42%;height:8px;border-radius:3px;background:var(--tc,#2563eb);margin-bottom:9px}
+.cv-thumb:after{content:"";display:block;width:75%;height:5px;border-radius:3px;background:#d1d5db;box-shadow:0 12px 0 #e5e7eb,0 24px 0 #e5e7eb,0 36px 0 #e5e7eb,0 48px 0 #e5e7eb}
+.cv-meta{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.cv-meta small{color:var(--mu)}
+.cv-badge{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#c7d2fe;background:rgba(99,102,241,.15);border:1px solid rgba(129,140,248,.3);padding:4px 7px;border-radius:999px}
+.cv-card-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.cv-empty{text-align:center;padding:28px 18px}
+@media(max-width:767px){.cv-grid{grid-template-columns:1fr}.cv-manager-head{display:block}.cv-manager-actions{margin-top:10px}.cv-card-actions button{flex:1}}
+</style></head>
 </head>
 <body data-v="home">
 <header class="top">
@@ -189,7 +207,7 @@ function go(v){document.body.dataset.v=v;document.body.classList.remove('prev');
 function prev(on){document.body.classList.toggle('prev',on);requestAnimationFrame(fit)}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-v],[data-soon]');if(!b)return;if(b.dataset.soon)toast('Coming soon');else go(b.dataset.v)});
 $('bP').onclick=()=>prev(!document.body.classList.contains('prev'));$('fab').onclick=()=>prev(true);
-$('bS').onclick=()=>{toast(persist()?'CV saved':'Saving is blocked in this browser');$('stt').textContent='✓ Saved just now'};
+$('bS').onclick=()=>{syncActiveLibrary();persist();scheduleCloudSave();toast('CV saved')};
 $('bX').onclick=$('bX2').onclick=()=>window.print();
 function escHtml(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
 /* Career tool handlers are bound after their view markup is created. */
@@ -197,7 +215,7 @@ function escHtml(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'
 $('v-home').innerHTML=`
 <div class="dash-head"><div><div class="ey">CAREERPILOT DASHBOARD</div><h2 style="margin:3px 0">Build your career in one place.</h2><p>CVs, professional templates, global jobs and career tools.</p></div><button class="pri" data-v="cv">✎ Build / Edit CV</button></div>
 <div class="dashboard-grid">
-<div class="card dstat"><span>📄</span><b>1</b><small>CV created</small></div>
+<div class="card dstat"><span>📄</span><b data-cv-count>1</b><small>CVs created</small></div>
 <div class="card dstat"><span>🎨</span><b>4+</b><small>CV templates</small></div>
 <div class="card dstat"><span>🌍</span><b>5</b><small>Job platforms</small></div>
 <div class="card dstat"><span>📊</span><b>58%</b><small>CV profile ready</small><div class="progress"><i></i></div></div>
@@ -230,7 +248,7 @@ $('makeLetter').onclick=()=>{const role=$('letterRole').value||'the position';co
 $('makeInterview').onclick=()=>{const role=$('intRole').value||'this role';const type=$('intType').value;const qs=['Tell me about yourself and your experience relevant to '+role+'.','Why are you interested in this position?','What is one project or achievement you are most proud of?','Describe a challenge you faced and how you solved it.','Which skills make you a strong fit for this role?','How do you prioritize work when you have multiple deadlines?','What would you do in your first 30 days in this role?','What questions would you ask the interviewer?'];$('intOut').innerHTML='<div class="card ai-panel"><b>'+escHtml(type)+' practice questions</b><ol class="ai-list">'+qs.map(escHtml).map(x=>'<li>'+x+'</li>').join('')+'</ol></div>'};
 $('v-profile').innerHTML='<div class="card pad"><h2 style="margin:0" data-n></h2><p class="hint">Free Plan</p><div class="row"><button data-soon="1" class="pri">Upgrade</button></div><div class="row" style="margin-top:8px"><button id="pLoad">Load saved CV</button><button id="pSave">Save CV</button></div><div class="row" style="margin-top:8px"><button id="pX">Export PDF</button></div></div>';
 $('pSave').onclick=()=>$('bS').click();$('pX').onclick=()=>window.print();
-$('pLoad').onclick=()=>{const r=ls(KEY);if(!r){toast('No saved CV found');return}try{S=norm(JSON.parse(r));sel=null;refresh();toast('CV loaded')}catch(e){toast('Could not load')}};
+$('pLoad').onclick=()=>{const x=activeCV();if(!x){toast('No saved CV found');return}openCV(x.id)};
 
 /* ---------- global jobs + saved CV views ---------- */
 const JOBS=[
@@ -248,8 +266,86 @@ function renderJobs(){
 }
 $('v-jobs').addEventListener('input',renderJobs);renderJobs();
 
-$('v-cvs').innerHTML='<div class="card pad"><div class="ey">MY CVs</div><h2 style="margin:4px 0">Saved on this device</h2><p class="hint">Your current CV is stored locally in this browser. Cloud account sync will be added in a later phase.</p><div class="card pad" style="background:rgba(0,0,0,.18);box-shadow:none"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><b data-n></b><div class="hint" data-t="title"></div></div><span class="st">✓ Local save</span></div><div class="row" style="margin-top:10px"><button class="pri" data-v="cv">Edit CV</button><button id="cvsExport">Export PDF</button></div></div></div>';
-$('cvsExport').onclick=()=>window.print();
+const CVLIB_KEY='careerpilot_cv_library_2026',CVACTIVE_KEY='careerpilot_active_cv_2026';
+let cvLibrary=[],activeCvId=null;
+function cloneCV(x){return JSON.parse(JSON.stringify(x))}
+function cvTime(v){return new Date(v||Date.now()).toLocaleString([], {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+function cvAccent(data){return data?.t?.ac||'#2563eb'}
+function cvTitle(data){return data?.d?.title||'Professional CV'}
+function loadCVLibrary(){
+  try{
+    const raw=ls(CVLIB_KEY);
+    if(raw){const a=JSON.parse(raw);if(Array.isArray(a)&&a.length){cvLibrary=a.map(x=>({id:String(x.id),name:x.name||'My CV',data:norm(x.data||dflt()),updatedAt:x.updatedAt||Date.now(),cloudId:x.cloudId||null}));}}
+  }catch(e){}
+  if(!cvLibrary.length){
+    const legacy=cloneCV(S);
+    cvLibrary=[{id:'cv-'+Date.now(),name:legacy.d.name||'My CV',data:legacy,updatedAt:Date.now(),cloudId:null}];
+  }
+  try{activeCvId=ls(CVACTIVE_KEY)||cvLibrary[0].id}catch(e){activeCvId=cvLibrary[0].id}
+  if(!cvLibrary.some(x=>x.id===activeCvId))activeCvId=cvLibrary[0].id;
+  saveCVLibrary();
+}
+function saveCVLibrary(){try{localStorage.setItem(CVLIB_KEY,JSON.stringify(cvLibrary));localStorage.setItem(CVACTIVE_KEY,activeCvId||'')}catch(e){}}
+function activeCV(){return cvLibrary.find(x=>x.id===activeCvId)||cvLibrary[0]}
+function syncActiveLibrary(){
+  const x=activeCV();if(!x)return;
+  x.data=cloneCV(S);x.name=S.d.name||x.name||'My CV';x.updatedAt=Date.now();saveCVLibrary();renderCVLibrary();
+}
+function openCV(id){
+  const x=cvLibrary.find(v=>v.id===id);if(!x)return;
+  activeCvId=x.id;S=norm(cloneCV(x.data));sel=null;saveCVLibrary();persist();refresh();renderCVLibrary();toast('CV opened');
+}
+function createCV(){
+  const d=cloneCV(dflt());d.d.name='Untitled CV';d.d.title='Professional Title';
+  const x={id:'cv-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),name:'Untitled CV',data:d,updatedAt:Date.now(),cloudId:null};
+  cvLibrary.unshift(x);activeCvId=x.id;S=norm(cloneCV(d));sel=null;saveCVLibrary();persist();refresh();renderCVLibrary();toast('New CV created');
+}
+function duplicateCV(id){
+  const src=cvLibrary.find(v=>v.id===id)||activeCV();if(!src)return;
+  const d=cloneCV(src.data),base=src.name||d.d.name||'My CV';d.d.name=base+' Copy';
+  const x={id:'cv-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),name:d.d.name,data:d,updatedAt:Date.now(),cloudId:null};
+  cvLibrary.unshift(x);activeCvId=x.id;S=norm(cloneCV(d));sel=null;saveCVLibrary();persist();refresh();renderCVLibrary();toast('CV duplicated');
+}
+function renameCV(id){
+  const x=cvLibrary.find(v=>v.id===id);if(!x)return;
+  const n=prompt('CV name',x.name||x.data?.d?.name||'My CV');if(n===null)return;
+  const name=n.trim();if(!name){toast('Enter a CV name');return}
+  x.name=name;x.data.d.name=name;x.updatedAt=Date.now();
+  if(x.id===activeCvId){S.d.name=name;persist()}
+  saveCVLibrary();renderCVLibrary();scheduleCloudSave();toast('CV renamed');
+}
+function deleteCV(id){
+  if(cvLibrary.length<=1){toast('Keep at least one CV');return}
+  const x=cvLibrary.find(v=>v.id===id);if(!x)return;
+  if(!confirm('Delete "'+(x.name||'My CV')+'"? This cannot be undone.'))return;
+  cvLibrary=cvLibrary.filter(v=>v.id!==id);
+  if(x.cloudId&&currentUser)deleteCloudCV(x.cloudId);
+  if(activeCvId===id){activeCvId=cvLibrary[0].id;S=norm(cloneCV(cvLibrary[0].data));sel=null;persist();refresh()}
+  saveCVLibrary();renderCVLibrary();toast('CV deleted');
+}
+function renderCVLibrary(){
+  const root=$('v-cvs');if(!root)return;
+  const q=($('cvSearch')?.value||'').toLowerCase();
+  const rows=cvLibrary.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.data?.d?.title||'').toLowerCase().includes(q));
+  root.querySelector('[data-count]').textContent=cvLibrary.length+' CV'+(cvLibrary.length===1?'':'s');
+  root.querySelector('[data-cloud]').textContent=currentUser?'☁ Cloud sync on':'Local device';
+  root.querySelector('[data-grid]').innerHTML=rows.map(x=>{
+    const active=x.id===activeCvId,accent=cvAccent(x.data);
+    return '<div class="card cv-card '+(active?'active':'')+'"><div class="cv-card-top"><div><div class="ey">'+(active?'ACTIVE CV':'SAVED CV')+'</div><h3 style="margin:3px 0 0">'+escHtml(x.name||'My CV')+'</h3></div>'+(active?'<span class="cv-badge">Current</span>':'')+'</div><div class="cv-thumb" style="--tc:'+accent+'"><b>'+escHtml(x.data?.d?.name||'Your Name')+'</b><div style="color:#6b7280;font-size:11px;margin-top:3px">'+escHtml(cvTitle(x.data))+'</div></div><div class="cv-meta"><small>Updated '+cvTime(x.updatedAt)+'</small><small>'+escHtml(x.data?.t?.tpl||'template')+'</small></div><div class="cv-card-actions"><button class="pri" data-open-cv="'+escHtml(x.id)+'">Open</button><button data-dup-cv="'+escHtml(x.id)+'">Duplicate</button><button data-rename-cv="'+escHtml(x.id)+'">Rename</button><button class="dg" data-del-cv="'+escHtml(x.id)+'">Delete</button></div></div>'
+  }).join('')||'<div class="card cv-empty"><div style="font-size:28px">📄</div><h3>No CVs found</h3><p class="hint">Create a new CV or change your search.</p></div>';
+}
+$('v-cvs').innerHTML='<div class="card pad"><div class="cv-manager-head"><div><div class="ey">MY CVs</div><h2 style="margin:4px 0">Your CV library</h2><p class="hint">Create separate CVs for different jobs, countries and career paths.</p></div><div class="cv-manager-actions"><button class="pri" id="newCV">+ New CV</button><button id="cvsImportCurrent">Save Current as CV</button></div></div><div class="cv-manager-tools"><input id="cvSearch" placeholder="Search CVs by name or role"><span class="st"><i></i><em data-cloud>Local device</em></span><span class="cv-badge" data-count>0 CVs</span></div></div><div class="cv-grid" data-grid></div>';
+loadCVLibrary();renderCVLibrary();
+$('cvSearch').addEventListener('input',renderCVLibrary);
+$('newCV').onclick=createCV;
+$('cvsImportCurrent').onclick=()=>{syncActiveLibrary();toast('Current CV saved to library')};
+$('v-cvs').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.openCv)openCV(b.dataset.openCv);
+  else if(b.dataset.dupCv)duplicateCV(b.dataset.dupCv);
+  else if(b.dataset.renameCv)renameCV(b.dataset.renameCv);
+  else if(b.dataset.delCv)deleteCV(b.dataset.delCv);
+});
 
 /* ---------- editor cards ---------- */
 const card=(t,b,o)=>`<details class="card"${o?' open':''}><summary>${t}</summary><div class="cb">${b}</div></details>`;
@@ -390,13 +486,42 @@ $('authSubmit').onclick=async()=>{authMessage('Please wait…');const email=$('a
 $('googleAuth').onclick=async()=>{try{authMessage('Opening Google…');const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});if(error)throw error}catch(e){authMessage(e.message||'Google login failed. Enable Google in Supabase Auth providers.')}};
 $('authLogout').onclick=async()=>{await sb.auth.signOut();authModal.classList.remove('on')};
 function updateAccountUI(){const b=$('authOpen');b.textContent=currentUser?'Account':'Sign in';Q('[data-n]').forEach(x=>x.textContent=currentUser?.user_metadata?.full_name||currentUser?.email?.split('@')[0]||'Guest')}
-async function loadCloud(){if(!currentUser)return;const {data,error}=await sb.from('cvs').select('id,name,cv_data,template,updated_at').order('updated_at',{ascending:false});if(error){toast('Cloud CV load failed');return}if(data?.length){const row=data[0];S=norm(row.cv_data);sel=null;refresh();localStorage.setItem(KEY,JSON.stringify(S));toast('Cloud CV loaded')}}
-async function saveCloud(){if(!currentUser)return;const payload={user_id:currentUser.id,name:S.d.name||'My CV',cv_data:S,template:S.t?.tpl||null,updated_at:new Date().toISOString()};const {data:existing}=await sb.from('cvs').select('id').eq('user_id',currentUser.id).order('updated_at',{ascending:false}).limit(1);let q;if(existing?.[0])q=sb.from('cvs').update(payload).eq('id',existing[0].id).eq('user_id',currentUser.id);else q=sb.from('cvs').insert(payload);const {error}=await q;if(error)toast('Cloud save failed');else toast('✓ Saved to cloud')}
-async function hydrateAuth(){const {data}=await sb.auth.getSession();currentUser=data.session?.user||null;updateAccountUI();if(currentUser){await loadCloud()}}
-sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||null;updateAccountUI();if(currentUser){authModal.classList.remove('on');await loadCloud();toast('Signed in')}});
-const oldSync=sync;sync=function(){oldSync();clearTimeout(cloudTimer);if(currentUser)cloudTimer=setTimeout(saveCloud,900)};
+async function loadCloud(){
+  if(!currentUser)return;
+  const {data,error}=await sb.from('cvs').select('id,name,cv_data,template,updated_at').order('updated_at',{ascending:false});
+  if(error){toast('Cloud CV load failed');return}
+  if(data?.length){
+    cvLibrary=data.map(row=>({id:'cloud-'+row.id,cloudId:row.id,name:row.name||row.cv_data?.d?.name||'My CV',data:norm(row.cv_data),updatedAt:row.updated_at||Date.now()}));
+    activeCvId=cvLibrary[0].id;S=norm(cloneCV(cvLibrary[0].data));sel=null;saveCVLibrary();localStorage.setItem(KEY,JSON.stringify(S));refresh();renderCVLibrary();toast(data.length+' CV'+(data.length===1?'':'s')+' loaded from cloud');
+  }else{
+    syncActiveLibrary();await saveCloud();
+  }
+}
+function scheduleCloudSave(){clearTimeout(cloudTimer);if(currentUser)cloudTimer=setTimeout(()=>saveCloud(),900)}
+async function saveCloud(){
+  if(!currentUser)return;
+  const x=activeCV();if(!x)return;
+  x.data=cloneCV(S);x.name=S.d.name||x.name||'My CV';x.updatedAt=Date.now();saveCVLibrary();
+  const payload={user_id:currentUser.id,name:x.name,cv_data:x.data,template:x.data.t?.tpl||null,updated_at:new Date().toISOString()};
+  let result;
+  if(x.cloudId){
+    result=await sb.from('cvs').update(payload).eq('id',x.cloudId).eq('user_id',currentUser.id);
+  }else{
+    result=await sb.from('cvs').insert(payload).select('id').maybeSingle();
+    if(result.data?.id){x.cloudId=result.data.id;saveCVLibrary()}
+  }
+  if(result.error)toast('Cloud save failed');else{renderCVLibrary();toast('✓ Saved to cloud')}
+}
+async function deleteCloudCV(id){
+  if(!currentUser||!id)return;
+  const {error}=await sb.from('cvs').delete().eq('id',id).eq('user_id',currentUser.id);
+  if(error)toast('Cloud delete failed');
+}
+async function hydrateAuth(){const {data}=await sb.auth.getSession();currentUser=data.session?.user||null;updateAccountUI();renderCVLibrary();if(currentUser){await loadCloud()}}
+sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||null;updateAccountUI();renderCVLibrary();if(currentUser){authModal.classList.remove('on');await loadCloud();toast('Signed in')}});
+const oldSync=sync;sync=function(){oldSync();syncActiveLibrary();scheduleCloudSave()};
 hydrateAuth();
-function refresh(){dyn();applyT();render();loadPanel();go(document.body.dataset.v)}
+function refresh(){dyn();applyT();render();loadPanel();renderCVLibrary();go(document.body.dataset.v)}
 refresh();
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 })();
