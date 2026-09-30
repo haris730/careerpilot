@@ -200,7 +200,7 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
 <div class="shell">
   <nav class="side glass" id="nav" aria-label="Main"></nav>
   <section class="editor" id="ed">
-    <div class="view on" id="v-home"></div><div class="view" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div><div class="view" id="v-jobs"></div><div class="view" id="v-cvs"></div><div class="view" id="v-match"></div><div class="view" id="v-writer"></div><div class="view" id="v-letter"></div><div class="view" id="v-interview"></div>
+    <div class="view on" id="v-home"></div><div class="view" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div><div class="view" id="v-jobs"></div><div class="view" id="v-cvs"></div><div class="view" id="v-match"></div><div class="view" id="v-writer"></div><div class="view" id="v-letter"></div><div class="view" id="v-interview"></div><div class="view" id="v-tracker"></div>
   </section>
   <main class="canvas">
     <div class="ctb glass"><button class="mo" data-v="cv">Edit</button><button id="zm" aria-label="Zoom out">−</button><span id="zv">100%</span><button id="zp" aria-label="Zoom in">+</button><button id="zf">Fit</button><button class="mo" data-v="design">Design</button><button class="mo" id="bX2">Export</button></div>
@@ -397,11 +397,11 @@ $('v-home').innerHTML=`
 <div class="portal"><b>Glassdoor</b><small>Jobs and company information</small><a href="https://www.glassdoor.com/Job/" target="_blank" rel="noopener noreferrer"><button>Search ↗</button></a></div>
 <div class="portal"><b>Jobs.com.pk</b><small>Pakistan opportunities</small><a href="https://www.jobs.com.pk/" target="_blank" rel="noopener noreferrer"><button>Search ↗</button></a></div>
 </div></div>
-<div class="card pad" style="margin-top:12px"><div class="ey">CAREER TOOLS</div><h3 style="margin:4px 0 10px">Coming next</h3><div class="quick-grid">
-<button class="quick" data-soon="1"><span class="qi">◎</span><span><b>AI Job Match</b><small>Match CV with job descriptions</small></span></button>
-<button class="quick" data-soon="1"><span class="qi">✉</span><span><b>Cover Letter</b><small>Create targeted applications</small></span></button>
-<button class="quick" data-soon="1"><span class="qi">☏</span><span><b>Interview Coach</b><small>Practice interviews</small></span></button>
-<button class="quick" data-soon="1"><span class="qi">✓</span><span><b>Application Tracker</b><small>Track applications</small></span></button>
+<div class="card pad" style="margin-top:12px"><div class="ey">CAREER TOOLS</div><h3 style="margin:4px 0 10px">Career Tools</h3><div class="quick-grid">
+<button class="quick" data-v="match"><span class="qi">◎</span><span><b>AI Job Match</b><small>Match CV with job descriptions</small></span></button>
+<button class="quick" data-v="letter"><span class="qi">✉</span><span><b>Cover Letter</b><small>Create targeted applications</small></span></button>
+<button class="quick" data-v="interview"><span class="qi">☏</span><span><b>Interview Coach</b><small>Practice interviews</small></span></button>
+<button class="quick" data-v="tracker"><span class="qi">✓</span><span><b>Application Tracker</b><small>Track your job applications</small></span></button>
 </div></div>`
 $('v-match').innerHTML=`<div class="card ai-panel"><div class="ey">JOB MATCH + ATS</div><h2>Match your CV to a real job</h2><p class="hint">Paste the job description to compare your current CV with the role. CareerPilot gives a transparent 0–100 match estimate, keyword gaps, section checks, and practical next steps — all locally in your browser.</p><div class="ai-grid"><label>Target job title <input id="matchRole" placeholder="Graphic Designer"></label><label>Company <input id="matchCompany" placeholder="Company name (optional)"></label></div><label style="display:block;margin-top:10px">Job description<textarea id="jobDesc" rows="9" aria-label="Job description" placeholder="Paste the complete job description here..."></textarea></label><div class="ai-actions" style="margin-top:10px"><button class="pri" id="runMatch">Analyze Job Match</button><button id="clearMatch">Clear</button></div><div id="matchResult" style="margin-top:14px"></div></div>`;
 $('v-writer').innerHTML=`<div class="card ai-panel">
