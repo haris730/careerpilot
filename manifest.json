@@ -6,5 +6,48 @@
   "background_color": "#0a0c11",
   "theme_color": "#0a0c11",
   "description": "Professional CV builder and global career assistant.",
-  "categories": ["business", "productivity", "education"]
+  "categories": [
+    "business",
+    "productivity",
+    "education"
+  ],
+  "id": "careerpilot",
+  "scope": "./",
+  "display_override": [
+    "standalone"
+  ],
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "CV Builder",
+      "short_name": "CV Builder",
+      "url": "./?view=cv"
+    },
+    {
+      "name": "Job Match",
+      "short_name": "Job Match",
+      "url": "./?view=match"
+    },
+    {
+      "name": "AI Writer",
+      "short_name": "AI Writer",
+      "url": "./?view=writer"
+    }
+  ]
 }
