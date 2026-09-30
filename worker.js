@@ -1,4 +1,4 @@
-const MODEL = '@cf/meta/llama-3.1-8b-instruct';
+const MODEL = '@cf/meta/llama-3.1-8b-instruct-fp8';
 const LIMIT = 6;
 const WINDOW_MS = 60 * 60 * 1000;
 const buckets = new Map();
@@ -41,12 +41,12 @@ function buildPrompt(body) {
     'Keep claims truthful and professional.'
   ];
   if (task === 'bullet') {
-    return rules.join('\n') + '\nTask: Rewrite this CV bullet into one concise, achievement-focused bullet. Use a strong action verb and preserve the original facts.\nCV context:\n' + cv + '\nInput:\n' + input;
+    return rules.join('\\n') + '\\nTask: Rewrite this CV bullet into one concise, achievement-focused bullet. Use a strong action verb and preserve the original facts.\\nCV context:\\n' + cv + '\\nInput:\\n' + input;
   }
   if (task === 'summary') {
-    return rules.join('\n') + '\nTask: Write a professional 3-4 sentence CV summary based only on the supplied background. Do not invent years of experience or achievements.\nCV context:\n' + cv + '\nInput:\n' + input;
+    return rules.join('\\n') + '\\nTask: Write a professional 3-4 sentence CV summary based only on the supplied background. Do not invent years of experience or achievements.\\nCV context:\\n' + cv + '\\nInput:\\n' + input;
   }
-  return rules.join('\n') + '\nTask: Tailor the supplied CV content to the job description. Return a concise revised version that naturally emphasizes relevant existing skills and experience. Do not add missing qualifications.\nCV context:\n' + cv + '\nCV content:\n' + input + '\nJob description:\n' + job;
+  return rules.join('\\n') + '\\nTask: Tailor the supplied CV content to the job description. Return a concise revised version that naturally emphasizes relevant existing skills and experience. Do not add missing qualifications.\\nCV context:\\n' + cv + '\\nCV content:\\n' + input + '\\nJob description:\\n' + job;
 }
 
 export default {
