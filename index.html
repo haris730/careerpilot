@@ -183,7 +183,7 @@ edu:[{degree:'Bachelor of Commerce',institute:'University Name',year:'2022',loca
 const mk=k=>k.replace('cv-link','cv-portfolio').replace(/^cv-h-(\w+)$/,'cv-$1-heading').replace(/^cv-skills-(\d)/,'cv-skill-$1').replace('-institute','-school');
 function norm(o){const b=dflt(),st={};for(const k in (o.st||{}))st[mk(k)]=o.st[k];return{d:Object.assign(b.d,o.d),st,t:Object.assign(b.t,o.t)}}
 const ls=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
-let S=dflt(),sel=null,Z=null,cz=1,H,hi=0,tm;
+let S=dflt(),sel=null,Z=null,cz=1,H,hi=0,tm, currentUser=null;
 try{const r=ls(KEY)||ls(OLD);if(r)S=norm(JSON.parse(r))}catch(e){}
 H=[JSON.stringify(S)];
 const paper=$('paper');
@@ -327,7 +327,7 @@ function renderCVLibrary(){
   const root=$('v-cvs');if(!root)return;
   const q=($('cvSearch')?.value||'').toLowerCase();
   const rows=cvLibrary.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.data?.d?.title||'').toLowerCase().includes(q));
-  root.querySelector('[data-count]').textContent=cvLibrary.length+' CV'+(cvLibrary.length===1?'':'s');
+  root.querySelector('[data-count]').textContent=cvLibrary.length+' CV'+(cvLibrary.length===1?'':'s');const stat=$('[data-cv-count]');if(stat)stat.textContent=cvLibrary.length;
   root.querySelector('[data-cloud]').textContent=currentUser?'☁ Cloud sync on':'Local device';
   root.querySelector('[data-grid]').innerHTML=rows.map(x=>{
     const active=x.id===activeCvId,accent=cvAccent(x.data);
@@ -477,7 +477,7 @@ $('sx').onclick=()=>{Q('.el.sel').forEach(x=>x.classList.remove('sel'));sel=null
 const SUPABASE_URL='https://gxixgacuryslyoawhrej.supabase.co';
 const SUPABASE_KEY='sb_publishable_cjEbbJ_VUoT_vKMOR-vBmA_It8gXYQd';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let authMode='login', currentUser=null, cloudTimer=null;
+let authMode='login', cloudTimer=null;
 const authModal=$('authModal'),authMsg=$('authMsg');
 function authMessage(m){authMsg.textContent=m||''}
 function openAuth(mode='login'){authMode=mode;$('authTitle').textContent=mode==='login'?'Welcome back':'Create your account';$('authSubmit').textContent=mode==='login'?'Login':'Create account';$('authNameWrap').style.display=mode==='login'?'none':'block';$('tabLogin').classList.toggle('on',mode==='login');$('tabSignup').classList.toggle('on',mode!=='login');$('authLogout').style.display=currentUser?'block':'none';authMessage('');authModal.classList.add('on')}
