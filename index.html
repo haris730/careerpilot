@@ -455,17 +455,23 @@ $('runMatch').onclick=()=>{
  const jd=$('jobDesc').value.trim(), role=$('matchRole').value.trim(), company=$('matchCompany').value.trim();
  if(!jd){$('matchResult').innerHTML='<div class="card ai-panel"><p class="hint">Paste a job description first.</p></div>';return}
  const d=S.d;
- if(!jd){$('matchResult').innerHTML='<div class="card ai-panel"><p class="hint">Paste a job description first.</p></div>';return}
  const cv=[d.name,d.title,d.email,d.phone,d.location,d.link,d.summary,...(d.skills||[]),...(d.languages||[]),...(d.projects||[]),...(d.certs||[]),...(d.achievements||[]),...(d.exp||[]).flatMap(x=>[x.position,x.company,x.start,x.end,x.location,x.description]),...(d.edu||[]).flatMap(x=>[x.degree,x.institute,x.year,x.location])].join(' ');
- const normText=s=>String(s||'').toLowerCase().replace(/[–—]/g,'-');
+ const normText=s=>String(s||'').toLowerCase().replace(/[–—]/g,'-').replace(/[^a-z0-9+#.\s-]/g,' ').replace(/\s+/g,' ').trim();
  const cvText=normText(cv),jdText=normText(jd);
- const stop=new Set(['the','and','for','with','from','that','this','your','you','are','our','job','work','will','have','has','not','can','all','their','they','who','into','about','using','role','team','company','years','year','what','how','but','our','this','these','those','they','them','then','than','also','more','most','must','able','looking','join','including','required','requirements','responsibilities','skills','experience','position','candidate','please','within','across','based','would','should','may','need','per','via','etc','such','well']);
- const tokens=toolWords(jdText).filter(x=>!stop.has(x)&&!/^\\d+$/.test(x));
+ const stop=new Set(['the','and','for','with','from','that','this','your','you','are','our','job','work','will','have','has','not','can','all','their','they','who','into','about','using','role','team','company','years','year','what','how','but','these','those','them','then','than','also','more','most','must','able','looking','join','including','required','requirements','responsibilities','skills','experience','position','candidate','please','within','across','based','would','should','may','need','per','via','etc','such','well','good','strong','knowledge','ability','plus']);
+ const raw=jdText.split(/\s+/).filter(Boolean);
+ const tokens=[...new Set(raw.filter(x=>x.length>=3&&!stop.has(x)&&!/^\d+$/.test(x)))];
+ const phrases=[];
+ for(let n=3;n>=2;n--){for(let i=0;i<=raw.length-n;i++){const p=raw.slice(i,i+n);if(p.every(x=>x.length>=2&&!stop.has(x))&&p.some(x=>!stop.has(x))){const s=p.join(' ');if(!phrases.includes(s)&&s.length>=7)phrases.push(s)}}}
+ const phraseKeys=phrases.filter(p=>cvText.includes(p));
  const freq={};tokens.forEach(x=>freq[x]=(freq[x]||0)+1);
  const keys=Object.keys(freq).sort((a,b)=>freq[b]-freq[a]);
  const hits=keys.filter(x=>cvText.includes(x));
  const missing=keys.filter(x=>!hits.includes(x));
- const keywordScore=keys.length?Math.round(hits.length/keys.length*50):0;
+ const phraseWeight=phraseKeys.length?Math.min(35,Math.round(phraseKeys.length/Math.max(Math.min(phrases.length,20),1)*35)):0;
+ const tokenWeight=keys.length?Math.round(hits.length/keys.length*15):0;
+ const keywordScore=Math.min(50,phraseWeight+tokenWeight);
+ const matchedSignals=[...phraseKeys,...hits.filter(x=>x.length>=4&&!phraseKeys.some(p=>p.split(' ').includes(x)))];
  const sections=[
   ['Contact details',!!(d.email&&d.phone&&d.location)],
   ['Professional summary',String(d.summary||'').trim().length>=80],
@@ -478,8 +484,12 @@ $('runMatch').onclick=()=>{
  const contactScore=(d.email&&d.phone)?10:(d.email||d.phone)?5:0;
  const cvWordCount=toolWords(cvText).length;
  const lengthScore=cvWordCount>=180&&cvWordCount<=1100?10:cvWordCount>=100&&cvWordCount<=1400?6:3;
- const quantified=/(\\b\\d+(?:[.,]\\d+)?%?\\b|\\$\\s?\\d|\\b(?:increased|grew|reduced|saved|generated|managed|led|delivered)\\b)/i.test(cv);
+ const quantified=/(\b\d+(?:[.,]\d+)?%?\b|\$\s?\d|\b(?:increased|grew|reduced|saved|generated|managed|led|delivered)\b)/i.test(cv);
  const evidenceScore=quantified?10:5;
+ const roleWords=toolWords(role).filter(x=>!stop.has(x));
+ const roleMatch=roleWords.length?Math.round(roleWords.filter(x=>cvText.includes(x)).length/roleWords.length*100):null;
+ const responsibilityCoverage=phrases.length?Math.round(phraseKeys.length/Math.max(Math.min(phrases.length,20),1)*100):0;
+ const matchScore=Math.min(100,Math.round((keywordScore/50)*55+(responsibilityCoverage/100)*25+(roleMatch===null?50:roleMatch)*.2));
  const score=Math.min(100,keywordScore+sectionScore+contactScore+lengthScore+evidenceScore);
  const fixes=[];
  if(!d.email||!d.phone)fixes.push('Complete your contact details (email and phone).');
@@ -489,14 +499,17 @@ $('runMatch').onclick=()=>{
  if(!quantified)fixes.push('Add measurable evidence where truthful: %, revenue, time saved, volume, or other concrete results.');
  if(cvWordCount<180)fixes.push('Your CV appears very short; add relevant achievements, projects, experience, or certifications.');
  if(cvWordCount>1400)fixes.push('Your CV appears long; remove repeated or low-value content.');
- missing.slice(0,8).forEach(x=>{if(x.length>3)fixes.push('If you genuinely have “'+x+'”, add it naturally to the relevant CV section.')});
+ missing.slice(0,6).forEach(x=>{if(x.length>3)fixes.push('If you genuinely have “'+x+'”, add it naturally to the relevant CV section.')});
  if(!fixes.length)fixes.push('No major rule-based issues found. Review each matched requirement and keep only claims you can support.');
  const badge=score>=80?'Strong ATS readiness':score>=60?'Good starting point':'Needs improvement';
- $('matchResult').innerHTML='<div class="card ai-panel ats-result"><div class="ats-top"><div><div class="ey">ATS READINESS</div><div class="ai-score">'+score+'<small>/100</small></div><b>'+badge+'</b></div><div class="ats-meta"><span>Keyword match <b>'+Math.round((hits.length/Math.max(keys.length,1))*100)+'%</b></span><span>'+hits.length+' matched</span><span>'+missing.length+' gaps</span></div></div><div class="ai-grid"><div><b>Matched keywords</b><ul class="ai-list">'+(hits.length?hits.slice(0,16).map(escHtml).map(x=>'<li>'+x+'</li>').join(''):'<li>No clear matches yet.</li>')+'</ul></div><div><b>Potential keyword gaps</b><ul class="ai-list">'+(missing.length?missing.slice(0,16).map(escHtml).map(x=>'<li>'+x+'</li>').join(''):'<li>No major keyword gaps detected.</li>')+'</ul></div></div><div class="ats-fixes"><b>Recommended fixes</b><ol class="ai-list">'+fixes.slice(0,10).map(escHtml).map(x=>'<li>'+x+'</li>').join('')+'</ol></div><div class="ats-breakdown"><span>Keywords '+keywordScore+'/50</span><span>Sections '+sectionScore+'/20</span><span>Contact '+contactScore+'/10</span><span>Length '+lengthScore+'/10</span><span>Evidence '+evidenceScore+'/10</span></div><p class="hint">ATS score is a transparent rule-based estimate, not a hiring prediction. Keyword gaps are suggestions only—never add a skill or claim you do not genuinely have.</p><div class="ai-actions" style="margin-top:10px"><button id="copyMatch">Copy Analysis</button><button id="useMatchWriter">Tailor CV with AI</button><button id="useMatchLetter">Create Cover Letter</button></div></div>';
+ const matchBadge=matchScore>=80?'High alignment':matchScore>=60?'Moderate alignment':'More tailoring recommended';
+ const matchedPhraseList=phraseKeys.slice(0,10).map(escHtml).map(x=>'<li>'+x+'</li>').join('');
+ const cleanMissing=missing.filter(x=>x.length>=4&&!/^(team|company|platforms?|materials?|stores?|requirements?|responsibilities?)$/.test(x)).slice(0,10);
+ $('matchResult').innerHTML='<div class="card ai-panel ats-result"><div class="ats-top"><div><div class="ey">JOB MATCH + ATS</div><div class="ai-score">'+matchScore+'<small>/100</small></div><b>'+matchBadge+'</b></div><div class="ats-meta"><span>ATS readiness <b>'+score+'/100</b></span><span>Phrase match <b>'+responsibilityCoverage+'%</b></span><span>Role match <b>'+(roleMatch===null?'—':roleMatch+'%')+'</b></span></div></div><div class="ats-breakdown" style="margin-bottom:12px"><span>ATS Keywords '+keywordScore+'/50</span><span>Sections '+sectionScore+'/20</span><span>Contact '+contactScore+'/10</span><span>Length '+lengthScore+'/10</span><span>Evidence '+evidenceScore+'/10</span></div><div class="ai-grid"><div><b>Matched job phrases</b><ul class="ai-list">'+(matchedPhraseList||'<li>No clear phrase matches yet.</li>')+'</ul></div><div><b>Potential keyword gaps</b><ul class="ai-list">'+(cleanMissing.length?cleanMissing.map(escHtml).map(x=>'<li>'+x+'</li>').join(''):'<li>No major keyword gaps detected.</li>')+'</ul></div></div><div class="ats-fixes"><b>Recommended fixes</b><ol class="ai-list">'+fixes.slice(0,8).map(escHtml).map(x=>'<li>'+x+'</li>').join('')+'</ol></div><p class="hint">Job Match combines phrase, keyword and role signals. ATS Readiness measures CV structure and machine-readable content. Both are transparent rule-based estimates—not hiring predictions.</p><div class="ai-actions" style="margin-top:10px"><button id="copyMatch">Copy Analysis</button><button id="useMatchWriter">Tailor CV with AI</button><button id="useMatchLetter">Create Cover Letter</button></div></div>';
  $('copyMatch').onclick=()=>copyToolText('matchResult',$('copyMatch'));
  $('useMatchWriter').onclick=()=>{go('writer');$('aiTask').value='tailor';updateAIWriterForm();$('aiInput').value=aiWriterContext();$('aiJob').value=jd;toast('Job details moved to AI Writer')};
  $('useMatchLetter').onclick=()=>{go('letter');$('letterRole').value=role;$('letterCompany').value=company;$('letterDesc').value=jd;toast('Job details moved to Cover Letter')};
-};$('clearMatch').onclick=()=>{$('jobDesc').value='';$('matchRole').value='';$('matchCompany').value='';$('matchResult').innerHTML=''};
+};$('clearMatch').onclick=()=>{$('jobDesc').value='';$('matchRole').value='';$('matchCompany').value='';$('matchResult').innerHTML=''}
 $('makeInterview').onclick=()=>{
  const role=$('intRole').value.trim()||'this role',type=$('intType').value,jd=$('intDesc').value;
  const focus=toolWords(jd).filter(x=>!['the','and','for','with','from','that','this','your','you','are','our','job','work','will','have','has','not','can','into','about','using'].includes(x)).slice(0,8);
