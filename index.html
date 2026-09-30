@@ -235,11 +235,11 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
 }
 /* Mobile CV preview: keep the real CV visible below the editor. No other behavior changes. */
 @media(max-width:767px){
-  body[data-v=cv]:not(.prev) .canvas{display:flex;height:auto;min-height:0;margin-top:14px;border-radius:16px;overflow:hidden}
+  body[data-v=cv]:not(.prev) .canvas{display:flex;flex:none;height:auto;min-height:0;margin-top:14px;border-radius:16px;overflow:hidden}
   body[data-v=cv]:not(.prev) .canvas .ctb{position:sticky;top:58px;z-index:10;justify-content:center}
-  body[data-v=cv]:not(.prev) .canvas .stage{width:100%;min-height:0;padding:12px 8px 24px;overflow:auto;display:block}
-  body[data-v=cv]:not(.prev) #fit{margin:0 auto;transform:none!important;transform-origin:top center}
-  body[data-v=cv]:not(.prev) #paper{margin:0 auto;box-shadow:0 8px 28px rgba(0,0,0,.22)}
+  body[data-v=cv]:not(.prev) .canvas .stage{width:100%;height:auto;min-height:0;flex:none;padding:12px 8px 24px;overflow:auto;display:block}
+  body[data-v=cv]:not(.prev) #fit{width:794px!important;height:auto!important;margin:0 auto;transform:none!important;transform-origin:top center}
+  body[data-v=cv]:not(.prev) #paper{margin:0;box-shadow:0 8px 28px rgba(0,0,0,.22)}
 }.cp-install-pill{display:none}.cp-online{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translate(-50%,-140%);z-index:60;padding:7px 12px;border-radius:999px;background:rgba(30,34,48,.96);border:1px solid var(--gb);box-shadow:var(--sh);font-size:11px;color:var(--mu);transition:transform .25s}.cp-online.on{transform:translate(-50%,0)}.cp-online.off{color:#fbbf24}@media(max-width:767px){.cp-install-pill{display:none;position:fixed;right:14px;top:calc(58px + env(safe-area-inset-top,0px));z-index:35;padding:8px 11px;border-radius:999px;background:var(--g);border:0;box-shadow:0 8px 20px rgba(99,102,241,.35);font-size:11px;font-weight:700}.cp-install-pill.show{display:inline-flex}.card{border-radius:14px}.pad,.ai-panel{padding:14px}button,input:not([type=checkbox]):not([type=color]):not([type=range]),select,textarea{min-height:44px}.mnav button{min-height:44px;padding:4px 2px}.mnav i{font-size:19px}.mnav small{font-size:10px}}@media(prefers-reduced-motion:reduce){.cp-online{transition:none}}</style></head>
 </head>
 <body data-v="home">
