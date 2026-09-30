@@ -302,22 +302,18 @@ $('bS').onclick=()=>{syncActiveLibrary();persist();scheduleCloudSave();toast('CV
 function exportPDF(){
   const source=$('paper');
   if(!source){toast('CV preview is not ready');return}
-
   const w=window.open('','_blank','width=1100,height=850');
   if(!w){toast('Please allow pop-ups to export PDF');return}
-
   const styles=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n');
   const clone=source.cloneNode(true);
-
-  /* Keep the exported CV as real HTML text — never convert it to canvas/image. */
-  Q('.el.sel,.el:hover',clone).forEach(x=>x.classList.remove('sel','hover'));
+  Q('.el.sel',clone).forEach(x=>x.classList.remove('sel'));
+  Q('.el:hover',clone).forEach(x=>x.classList.remove('hover'));
   Q('[contenteditable]',clone).forEach(x=>{
     x.removeAttribute('contenteditable');
     x.removeAttribute('spellcheck');
     x.removeAttribute('tabindex');
   });
-
-  const printCss='
+  const printCss=`
     @page{size:A4;margin:0}
     html,body{margin:0!important;padding:0!important;background:#fff!important;width:210mm;min-height:297mm}
     body{display:block!important;color:#1f2937!important;-webkit-user-select:text!important;user-select:text!important}
@@ -333,22 +329,14 @@ function exportPDF(){
       html,body{width:210mm!important;background:#fff!important}
       .pdf-wrap{width:210mm!important}
     }
-  ';
-
+  `;
   w.document.open();
   w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>CareerPilot CV — '+esc(S.d.name||'CV')+'</title><style>'+styles+'\n'+printCss+'</style></head><body><div class="pdf-wrap">'+clone.outerHTML+'</div></body></html>');
   w.document.close();
-
-  const print=()=>{
-    w.focus();
-    w.print();
-  };
-
+  const print=()=>{w.focus();w.print()};
   if(w.document.fonts&&w.document.fonts.ready){
     w.document.fonts.ready.then(()=>setTimeout(print,250)).catch(()=>setTimeout(print,500));
-  }else{
-    setTimeout(print,500);
-  }
+  }else setTimeout(print,500);
 }
 $('bX').onclick=$('bX2').onclick=exportPDF;
 function escHtml(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
