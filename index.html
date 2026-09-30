@@ -419,7 +419,7 @@ $('ed').addEventListener('input',e=>{
 /* ---------- design panel ---------- */
 const LAY=[['1','One Column'],['2','Two Column'],['s','Sidebar'],['3','Reverse'],['4','Editorial'],['5','Compact']],RG=[['mg','Margins',20,60],['sp','Section spacing',8,36],['cw','Column width',180,320],['gp','Column gap',0,40]];
 $('v-design').innerHTML=`<div class="tabs" role="tablist">${['Templates','Colors','Typography','Layout'].map((t,i)=>`<button role="tab" data-dt="${i}" class="${i?'':'on'}">${t}</button>`).join('')}</div>
-<div class="dp on card pad"><div class="car">${TPL.map(([n,p],i)=>`<button class="tc" data-tp="${i}"><div class="th ${p.lay}" style="--c:${p.ac}"><i></i><s></s><s></s></div>${n}</button>`).join('')}</div></div>
+<div class="dp on card pad"><div class="car">${TPL.map(([n,p],i)=>`<button class="tc" data-tp="${i}"><div class="th th-${p.lay}" style="--c:${p.ac}"><i></i><s></s><s></s></div>${n}</button>`).join('')}</div></div>
 <div class="dp card pad"><div class="sw">${COL.map(([n,c])=>`<button class="sc" data-col="${c}"><i style="background:${c}"></i>${n}</button>`).join('')}</div><label>Custom accent color<input type="color" id="tAc"></label><label>CV background<select id="tBg"></select></label></div>
 <div class="dp card pad"><label>Template font<select id="tFf"></select></label><p class="hint">Select any text in the CV to change its font, size, weight, letter spacing and line height. Only that element changes.</p></div>
 <div class="dp card pad"><div class="row">${LAY.map(([v,l])=>`<button class="lb" data-lay="${v}">${l}</button>`).join('')}</div>${RG.map(([k,l,a,b])=>`<label>${l}<input type="range" data-l="${k}" min="${a}" max="${b}"></label>`).join('')}</div>`;
