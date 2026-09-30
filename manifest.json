@@ -37,17 +37,17 @@
     {
       "name": "CV Builder",
       "short_name": "CV Builder",
-      "url": "./?view=cv"
+      "url": "./#cv"
     },
     {
       "name": "Job Match",
       "short_name": "Job Match",
-      "url": "./?view=match"
+      "url": "./#match"
     },
     {
       "name": "AI Writer",
       "short_name": "AI Writer",
-      "url": "./?view=writer"
+      "url": "./#writer"
     }
   ]
 }
