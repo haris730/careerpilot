@@ -555,7 +555,8 @@ $('v-jobs').innerHTML=`<div class="card pad">
 <h2 style="margin:0 0 6px">Find real jobs from multiple sources</h2>
 <p class="hint">Search live remote jobs inside CareerPilot. Job details and applications stay with the original job provider.</p>
 <div class="row"><input id="jobQ" placeholder="Job title, skill or keyword" style="margin:0"><input id="jobLoc" placeholder="Country, region or Remote" style="margin:0"></div>
-<div class="row" style="margin-top:8px"><select id="jobType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><button class="pri" id="jobSearchBtn">Search Live Jobs</button></div>
+<div class="row" style="margin-top:8px"><select id="jobType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><select id="jobExp" style="margin:0"><option value="">All experience levels</option><option value="entry">Entry / Junior</option><option value="mid">Mid-level</option><option value="senior">Senior / Lead</option></select></div>
+<div class="row" style="margin-top:8px"><select id="jobSalary" style="margin:0"><option value="0">Any salary</option><option value="30000">$30k+ / year</option><option value="50000">$50k+ / year</option><option value="75000">$75k+ / year</option><option value="100000">$100k+ / year</option><option value="150000">$150k+ / year</option></select><select id="jobSort" style="margin:0"><option value="recent">Newest first</option><option value="salary">Highest salary</option><option value="match">Best CV match</option></select><button class="pri" id="jobSearchBtn">Search Live Jobs</button></div>
 <div id="jobStatus" class="hint" style="margin-top:9px">Enter a keyword and search. Remote jobs are supplied by Remotive.</div>
 </div>
 <div id="jobCards"></div>
@@ -593,15 +594,29 @@ function matchHtml(j){
   const m=cvMatch(j);
   return '<div class="card" style="margin-top:10px;padding:12px;border-color:rgba(129,140,248,.35)"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">CV MATCH</div><b style="font-size:24px">'+m.score+'%</b></div><div class="hint">Based on your current CV content</div></div><div class="ai-grid" style="margin-top:10px"><div><b>Matched</b><div class="hint" style="margin-top:5px">'+(m.matched.length?m.matched.map(jobEsc).join(' · '):'No direct keyword matches yet.')+'</div></div><div><b>Possible gaps</b><div class="hint" style="margin-top:5px">'+(m.missing.length?m.missing.map(jobEsc).join(' · '):'No obvious keyword gaps.')+'</div></div></div></div>';
 }
+function jobSalaryMax(j){
+  const s=String(j.salary||'').replace(/,/g,'');
+  const nums=[...s.matchAll(/(?:\\$|€|£)?\\s*(\\d+(?:\\.\\d+)?)\\s*([kKmM])?/g)].map(m=>{let n=Number(m[1]);if((m[2]||'').toLowerCase()==='k')n*=1000;if((m[2]||'').toLowerCase()==='m')n*=1000000;return n});
+  return nums.length?Math.max(...nums):0;
+}
+function jobExperience(j){
+  const t=String(j.title||'').toLowerCase();
+  if(/senior|sr\\.?|lead|principal|staff|manager|director|head|architect/.test(t))return 'senior';
+  if(/junior|jr\\.?|entry|intern|trainee|graduate/.test(t))return 'entry';
+  return 'mid';
+}
+function jobLocationText(j){
+  return Array.isArray(j.candidate_required_location)?j.candidate_required_location.join(', '):(j.candidate_required_location||'Remote');
+}
 function jobCard(j){
   const salary=j.salary&&j.salary.trim()?j.salary:'Salary not listed';
-  const loc=Array.isArray(j.candidate_required_location)?j.candidate_required_location.join(', '):(j.candidate_required_location||j.job_type||'Remote');
-  const tags=[j.job_type,loc].filter(Boolean).map(jobEsc).join(' · ');
+  const loc=jobLocationText(j);
+  const tags=[jobTypeLabel(j.job_type),loc,jobExperience(j)==='entry'?'Entry / Junior':jobExperience(j)==='senior'?'Senior / Lead':'Mid-level'].filter(Boolean).map(jobEsc).join(' · ');
   const saved=isJobSaved(j);
   return '<div class="card pad" data-job-card="'+jobEsc(jobKey(j))+'" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0"><div class="ey">'+jobEsc(j.category||'REMOTE JOB')+'</div><h3 style="margin:3px 0 5px">'+jobEsc(j.title)+'</h3><div style="font-weight:600">'+jobEsc(j.company_name||'Company')+'</div><div class="hint" style="margin-top:4px">'+tags+'</div><div class="hint" style="margin-top:4px">💰 '+jobEsc(salary)+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button data-job-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-job-save="'+jobEsc(jobKey(j))+'">'+(saved?'✓ Saved':'☆ Save')+'</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button class="pri">Apply ↗</button></a></div></div><div class="hint" style="margin-top:10px">Source: Remotive · '+jobEsc(j.publication_date?new Date(j.publication_date).toLocaleDateString():'Recently listed')+'</div><div data-job-match-panel style="display:none"></div></div>'
 }
 async function loadLiveJobs(){
-  const q=($('jobQ')?.value||'').trim(),loc=($('jobLoc')?.value||'').trim(),type=$('jobType')?.value||'';
+  const q=($('jobQ')?.value||'').trim(),loc=($('jobLoc')?.value||'').trim(),type=$('jobType')?.value||'',exp=$('jobExp')?.value||'',salary=Number($('jobSalary')?.value||0),sort=$('jobSort')?.value||'recent';
   const status=$('jobStatus'),cards=$('jobCards');if(!status||!cards)return;
   status.textContent='Loading live jobs…';cards.innerHTML='<div class="card pad"><div class="hint">Searching live listings…</div></div>';
   const p=new URLSearchParams();if(q)p.set('search',q);if(type)p.set('type',type);p.set('limit','30');
@@ -611,8 +626,13 @@ async function loadLiveJobs(){
     let rows=Array.isArray(data.jobs)?data.jobs:[];
     window.__careerPilotLiveJobs=rows;
     const needle=loc.toLowerCase();
-    if(needle)rows=rows.filter(j=>String(j.candidate_required_location||'').toLowerCase().includes(needle)||String(j.title||'').toLowerCase().includes(needle)||String(j.company_name||'').toLowerCase().includes(needle));
-    cards.innerHTML=rows.length?rows.map(jobCard).join(''):'<div class="card pad"><div class="hint">No live jobs matched these filters. Try a broader keyword such as “designer”, “developer” or “marketing”.</div></div>';
+    if(needle)rows=rows.filter(j=>jobLocationText(j).toLowerCase().includes(needle)||String(j.title||'').toLowerCase().includes(needle)||String(j.company_name||'').toLowerCase().includes(needle));
+    if(exp)rows=rows.filter(j=>jobExperience(j)===exp);
+    if(salary)rows=rows.filter(j=>jobSalaryMax(j)>=salary);
+    if(sort==='salary')rows.sort((a,b)=>jobSalaryMax(b)-jobSalaryMax(a));
+    else if(sort==='match')rows.sort((a,b)=>cvMatch(b).score-cvMatch(a).score);
+    else rows.sort((a,b)=>new Date(b.publication_date||0)-new Date(a.publication_date||0));
+    cards.innerHTML=rows.length?rows.map(jobCard).join(''):'<div class="card pad"><div class="hint">No live jobs matched these filters. Try broader filters or remove the salary/experience requirement.</div></div>';
     status.textContent=rows.length+' live job'+(rows.length===1?'':'s')+' found · Source: Remotive';
   }catch(e){
     cards.innerHTML='<div class="card pad"><div class="hint">Live job search is temporarily unavailable. You can still use the job portals below.</div></div>';
