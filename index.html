@@ -622,7 +622,7 @@ async function loadLiveJobs(){
 function renderSavedJobs(){
   const box=$('savedJobCards'),count=$('savedJobCount');if(!box||!count)return;
   const a=loadSavedJobs();count.textContent=a.length;
-  box.innerHTML=a.length?a.map(j=>'<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><b>'+jobEsc(j.title)+'</b><div class="hint">'+jobEsc(j.company_name||'Company')+' · '+jobEsc(j.job_type||'Remote')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-saved-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-saved-remove="'+jobEsc(jobKey(j))+'">Remove</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer"><button class="pri">Apply ↗</button></a></div></div><div data-saved-match-panel style="display:none"></div></div>').join(''):'<div class="hint">No saved jobs yet. Use ☆ Save on any live job.</div>';
+  box.innerHTML=a.length?a.map(j=>'<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><b>'+jobEsc(j.title)+'</b><div class="hint">'+jobEsc(j.company_name||'Company')+' · '+jobEsc(j.job_type||'Remote')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-saved-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-saved-track="'+jobEsc(jobKey(j))+'">+ Tracker</button><button data-saved-remove="'+jobEsc(jobKey(j))+'">Remove</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer"><button class="pri">Apply ↗</button></a></div></div><div data-saved-match-panel style="display:none"></div></div>').join(''):'<div class="hint">No saved jobs yet. Use ☆ Save on any live job.</div>';
 }
 function findJobByKey(key){
   return loadSavedJobs().find(j=>jobKey(j)===String(key))||window.__careerPilotLiveJobs?.find(j=>jobKey(j)===String(key));
@@ -639,6 +639,13 @@ $('v-jobs').addEventListener('click',e=>{
   if(save&&j){if(isJobSaved(j)){removeSavedJob(jobKey(j))}else saveJob(j);return}
   if(match&&j){const panel=match.closest('[data-job-card]')?.querySelector('[data-job-match-panel]');if(panel){panel.innerHTML=matchHtml(j);panel.style.display=panel.style.display==='none'?'block':'none'}return}
   if(smatch&&j){const panel=smatch.closest('.card')?.querySelector('[data-saved-match-panel]');if(panel){panel.innerHTML=matchHtml(j);panel.style.display=panel.style.display==='none'?'block':'none'}return}
+  const strack=e.target.closest('[data-saved-track]');
+  if(strack&&j){
+    const a=loadTracks(),exists=a.some(x=>x.link&&j.url&&x.link===j.url);
+    if(exists){toast('Already in Application Tracker');return}
+    a.unshift({role:j.title||'Untitled role',company:j.company_name||'',status:'Saved',link:j.url||'',createdAt:Date.now()});
+    saveTracks(a);renderTracks();toast('✓ Added to Application Tracker');return
+  }
   if(remove&&j){removeSavedJob(jobKey(j))}
 });
 renderJobPortals();
