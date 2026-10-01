@@ -582,11 +582,60 @@ $('v-jobs').innerHTML=`<div class="card pad">
 function jobEsc(v){return escHtml(String(v||''))}
 const JOB_ALERTS_KEY='careerpilot_job_alerts_v1';
 const JOB_ALERT_MATCHES_KEY='careerpilot_job_alert_matches_v1';
-function loadJobAlerts(){try{const a=JSON.parse(localStorage.getItem(JOB_ALERTS_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
+function loadJobAlerts(){try{return JSON.parse(localStorage.getItem(JOB_ALERTS_KEY)||'[]')}catch(e){return[]}}
 function saveJobAlerts(a){try{localStorage.setItem(JOB_ALERTS_KEY,JSON.stringify(a))}catch(e){}}
-function loadAlertMatches(){try{const a=JSON.parse(localStorage.getItem(JOB_ALERT_MATCHES_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
+function loadAlertMatches(){try{return JSON.parse(localStorage.getItem(JOB_ALERT_MATCHES_KEY)||'[]')}catch(e){return[]}}
 function saveAlertMatches(a){try{localStorage.setItem(JOB_ALERT_MATCHES_KEY,JSON.stringify(a.slice(0,60)))}catch(e){}}
-function alertLabel(a){return [a.q||'Any role',a.loc||'Any location',a.exp?({entry:'Entry / Junior',mid:'Mid-level',senior:'Senior / Lead'}[a.exp]):'Any experience',a.salary?'
+function alertLabel(a){return [a.q||'Any role',a.loc||'Any location',a.exp?({entry:'Entry / Junior',mid:'Mid-level',senior:'Senior / Lead'}[a.exp]):'Any experience',a.salary?'$'+Math.round(a.salary/1000)+'k+':'Any salary'].join(' · ')}
+function renderJobAlerts(){
+ const box=$('jobAlertList'),count=$('jobAlertNewCount');if(!box||!count)return;
+ const alerts=loadJobAlerts(),matches=loadAlertMatches();count.textContent=matches.filter(x=>x.new).length;
+ box.innerHTML=alerts.length?alerts.map(a=>'<div class="alert-item"><div style="display:flex;justify-content:space-between;gap:8px"><div><b>'+jobEsc(a.q||'Any job')+'</b><div class="hint">'+jobEsc(alertLabel(a))+'</div></div><span class="alert-new">'+(a.newCount||0)+' new</span></div><div class="alert-actions"><button data-alert-check="'+jobEsc(a.id)+'">Check</button><button data-alert-delete="'+jobEsc(a.id)+'">Delete</button></div></div>').join(''):'<div class="hint">Create your first alert above. Alerts are saved on this device.</div>';
+ const mb=$('jobAlertMatches');if(!mb)return;
+ mb.innerHTML=matches.length?'<div class="ey">NEW / RECENT MATCHES</div>'+matches.slice(0,10).map(x=>'<div class="card" style="padding:11px;margin-top:7px"><div style="display:flex;justify-content:space-between;gap:8px"><div><b>'+jobEsc(x.job.title)+'</b><div class="hint">'+jobEsc(x.job.company_name||'Company')+' · '+jobEsc(jobLocationText(x.job))+'</div><div class="hint">CV Match: '+cvMatch(x.job).score+'%'+(x.new?' · NEW':'')+'</div></div><div style="display:flex;gap:5px;flex-wrap:wrap"><button data-alert-save="'+jobEsc(jobKey(x.job))+'">'+(isJobSaved(x.job)?'✓ Saved':'☆ Save')+'</button><a href="'+jobEsc(x.job.url)+'" target="_blank" rel="noopener noreferrer"><button class="pri">Apply ↗</button></a></div></div></div>').join(''):'';
+}
+function alertMatchesJob(j,a){
+ const q=String(a.q||'').toLowerCase(),loc=String(a.loc||'').toLowerCase(),text=[j.title,j.category,j.company_name,j.job_type,jobLocationText(j)].join(' ').toLowerCase();
+ if(q&&!text.includes(q))return false;
+ if(loc&&!jobLocationText(j).toLowerCase().includes(loc)&&!String(j.title||'').toLowerCase().includes(loc)&&!String(j.company_name||'').toLowerCase().includes(loc))return false;
+ if(a.type&&String(j.job_type||'')!==a.type)return false;
+ if(a.exp&&jobExperience(j)!==a.exp)return false;
+ if(a.salary&&jobSalaryMax(j)<Number(a.salary))return false;
+ return true;
+}
+async function checkOneJobAlert(a){
+ const p=new URLSearchParams();if(a.q)p.set('search',a.q);if(a.type)p.set('type',a.type);p.set('limit','30');
+ const r=await fetch('/api/jobs?'+p.toString(),{headers:{accept:'application/json'}}),data=await r.json();if(!r.ok)throw new Error(data.error||'Job service unavailable');
+ const rows=(Array.isArray(data.jobs)?data.jobs:[]).filter(j=>alertMatchesJob(j,a)),seen=new Set(a.seen||[]),fresh=rows.filter(j=>!seen.has(jobKey(j)));
+ a.seen=[...rows.map(jobKey),...(a.seen||[])].slice(0,120);a.lastChecked=Date.now();a.newCount=fresh.length;
+ return fresh.map(j=>({id:jobKey(j)+'|'+a.id,job:j,new:true,createdAt:Date.now()}));
+}
+async function checkJobAlerts(ids){
+ const alerts=loadJobAlerts();if(!alerts.length){toast('Create a Job Alert first');return}
+ const status=$('jobAlertStatus');if(status)status.textContent='Checking new matching jobs…';let all=[];
+ try{
+  const target=ids?alerts.filter(a=>ids.includes(a.id)):alerts;
+  for(const a of target)all.push(...await checkOneJobAlert(a));
+  saveJobAlerts(alerts);saveAlertMatches([...all,...loadAlertMatches().map(x=>({...x,new:false}))]);renderJobAlerts();
+  if(status)status.textContent=all.length?all.length+' new match'+(all.length===1?'':'es')+' found · Checked just now':'No new matching jobs · Checked just now';
+  if(all.length)toast('✓ '+all.length+' new job match'+(all.length===1?'':'es'));
+ }catch(e){if(status)status.textContent='Job alert check failed. Please try again.';toast(e.message||'Job alert check failed')}
+}
+function createJobAlert(){
+ const a={id:'alert-'+Date.now(),q:($('alertQ')?.value||'').trim(),loc:($('alertLoc')?.value||'').trim(),type:$('alertType')?.value||'',exp:$('alertExp')?.value||'',salary:Number($('alertSalary')?.value||0),freq:$('alertFreq')?.value||'daily',seen:[],newCount:0,createdAt:Date.now()};
+ if(!a.q&&!a.loc){toast('Add a job keyword or location');return}
+ const alerts=loadJobAlerts();alerts.unshift(a);saveJobAlerts(alerts);renderJobAlerts();$('alertQ').value='';$('alertLoc').value='';toast('✓ Job Alert created');checkJobAlerts([a.id]);
+}
+function maybeAutoCheckJobAlerts(){const a=loadJobAlerts(),now=Date.now();if(a.length&&a.some(x=>!x.lastChecked||now-x.lastChecked>6*60*60*1000))checkJobAlerts()}
+$('createJobAlert').onclick=createJobAlert;$('checkJobAlerts').onclick=()=>checkJobAlerts();
+$('jobAlertsPanel').addEventListener('click',e=>{
+ const c=e.target.closest('[data-alert-check]'),d=e.target.closest('[data-alert-delete]'),s=e.target.closest('[data-alert-save]');
+ if(c){checkJobAlerts([c.dataset.alertCheck]);return}
+ if(d){saveJobAlerts(loadJobAlerts().filter(a=>a.id!==d.dataset.alertDelete));renderJobAlerts();toast('Job Alert deleted');return}
+ if(s){const j=findJobByKey(s.dataset.alertSave);if(j&&!isJobSaved(j))saveJob(j);renderJobAlerts()}
+});
+renderJobAlerts();
+
 function jobTypeLabel(v){return String(v||'').replace(/_/g,' ').replace(/\\b\\w/g,m=>m.toUpperCase())}
 function renderJobPortals(){
   $('jobPortals').innerHTML=JOBS.map(x=>'<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--gb)"><div><b>'+jobEsc(x[0])+'</b><div class="hint">'+jobEsc(x[1])+' · '+jobEsc(x[3])+'</div></div><a href="'+x[2]+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button>Open ↗</button></a></div>').join('')
