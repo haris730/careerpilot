@@ -559,17 +559,46 @@ $('v-jobs').innerHTML=`<div class="card pad">
 <div id="jobStatus" class="hint" style="margin-top:9px">Enter a keyword and search. Remote jobs are supplied by Remotive.</div>
 </div>
 <div id="jobCards"></div>
+<div class="card pad" id="savedJobsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">SAVED JOBS</div><p class="hint" style="margin:4px 0 0">Keep interesting jobs here before you apply.</p></div><b id="savedJobCount">0</b></div><div id="savedJobCards" style="margin-top:12px"></div></div>
 <div class="card pad"><div class="ey">OTHER JOB PLATFORMS</div><p class="hint" style="margin:4px 0 10px">You can also open established job portals directly.</p><div id="jobPortals"></div></div>`;
 function jobEsc(v){return escHtml(String(v||''))}
 function jobTypeLabel(v){return String(v||'').replace(/_/g,' ').replace(/\\b\\w/g,m=>m.toUpperCase())}
 function renderJobPortals(){
   $('jobPortals').innerHTML=JOBS.map(x=>'<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--gb)"><div><b>'+jobEsc(x[0])+'</b><div class="hint">'+jobEsc(x[1])+' · '+jobEsc(x[3])+'</div></div><a href="'+x[2]+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button>Open ↗</button></a></div>').join('')
 }
+const SAVED_JOBS_KEY='careerpilot_saved_jobs_v1';
+function loadSavedJobs(){try{const a=JSON.parse(localStorage.getItem(SAVED_JOBS_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
+function saveSavedJobs(a){try{localStorage.setItem(SAVED_JOBS_KEY,JSON.stringify(a))}catch(e){}}
+function jobKey(j){return String(j.id||j.url||((j.title||'')+'|'+(j.company_name||'')))}
+function isJobSaved(j){return loadSavedJobs().some(x=>jobKey(x)===jobKey(j))}
+function saveJob(j){const a=loadSavedJobs();if(a.some(x=>jobKey(x)===jobKey(j))){toast('Job already saved');return}a.unshift(j);saveSavedJobs(a);renderSavedJobs();toast('✓ Job saved')}
+function removeSavedJob(id){const a=loadSavedJobs().filter(x=>jobKey(x)!==String(id));saveSavedJobs(a);renderSavedJobs();renderJobCardsIfPresent()}
+function cvMatch(j){
+  const d=S?.d||{};
+  const cvText=[d.name,d.title,d.summary,(d.skills||[]).join(' '),(d.languages||[]).join(' '),(d.certs||[]).join(' '),(d.projects||[]).join(' '),...(d.exp||[]).flatMap(x=>[x.position,x.company,x.description]),...(d.edu||[]).flatMap(x=>[x.degree,x.institute,x.year])].filter(Boolean).join(' ');
+  const cvWords=new Set(toolWords(cvText));
+  const jobText=[j.title,j.category,j.job_type,j.company_name,j.candidate_required_location].flat().filter(Boolean).join(' ');
+  const words=toolWords(jobText);
+  const stop=new Set(['senior','junior','lead','remote','full','time','part','contract','freelance','developer','engineer','specialist','manager','assistant','associate','the','and','for','with','from','worldwide','usa','canada','united','states','global']);
+  const useful=[...new Set(words.filter(w=>w.length>2&&!stop.has(w)))];
+  const matched=useful.filter(w=>cvWords.has(w));
+  const missing=useful.filter(w=>!cvWords.has(w)).slice(0,6);
+  const titleWords=toolWords(j.title||'').filter(w=>!stop.has(w));
+  const titleHits=titleWords.filter(w=>cvWords.has(w)).length;
+  const skillHits=matched.length;
+  const score=useful.length?Math.min(98,Math.max(8,Math.round(35+(skillHits/useful.length)*55+(titleHits?10:0)))):35;
+  return {score,matched:matched.slice(0,8),missing};
+}
+function matchHtml(j){
+  const m=cvMatch(j);
+  return '<div class="card" style="margin-top:10px;padding:12px;border-color:rgba(129,140,248,.35)"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">CV MATCH</div><b style="font-size:24px">'+m.score+'%</b></div><div class="hint">Based on your current CV content</div></div><div class="ai-grid" style="margin-top:10px"><div><b>Matched</b><div class="hint" style="margin-top:5px">'+(m.matched.length?m.matched.map(jobEsc).join(' · '):'No direct keyword matches yet.')+'</div></div><div><b>Possible gaps</b><div class="hint" style="margin-top:5px">'+(m.missing.length?m.missing.map(jobEsc).join(' · '):'No obvious keyword gaps.')+'</div></div></div></div>';
+}
 function jobCard(j){
   const salary=j.salary&&j.salary.trim()?j.salary:'Salary not listed';
   const loc=Array.isArray(j.candidate_required_location)?j.candidate_required_location.join(', '):(j.candidate_required_location||j.job_type||'Remote');
   const tags=[j.job_type,loc].filter(Boolean).map(jobEsc).join(' · ');
-  return '<div class="card pad" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0"><div class="ey">'+jobEsc(j.category||'REMOTE JOB')+'</div><h3 style="margin:3px 0 5px">'+jobEsc(j.title)+'</h3><div style="font-weight:600">'+jobEsc(j.company_name||'Company')+'</div><div class="hint" style="margin-top:4px">'+tags+'</div><div class="hint" style="margin-top:4px">💰 '+jobEsc(salary)+'</div></div><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none;flex:0 0 auto"><button class="pri">Apply ↗</button></a></div><div class="hint" style="margin-top:10px">Source: Remotive · '+jobEsc(j.publication_date?new Date(j.publication_date).toLocaleDateString():'Recently listed')+'</div></div>'
+  const saved=isJobSaved(j);
+  return '<div class="card pad" data-job-card="'+jobEsc(jobKey(j))+'" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0"><div class="ey">'+jobEsc(j.category||'REMOTE JOB')+'</div><h3 style="margin:3px 0 5px">'+jobEsc(j.title)+'</h3><div style="font-weight:600">'+jobEsc(j.company_name||'Company')+'</div><div class="hint" style="margin-top:4px">'+tags+'</div><div class="hint" style="margin-top:4px">💰 '+jobEsc(salary)+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button data-job-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-job-save="'+jobEsc(jobKey(j))+'">'+(saved?'✓ Saved':'☆ Save')+'</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button class="pri">Apply ↗</button></a></div></div><div class="hint" style="margin-top:10px">Source: Remotive · '+jobEsc(j.publication_date?new Date(j.publication_date).toLocaleDateString():'Recently listed')+'</div><div data-job-match-panel style="display:none"></div></div>'
 }
 async function loadLiveJobs(){
   const q=($('jobQ')?.value||'').trim(),loc=($('jobLoc')?.value||'').trim(),type=$('jobType')?.value||'';
@@ -580,6 +609,7 @@ async function loadLiveJobs(){
     const r=await fetch('/api/jobs?'+p.toString(),{headers:{accept:'application/json'}});
     const data=await r.json();if(!r.ok)throw new Error(data.error||'Job service unavailable');
     let rows=Array.isArray(data.jobs)?data.jobs:[];
+    window.__careerPilotLiveJobs=rows;
     const needle=loc.toLowerCase();
     if(needle)rows=rows.filter(j=>String(j.candidate_required_location||'').toLowerCase().includes(needle)||String(j.title||'').toLowerCase().includes(needle)||String(j.company_name||'').toLowerCase().includes(needle));
     cards.innerHTML=rows.length?rows.map(jobCard).join(''):'<div class="card pad"><div class="hint">No live jobs matched these filters. Try a broader keyword such as “designer”, “developer” or “marketing”.</div></div>';
@@ -589,9 +619,30 @@ async function loadLiveJobs(){
     status.textContent='Live search unavailable right now.';
   }
 }
+function renderSavedJobs(){
+  const box=$('savedJobCards'),count=$('savedJobCount');if(!box||!count)return;
+  const a=loadSavedJobs();count.textContent=a.length;
+  box.innerHTML=a.length?a.map(j=>'<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><b>'+jobEsc(j.title)+'</b><div class="hint">'+jobEsc(j.company_name||'Company')+' · '+jobEsc(j.job_type||'Remote')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-saved-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-saved-remove="'+jobEsc(jobKey(j))+'">Remove</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer"><button class="pri">Apply ↗</button></a></div></div><div data-saved-match-panel style="display:none"></div></div>').join(''):'<div class="hint">No saved jobs yet. Use ☆ Save on any live job.</div>';
+}
+function findJobByKey(key){
+  return loadSavedJobs().find(j=>jobKey(j)===String(key))||window.__careerPilotLiveJobs?.find(j=>jobKey(j)===String(key));
+}
+function renderJobCardsIfPresent(){Q('[data-job-card]').forEach(card=>{const key=card.getAttribute('data-job-card'),j=findJobByKey(key);if(j){const b=card.querySelector('[data-job-save]');if(b)b.textContent=isJobSaved(j)?'✓ Saved':'☆ Save'}})}
 $('jobSearchBtn').onclick=loadLiveJobs;
 $('v-jobs').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='jobQ'||e.target.id==='jobLoc'))loadLiveJobs()});
+$('v-jobs').addEventListener('click',e=>{
+  const save=e.target.closest('[data-job-save]');
+  const match=e.target.closest('[data-job-match]');
+  const smatch=e.target.closest('[data-saved-match]');
+  const remove=e.target.closest('[data-saved-remove]');
+  const j=save||match||smatch||remove?findJobByKey((save||match||smatch||remove).dataset.jobSave||(save||match||smatch||remove).dataset.jobMatch||(save||match||smatch||remove).dataset.savedMatch||(save||match||smatch||remove).dataset.savedRemove):null;
+  if(save&&j){if(isJobSaved(j)){removeSavedJob(jobKey(j))}else saveJob(j);return}
+  if(match&&j){const panel=match.closest('[data-job-card]')?.querySelector('[data-job-match-panel]');if(panel){panel.innerHTML=matchHtml(j);panel.style.display=panel.style.display==='none'?'block':'none'}return}
+  if(smatch&&j){const panel=smatch.closest('.card')?.querySelector('[data-saved-match-panel]');if(panel){panel.innerHTML=matchHtml(j);panel.style.display=panel.style.display==='none'?'block':'none'}return}
+  if(remove&&j){removeSavedJob(jobKey(j))}
+});
 renderJobPortals();
+renderSavedJobs();
 loadLiveJobs();
 
 const CVLIB_KEY='careerpilot_cv_library_2026',CVACTIVE_KEY='careerpilot_active_cv_2026';
