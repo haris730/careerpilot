@@ -550,13 +550,49 @@ const JOBS=[
  ['EURES','Official European job portal and mobility services.','https://eures.europa.eu/','Europe'],
  ['Jobs.com.pk','Pakistan-focused jobs portal.','https://www.jobs.com.pk/','Pakistan']
 ];
-$('v-jobs').innerHTML='<div class="card pad"><div class="ey" style="margin-bottom:5px">GLOBAL JOB SEARCH</div><h2 style="margin:0 0 6px">Find your next opportunity</h2><p class="hint">CareerPilot connects you to established job platforms. Job listings and applications remain on the original provider website.</p><div class="row"><input id="jobQ" placeholder="Job title, skill or keyword" style="margin:0"><input id="jobLoc" placeholder="Country or Remote" style="margin:0"></div></div><div id="jobCards"></div>';
-function renderJobs(){
-  const q=($('jobQ')?.value||'').toLowerCase(),loc=($('jobLoc')?.value||'').toLowerCase();
-  const rows=JOBS.filter(x=>(!q||x[0].toLowerCase().includes(q)||x[1].toLowerCase().includes(q)||x[3].toLowerCase().includes(q))&&(!loc||x[3].toLowerCase().includes(loc)||x[1].toLowerCase().includes(loc)));
-  $('jobCards').innerHTML=rows.map(x=>'<div class="card pad" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div class="ey">'+x[3].toUpperCase()+'</div><h3 style="margin:3px 0 5px">'+x[0]+'</h3><div class="hint">'+x[1]+'</div></div><a href="'+x[2]+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button class="pri">Open Jobs ↗</button></a></div></div>').join('')||'<div class="card pad"><div class="hint">No matching source found. Try another keyword or country.</div></div>';
+$('v-jobs').innerHTML=`<div class="card pad">
+<div class="ey" style="margin-bottom:5px">LIVE GLOBAL JOB SEARCH</div>
+<h2 style="margin:0 0 6px">Find real jobs from multiple sources</h2>
+<p class="hint">Search live remote jobs inside CareerPilot. Job details and applications stay with the original job provider.</p>
+<div class="row"><input id="jobQ" placeholder="Job title, skill or keyword" style="margin:0"><input id="jobLoc" placeholder="Country, region or Remote" style="margin:0"></div>
+<div class="row" style="margin-top:8px"><select id="jobType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><button class="pri" id="jobSearchBtn">Search Live Jobs</button></div>
+<div id="jobStatus" class="hint" style="margin-top:9px">Enter a keyword and search. Remote jobs are supplied by Remotive.</div>
+</div>
+<div id="jobCards"></div>
+<div class="card pad"><div class="ey">OTHER JOB PLATFORMS</div><p class="hint" style="margin:4px 0 10px">You can also open established job portals directly.</p><div id="jobPortals"></div></div>`;
+function jobEsc(v){return escHtml(String(v||''))}
+function jobTypeLabel(v){return String(v||'').replace(/_/g,' ').replace(/\\b\\w/g,m=>m.toUpperCase())}
+function renderJobPortals(){
+  $('jobPortals').innerHTML=JOBS.map(x=>'<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--gb)"><div><b>'+jobEsc(x[0])+'</b><div class="hint">'+jobEsc(x[1])+' · '+jobEsc(x[3])+'</div></div><a href="'+x[2]+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button>Open ↗</button></a></div>').join('')
 }
-$('v-jobs').addEventListener('input',renderJobs);renderJobs();
+function jobCard(j){
+  const salary=j.salary&&j.salary.trim()?j.salary:'Salary not listed';
+  const loc=Array.isArray(j.candidate_required_location)?j.candidate_required_location.join(', '):(j.candidate_required_location||j.job_type||'Remote');
+  const tags=[j.job_type,loc].filter(Boolean).map(jobEsc).join(' · ');
+  return '<div class="card pad" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0"><div class="ey">'+jobEsc(j.category||'REMOTE JOB')+'</div><h3 style="margin:3px 0 5px">'+jobEsc(j.title)+'</h3><div style="font-weight:600">'+jobEsc(j.company_name||'Company')+'</div><div class="hint" style="margin-top:4px">'+tags+'</div><div class="hint" style="margin-top:4px">💰 '+jobEsc(salary)+'</div></div><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none;flex:0 0 auto"><button class="pri">Apply ↗</button></a></div><div class="hint" style="margin-top:10px">Source: Remotive · '+jobEsc(j.publication_date?new Date(j.publication_date).toLocaleDateString():'Recently listed')+'</div></div>'
+}
+async function loadLiveJobs(){
+  const q=($('jobQ')?.value||'').trim(),loc=($('jobLoc')?.value||'').trim(),type=$('jobType')?.value||'';
+  const status=$('jobStatus'),cards=$('jobCards');if(!status||!cards)return;
+  status.textContent='Loading live jobs…';cards.innerHTML='<div class="card pad"><div class="hint">Searching live listings…</div></div>';
+  const p=new URLSearchParams();if(q)p.set('search',q);if(type)p.set('type',type);p.set('limit','30');
+  try{
+    const r=await fetch('/api/jobs?'+p.toString(),{headers:{accept:'application/json'}});
+    const data=await r.json();if(!r.ok)throw new Error(data.error||'Job service unavailable');
+    let rows=Array.isArray(data.jobs)?data.jobs:[];
+    const needle=loc.toLowerCase();
+    if(needle)rows=rows.filter(j=>String(j.candidate_required_location||'').toLowerCase().includes(needle)||String(j.title||'').toLowerCase().includes(needle)||String(j.company_name||'').toLowerCase().includes(needle));
+    cards.innerHTML=rows.length?rows.map(jobCard).join(''):'<div class="card pad"><div class="hint">No live jobs matched these filters. Try a broader keyword such as “designer”, “developer” or “marketing”.</div></div>';
+    status.textContent=rows.length+' live job'+(rows.length===1?'':'s')+' found · Source: Remotive';
+  }catch(e){
+    cards.innerHTML='<div class="card pad"><div class="hint">Live job search is temporarily unavailable. You can still use the job portals below.</div></div>';
+    status.textContent='Live search unavailable right now.';
+  }
+}
+$('jobSearchBtn').onclick=loadLiveJobs;
+$('v-jobs').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='jobQ'||e.target.id==='jobLoc'))loadLiveJobs()});
+renderJobPortals();
+loadLiveJobs();
 
 const CVLIB_KEY='careerpilot_cv_library_2026',CVACTIVE_KEY='careerpilot_active_cv_2026';
 let cvLibrary=[],activeCvId=null;
