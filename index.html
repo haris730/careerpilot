@@ -634,12 +634,13 @@ $('v-jobs').addEventListener('click',e=>{
   const save=e.target.closest('[data-job-save]');
   const match=e.target.closest('[data-job-match]');
   const smatch=e.target.closest('[data-saved-match]');
+  const strack=e.target.closest('[data-saved-track]');
   const remove=e.target.closest('[data-saved-remove]');
-  const j=save||match||smatch||remove?findJobByKey((save||match||smatch||remove).dataset.jobSave||(save||match||smatch||remove).dataset.jobMatch||(save||match||smatch||remove).dataset.savedMatch||(save||match||smatch||remove).dataset.savedRemove):null;
+  const action=save||match||smatch||strack||remove;
+  const j=action?findJobByKey(action.dataset.jobSave||action.dataset.jobMatch||action.dataset.savedMatch||action.dataset.savedTrack||action.dataset.savedRemove):null;
   if(save&&j){if(isJobSaved(j)){removeSavedJob(jobKey(j))}else saveJob(j);return}
   if(match&&j){const panel=match.closest('[data-job-card]')?.querySelector('[data-job-match-panel]');if(panel){panel.innerHTML=matchHtml(j);panel.style.display=panel.style.display==='none'?'block':'none'}return}
   if(smatch&&j){const panel=smatch.closest('.card')?.querySelector('[data-saved-match-panel]');if(panel){panel.innerHTML=matchHtml(j);panel.style.display=panel.style.display==='none'?'block':'none'}return}
-  const strack=e.target.closest('[data-saved-track]');
   if(strack&&j){
     const a=loadTracks(),exists=a.some(x=>x.link&&j.url&&x.link===j.url);
     if(exists){toast('Already in Application Tracker');return}
