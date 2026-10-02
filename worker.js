@@ -8,6 +8,49 @@ function apiJson(data,status,origin){return new Response(JSON.stringify(data),{s
 async function supabaseUser(request){const auth=request.headers.get('Authorization')||'';if(!auth.startsWith('Bearer '))return null;const res=await fetch(SUPABASE_URL+'/auth/v1/user',{headers:{apikey:SUPABASE_KEY,authorization:auth,accept:'application/json'}});if(!res.ok)return null;try{return await res.json()}catch{return null}}
 function bearer(request){const auth=request.headers.get('Authorization')||'';return auth.startsWith('Bearer ')?auth:null}
 async function supabaseRpc(request,name,body){const auth=bearer(request);if(!auth)return null;const res=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:{apikey:SUPABASE_KEY,authorization:auth,'content-type':'application/json',accept:'application/json'},body:JSON.stringify(body||{})});if(!res.ok)return null;try{return await res.json()}catch{return null}}
+async function hmacHex(secret,rawBody){const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);const sig=new Uint8Array(await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(rawBody)));return [...sig].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function safeEqual(a,b){if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0}
+async function supabaseAdmin(env,path,options={}){if(!env.SUPABASE_SERVICE_ROLE_KEY)return null;const res=await fetch(SUPABASE_URL+path,{...options,headers:{apikey:env.SUPABASE_SERVICE_ROLE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY,accept:'application/json','content-type':'application/json',...(options.headers||{})}});if(!res.ok)return null;try{return await res.json()}catch{return null}}
+async function handleBillingWebhook(request,env){
+  const secret=env.LEMONSQUEEZY_WEBHOOK_SECRET;
+  if(!secret)return apiJson({error:'Billing webhook is not configured.'},503,'*');
+  const raw=await request.text();
+  const signature=request.headers.get('X-Signature')||'';
+  const digest=await hmacHex(secret,raw);
+  if(!safeEqual(digest,signature))return apiJson({error:'Invalid webhook signature.'},401,'*');
+  let event;try{event=JSON.parse(raw)}catch{return apiJson({error:'Invalid webhook payload.'},400,'*')}
+  const eventName=String(event?.meta?.event_name||request.headers.get('X-Event-Name')||'unknown');
+  const eventId=String(event?.data?.id||'')+'::'+eventName;
+  const userId=String(event?.meta?.custom_data?.user_id||'');
+  if(!eventId||!userId)return apiJson({ok:true},200,'*');
+  const saved=await supabaseAdmin(env,'/rest/v1/billing_events',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({event_id:eventId,event_name:eventName,user_id:userId,provider:'lemonsqueezy',payload:event})});
+  if(saved===null){
+    const check=await fetch(SUPABASE_URL+'/rest/v1/billing_events?event_id=eq.'+encodeURIComponent(eventId),{headers:{apikey:env.SUPABASE_SERVICE_ROLE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY,accept:'application/json'}});
+    if(check.ok){const rows=await check.json();if(rows?.length)return apiJson({ok:true,duplicate:true},200,'*')}
+  }
+  const a=event?.data?.attributes||{};
+  const status=String(a.status||'').toLowerCase();
+  const ends=a.ends_at||null;
+  const renews=a.renews_at||null;
+  const activeStatuses=new Set(['active','on_trial','past_due','cancelled']);
+  const until=ends||renews||new Date(Date.now()+31*86400000).toISOString();
+  const active=activeStatuses.has(status)&&(!ends||new Date(ends)>new Date());
+  const plan=active?'premium':'free';
+  await supabaseAdmin(env,'/rest/v1/user_entitlements',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({user_id:userId,plan,premium_until:active?until:null,updated_at:new Date().toISOString()})});
+  return apiJson({ok:true,plan},200,'*');
+}
+async function createLemonCheckout(request,env,url){
+  if(request.method!=='POST')return apiJson({error:'Method not allowed'},405,url.origin);
+  if(!env.LEMONSQUEEZY_API_KEY||!env.LEMONSQUEEZY_STORE_ID||!env.LEMONSQUEEZY_MONTHLY_VARIANT_ID)return apiJson({error:'Payment checkout is not configured yet.'},503,url.origin);
+  const user=await supabaseUser(request);if(!user?.id)return apiJson({error:'Sign in required.'},401,url.origin);
+  let body;try{body=await request.json()}catch{return apiJson({error:'Invalid JSON request.'},400,url.origin)}
+  const plan=body.plan==='yearly'?'yearly':'monthly';
+  const variant=plan==='yearly'?(env.LEMONSQUEEZY_YEARLY_VARIANT_ID||env.LEMONSQUEEZY_MONTHLY_VARIANT_ID):env.LEMONSQUEEZY_MONTHLY_VARIANT_ID;
+  const payload={data:{type:'checkouts',attributes:{checkout_options:{embed:true},checkout_data:{email:user.email||'',name:user.user_metadata?.full_name||'',custom:{user_id:user.id,plan}},product_options:{redirect_url:url.origin+'/#profile'}},relationships:{store:{data:{type:'stores',id:String(env.LEMONSQUEEZY_STORE_ID)}},variant:{data:{type:'variants',id:String(variant)}}}}};
+  const res=await fetch('https://api.lemonsqueezy.com/v1/checkouts',{method:'POST',headers:{Accept:'application/vnd.api+json','Content-Type':'application/vnd.api+json',Authorization:'Bearer '+env.LEMONSQUEEZY_API_KEY},body:JSON.stringify(payload)});
+  if(!res.ok)return apiJson({error:'Unable to create checkout.'},502,url.origin);
+  const data=await res.json();return apiJson({url:data?.data?.attributes?.url||''},200,url.origin);
+}
 function alertJobKey(j){return String(j.id||j.url||((j.title||'')+'|'+(j.company_name||'')))}
 function alertSalaryMax(j){const s=String(j.salary||'').replace(/,/g,'');const nums=[...s.matchAll(/(?:\$|€|£)?\s*(\d+(?:\.\d+)?)\s*([kKmM])?/g)].map(m=>{let n=Number(m[1]);if((m[2]||'').toLowerCase()==='k')n*=1000;if((m[2]||'').toLowerCase()==='m')n*=1000000;return n});return nums.length?Math.max(...nums):0}
 function alertJobExperience(j){const t=String(j.title||'').toLowerCase();if(/senior|sr\.?|lead|principal|staff|manager|director|head|architect/.test(t))return'senior';if(/junior|jr\.?|entry|intern|trainee|graduate/.test(t))return'entry';return'mid'}
@@ -60,6 +103,8 @@ function buildPrompt(body) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === '/api/billing/webhook') return handleBillingWebhook(request, env);
+    if (url.pathname === '/api/checkout') return createLemonCheckout(request, env, url);
     if (url.pathname === '/api/job-alerts') return handleServerAlerts(request, env, url);
     if (url.pathname === '/api/jobs') {
       if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { 'access-control-allow-origin': url.origin, 'access-control-allow-methods': 'GET, OPTIONS', 'access-control-allow-headers': 'content-type' } });
