@@ -126,7 +126,23 @@ body[data-v=cv]:not(.prev) .fab{display:block}.fab{position:fixed;right:16px;bot
 @media print{@page{size:A4;margin:0}html,body{background:#fff!important;height:auto}.top,.side,.editor,.ctb,#esel,.mnav,.fab,#toast{display:none!important}.shell{display:block;padding:0}.canvas{display:block!important;background:none;border:0;box-shadow:none;overflow:visible;height:auto}.stage{padding:0;overflow:visible}#fit{width:auto!important;height:auto!important}#paper{transform:none!important;box-shadow:none;width:210mm;min-height:297mm}.el:hover,.el.sel{outline:none}.el:empty{display:none}}
 .ai-panel{padding:16px}.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ai-score{font-size:38px;font-weight:800}.ai-list{margin:8px 0 0;padding-left:18px}.ai-list li{margin:6px 0}.ai-actions{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:767px){.ai-grid{grid-template-columns:1fr}}.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.dstat{padding:14px}.dstat b{display:block;font-size:22px;margin-top:5px}.dstat small,.dash-head p,.quick small,.portal small{color:var(--mu)}.quick-grid,.portal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.quick{display:flex;align-items:center;gap:10px;text-align:left;padding:14px}.qi{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:rgba(99,102,241,.15);font-size:19px}.portal-grid{grid-template-columns:repeat(3,1fr)}.portal{padding:12px}.portal b{display:block;margin-bottom:4px}.portal small{display:block;min-height:34px}.progress{height:6px;background:rgba(255,255,255,.08);border-radius:9px;overflow:hidden;margin-top:7px}.progress i{display:block;height:100%;width:58%;background:var(--g)}@media(max-width:900px){.dashboard-grid{grid-template-columns:repeat(2,1fr)}.portal-grid{grid-template-columns:1fr 1fr}}@media(max-width:767px){.dashboard-grid,.quick-grid,.portal-grid{grid-template-columns:1fr}.dash-head{display:block}.dash-head button{margin-top:10px}}\n
 .auth-fab{position:fixed;right:18px;top:14px;z-index:40}.auth-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}.auth-modal.on{display:flex}.auth-box{width:min(430px,100%);background:#10131c;border:1px solid var(--gb);border-radius:22px;padding:22px;box-shadow:var(--sh)}.auth-box h2{margin:0 0 5px}.auth-box .hint{margin:0 0 16px}.auth-tabs{display:flex;gap:8px;margin-bottom:14px}.auth-tabs button{flex:1}.auth-tabs .on{background:var(--g);color:white}.auth-msg{min-height:20px;font-size:13px;color:var(--mu);margin:10px 0}.auth-close{position:absolute;top:16px;right:16px}.account-menu{display:flex;gap:8px;align-items:center}.account-menu small{color:var(--mu)}@media(max-width:700px){.auth-fab{top:8px;right:8px}}
-.plan-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border:1px solid #273044;border-radius:14px;background:linear-gradient(135deg,#111827,#0b1220);margin-bottom:14px}.plan-bar b{font-size:14px}.plan-pill{font-size:11px;padding:5px 9px;border-radius:999px;background:#1f2937;color:#dbeafe}.plan-pill.premium{background:#f59e0b;color:#111}.premium-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.premium-card{border:1px solid #273044;border-radius:14px;padding:16px;background:#0f1420}.premium-card.locked{opacity:.82}.premium-card h3{margin:6px 0}.premium-tag{font-size:10px;letter-spacing:.08em;color:#f59e0b;font-weight:800}.upgrade-modal{max-width:620px}.price-card{border:1px solid #334155;border-radius:16px;padding:18px;background:#111827}.price-card ul{padding-left:18px}.usage-line{font-size:12px;color:#94a3b8;margin-top:7px}@media(max-width:720px){.premium-grid{grid-template-columns:1fr}.plan-bar{align-items:flex-start;flex-direction:column}}</style><style>
+.plan-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border:1px solid #273044;border-radius:14px;background:linear-gradient(135deg,#111827,#0b1220);margin-bottom:14px}.plan-bar b{font-size:14px}.plan-pill{font-size:11px;padding:5px 9px;border-radius:999px;background:#1f2937;color:#dbeafe}.plan-pill.premium{background:#f59e0b;color:#111}.premium-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.premium-card{border:1px solid #273044;border-radius:14px;padding:16px;background:#0f1420}.premium-card.locked{opacity:.82}.premium-card h3{margin:6px 0}.premium-tag{font-size:10px;letter-spacing:.08em;color:#f59e0b;font-weight:800}.upgrade-modal{max-width:620px}.price-card{border:1px solid #334155;border-radius:16px;padding:18px;background:#111827}.price-card ul{padding-left:18px}.usage-line{font-size:12px;color:#94a3b8;margin-top:7px}@media(max-width:720px){.premium-grid{grid-template-columns:1fr}.plan-bar{align-items:flex-start;flex-direction:column}}
+/* Global Jobs connected workflow */
+.job-detail-backdrop{display:none;position:fixed;inset:0;z-index:140;background:rgba(0,0,0,.58);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:18px}
+.job-detail-backdrop.on{display:flex}
+.job-detail-modal{width:min(920px,100%);max-height:min(88dvh,820px);overflow:auto;background:var(--bg,#0b0e14);border:1px solid var(--gb);border-radius:22px;box-shadow:0 25px 80px rgba(0,0,0,.5);padding:22px}
+body.light .job-detail-modal{background:#fff}
+.job-detail-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.job-detail-close{width:40px;height:40px;border-radius:50%;font-size:24px;line-height:1;flex:0 0 auto}
+.job-detail-meta{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.job-detail-chip{border:1px solid var(--gb);border-radius:999px;padding:6px 10px;font-size:12px}
+.job-detail-body{line-height:1.7;font-size:14px;white-space:pre-wrap;word-break:break-word}
+.job-detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid var(--gb)}
+.job-detail-actions button{min-height:42px}
+.job-card-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.job-card-actions button{min-height:38px}
+@media(max-width:820px){.job-detail-backdrop{padding:0;align-items:flex-end}.job-detail-modal{width:100%;max-height:88dvh;border-radius:22px 22px 0 0;padding:18px 15px calc(20px + env(safe-area-inset-bottom,0px))}.job-detail-head h2{font-size:21px}.job-card-actions{justify-content:flex-start}.job-card-actions button{flex:1 1 auto}.job-detail-actions button{flex:1 1 45%}}
+</style><style>
 .cv-manager-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
 .cv-manager-actions{display:flex;gap:8px;flex-wrap:wrap}
 .cv-manager-tools{display:flex;gap:8px;margin:12px 0}
@@ -590,6 +606,7 @@ $('v-jobs').innerHTML=`<div class="card pad">
 <div class="card pad" id="savedJobsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">SAVED JOBS</div><p class="hint" style="margin:4px 0 0">Keep interesting jobs here before you apply.</p></div><b id="savedJobCount">0</b></div><div id="savedJobCards" style="margin-top:12px"></div></div>
 <div class="card pad" id="jobAlertsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">JOB ALERTS</div><p class="hint" style="margin:4px 0 0">Save your preferred jobs and detect new matching listings.</p></div><b id="jobAlertNewCount">0</b></div><div class="row" style="margin-top:10px"><input id="alertQ" placeholder="Job title or skill" style="margin:0"><input id="alertLoc" placeholder="Country, region or Remote" style="margin:0"></div><div class="row" style="margin-top:8px"><select id="alertType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><select id="alertExp" style="margin:0"><option value="">All experience levels</option><option value="entry">Entry / Junior</option><option value="mid">Mid-level</option><option value="senior">Senior / Lead</option></select></div><div class="row" style="margin-top:8px"><select id="alertSalary" style="margin:0"><option value="0">Any salary</option><option value="30000">$30k+ / year</option><option value="50000">$50k+ / year</option><option value="75000">$75k+ / year</option><option value="100000">$100k+ / year</option><option value="150000">$150k+ / year</select><select id="alertFreq" style="margin:0"><option value="daily">Check daily</option><option value="weekly">Check weekly</option></select><button class="pri" id="createJobAlert">Create Job Alert</button></div><div id="jobAlertStatus" class="hint" style="margin-top:9px">Alerts are saved on this device.</div><div id="jobAlertList" style="margin-top:12px"></div><div id="jobAlertMatches" style="margin-top:12px"></div><div style="margin-top:10px"><button id="checkJobAlerts">Check New Jobs</button></div></div><div class="card pad"><div class="ey">OTHER JOB PLATFORMS</div><p class="hint" style="margin:4px 0 10px">You can also open established job portals directly.</p><div id="jobPortals"></div></div>`;
 function jobEsc(v){return escHtml(String(v||''))}
+document.body.insertAdjacentHTML('beforeend','<div class="job-detail-backdrop" id="jobDetailModal" aria-hidden="true"><div class="job-detail-modal" id="jobDetailContent"></div></div>');
 function jobTypeLabel(v){return String(v||'').replace(/_/g,' ').replace(/\\b\\w/g,m=>m.toUpperCase())}
 function renderJobPortals(){
   $('jobPortals').innerHTML=JOBS.map(x=>'<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--gb)"><div><b>'+jobEsc(x[0])+'</b><div class="hint">'+jobEsc(x[1])+' · '+jobEsc(x[3])+'</div></div><a href="'+x[2]+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button>Open ↗</button></a></div>').join('')
@@ -635,12 +652,21 @@ function jobExperience(j){
 function jobLocationText(j){
   return Array.isArray(j.candidate_required_location)?j.candidate_required_location.join(', '):(j.candidate_required_location||'Remote');
 }
+function jobDescriptionText(j){return String(j.description||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/\\s+/g,' ').trim()}
+function addJobToTracker(j,status='Saved'){const a=loadTracks(),url=j.url||'';if(a.some(x=>x.link&&url&&x.link===url)){toast('Already in Application Tracker');return false}a.unshift({role:j.title||'Untitled role',company:j.company_name||'',status,link:url,jobKey:jobKey(j),createdAt:Date.now()});saveTracks(a);renderTracks();toast('✓ Added to Application Tracker');return true}
+function openJobDetails(j){
+ const modal=$('jobDetailModal');if(!modal)return;
+ const desc=jobDescriptionText(j)||'No detailed description was provided by the job source.';
+ const salary=j.salary&&j.salary.trim()?j.salary:'Salary not listed',loc=jobLocationText(j),saved=isJobSaved(j),m=cvMatch(j);
+ $('jobDetailContent').innerHTML='<div class="job-detail-head"><div><div class="ey">'+jobEsc(j.category||'REMOTE JOB')+'</div><h2 style="margin:4px 0">'+jobEsc(j.title||'Job opportunity')+'</h2><b>'+jobEsc(j.company_name||'Company')+'</b></div><button class="job-detail-close" data-job-detail-close aria-label="Close">×</button></div><div class="job-detail-meta"><span class="job-detail-chip">📍 '+jobEsc(loc)+'</span><span class="job-detail-chip">💼 '+jobEsc(jobTypeLabel(j.job_type)||'Remote')+'</span><span class="job-detail-chip">Level: '+jobEsc(jobExperience(j)==='entry'?'Entry / Junior':jobExperience(j)==='senior'?'Senior / Lead':'Mid-level')+'</span><span class="job-detail-chip">💰 '+jobEsc(salary)+'</span><span class="job-detail-chip">CV Match: '+m.score+'%</span></div><div class="ey" style="margin-top:12px">JOB DESCRIPTION</div><div class="job-detail-body" style="margin-top:8px">'+jobEsc(desc)+'</div><div class="job-detail-actions"><button data-detail-match="'+jobEsc(jobKey(j))+'">◎ Match CV</button><button data-detail-save="'+jobEsc(jobKey(j))+'">'+(saved?'✓ Saved':'☆ Save Job')+'</button><button data-detail-track="'+jobEsc(jobKey(j))+'">+ Track</button><button data-detail-applied="'+jobEsc(jobKey(j))+'">✓ Mark Applied</button><a href="'+jobEsc(j.url||'#')+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button class="pri">Apply on Source ↗</button></a></div><div id="jobDetailMatch" style="margin-top:10px"></div>';
+ modal.classList.add('on');modal.setAttribute('aria-hidden','false');
+}
 function jobCard(j){
   const salary=j.salary&&j.salary.trim()?j.salary:'Salary not listed';
   const loc=jobLocationText(j);
   const tags=[jobTypeLabel(j.job_type),loc,jobExperience(j)==='entry'?'Entry / Junior':jobExperience(j)==='senior'?'Senior / Lead':'Mid-level'].filter(Boolean).map(jobEsc).join(' · ');
-  const saved=isJobSaved(j);
-  return '<div class="card pad" data-job-card="'+jobEsc(jobKey(j))+'" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0"><div class="ey">'+jobEsc(j.category||'REMOTE JOB')+'</div><h3 style="margin:3px 0 5px">'+jobEsc(j.title)+'</h3><div style="font-weight:600">'+jobEsc(j.company_name||'Company')+'</div><div class="hint" style="margin-top:4px">'+tags+'</div><div class="hint" style="margin-top:4px">💰 '+jobEsc(salary)+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button data-job-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-job-save="'+jobEsc(jobKey(j))+'">'+(saved?'✓ Saved':'☆ Save')+'</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button class="pri">Apply ↗</button></a></div></div><div class="hint" style="margin-top:10px">Source: Remotive · '+jobEsc(j.publication_date?new Date(j.publication_date).toLocaleDateString():'Recently listed')+'</div><div data-job-match-panel style="display:none"></div></div>'
+  const saved=isJobSaved(j),m=cvMatch(j);
+  return '<div class="card pad" data-job-card="'+jobEsc(jobKey(j))+'" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0"><div class="ey">'+jobEsc(j.category||'REMOTE JOB')+'</div><h3 style="margin:3px 0 5px">'+jobEsc(j.title)+'</h3><div style="font-weight:600">'+jobEsc(j.company_name||'Company')+'</div><div class="hint" style="margin-top:4px">'+tags+'</div><div class="hint" style="margin-top:4px">💰 '+jobEsc(salary)+' · CV Match '+m.score+'%</div></div><div class="job-card-actions"><button data-job-detail="'+jobEsc(jobKey(j))+'">Details</button><button data-job-match="'+jobEsc(jobKey(j))">Match CV</button><button data-job-save="'+jobEsc(jobKey(j))+'">'+(saved?'✓ Saved':'☆ Save')+'</button><button data-job-track="'+jobEsc(jobKey(j))+'">+ Tracker</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button class="pri">Apply ↗</button></a></div></div><div class="hint" style="margin-top:10px">Source: Remotive · '+jobEsc(j.publication_date?new Date(j.publication_date).toLocaleDateString():'Recently listed')+'</div><div data-job-match-panel style="display:none"></div></div>'
 }
 async function loadLiveJobs(){
   const q=($('jobQ')?.value||'').trim(),loc=($('jobLoc')?.value||'').trim(),type=$('jobType')?.value||'',exp=$('jobExp')?.value||'',salary=Number($('jobSalary')?.value||0),sort=$('jobSort')?.value||'recent';
@@ -669,7 +695,7 @@ async function loadLiveJobs(){
 function renderSavedJobs(){
   const box=$('savedJobCards'),count=$('savedJobCount');if(!box||!count)return;
   const a=loadSavedJobs();count.textContent=a.length;
-  box.innerHTML=a.length?a.map(j=>'<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><b>'+jobEsc(j.title)+'</b><div class="hint">'+jobEsc(j.company_name||'Company')+' · '+jobEsc(j.job_type||'Remote')+'</div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-saved-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-saved-track="'+jobEsc(jobKey(j))+'">+ Tracker</button><button data-saved-remove="'+jobEsc(jobKey(j))+'">Remove</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer"><button class="pri">Apply ↗</button></a></div></div><div data-saved-match-panel style="display:none"></div></div>').join(''):'<div class="hint">No saved jobs yet. Use ☆ Save on any live job.</div>';
+  box.innerHTML=a.length?a.map(j=>'<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="min-width:0"><b>'+jobEsc(j.title)+'</b><div class="hint">'+jobEsc(j.company_name||'Company')+' · '+jobEsc(j.job_type||'Remote')+' · CV Match '+cvMatch(j).score+'%</div></div><div class="job-card-actions"><button data-saved-detail="'+jobEsc(jobKey(j))+'">Details</button><button data-saved-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-saved-track="'+jobEsc(jobKey(j))+'">+ Tracker</button><button data-saved-remove="'+jobEsc(jobKey(j))+'">Remove</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer"><button class="pri">Apply ↗</button></a></div></div><div data-saved-match-panel style="display:none"></div></div>').join(''):'<div class="hint">No saved jobs yet. Use ☆ Save on any live job.</div>';
 }
 function findJobByKey(key){
   return loadSavedJobs().find(j=>jobKey(j)===String(key))||window.__careerPilotLiveJobs?.find(j=>jobKey(j)===String(key));
@@ -678,24 +704,34 @@ function renderJobCardsIfPresent(){Q('[data-job-card]').forEach(card=>{const key
 $('jobSearchBtn').onclick=loadLiveJobs;
 $('v-jobs').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='jobQ'||e.target.id==='jobLoc'))loadLiveJobs()});
 $('v-jobs').addEventListener('click',e=>{
-  const save=e.target.closest('[data-job-save]');
-  const match=e.target.closest('[data-job-match]');
-  const smatch=e.target.closest('[data-saved-match]');
-  const strack=e.target.closest('[data-saved-track]');
-  const remove=e.target.closest('[data-saved-remove]');
-  const action=save||match||smatch||strack||remove;
-  const j=action?findJobByKey(action.dataset.jobSave||action.dataset.jobMatch||action.dataset.savedMatch||action.dataset.savedTrack||action.dataset.savedRemove):null;
-  if(save&&j){if(isJobSaved(j)){removeSavedJob(jobKey(j))}else saveJob(j);return}
+  const detail=e.target.closest('[data-job-detail]'),save=e.target.closest('[data-job-save]'),match=e.target.closest('[data-job-match]'),track=e.target.closest('[data-job-track]');
+  const sdetail=e.target.closest('[data-saved-detail]'),smatch=e.target.closest('[data-saved-match]'),strack=e.target.closest('[data-saved-track]'),remove=e.target.closest('[data-saved-remove]');
+  const action=detail||save||match||track||sdetail||smatch||strack||remove;
+  const key=action?.dataset.jobDetail||action?.dataset.jobSave||action?.dataset.jobMatch||action?.dataset.jobTrack||action?.dataset.savedDetail||action?.dataset.savedMatch||action?.dataset.savedTrack||action?.dataset.savedRemove;
+  const j=key?findJobByKey(key):null;
+  if(detail&&j){openJobDetails(j);return}
+  if(sdetail&&j){openJobDetails(j);return}
+  if(save&&j){if(isJobSaved(j))removeSavedJob(jobKey(j));else saveJob(j);renderJobCardsIfPresent();return}
   if(match&&j){const panel=match.closest('[data-job-card]')?.querySelector('[data-job-match-panel]');if(panel){panel.innerHTML=matchHtml(j);panel.style.display=panel.style.display==='none'?'block':'none'}return}
+  if(track&&j){addJobToTracker(j,'Saved');return}
   if(smatch&&j){const panel=smatch.closest('.card')?.querySelector('[data-saved-match-panel]');if(panel){panel.innerHTML=matchHtml(j);panel.style.display=panel.style.display==='none'?'block':'none'}return}
-  if(strack&&j){
-    const a=loadTracks(),exists=a.some(x=>x.link&&j.url&&x.link===j.url);
-    if(exists){toast('Already in Application Tracker');return}
-    a.unshift({role:j.title||'Untitled role',company:j.company_name||'',status:'Saved',link:j.url||'',createdAt:Date.now()});
-    saveTracks(a);renderTracks();toast('✓ Added to Application Tracker');return
-  }
+  if(strack&&j){addJobToTracker(j,'Saved');return}
   if(remove&&j){removeSavedJob(jobKey(j))}
 });
+document.addEventListener('click',e=>{
+  const modal=$('jobDetailModal');
+  if(!modal)return;
+  if(e.target.closest('[data-job-detail-close]')||e.target===modal){modal.classList.remove('on');modal.setAttribute('aria-hidden','true');return}
+  const m=e.target.closest('[data-detail-match]'),s=e.target.closest('[data-detail-save]'),t=e.target.closest('[data-detail-track]'),ap=e.target.closest('[data-detail-applied]');
+  const key=(m||s||t||ap)?.dataset.detailMatch||(s?.dataset.detailSave)||(t?.dataset.detailTrack)||(ap?.dataset.detailApplied);
+  const j=key?findJobByKey(key):null;
+  if(!j)return;
+  if(m){$('jobDetailMatch').innerHTML=matchHtml(j);return}
+  if(s){if(isJobSaved(j)){removeSavedJob(jobKey(j))}else saveJob(j);openJobDetails(j);return}
+  if(t){addJobToTracker(j,'Saved');return}
+  if(ap){addJobToTracker(j,'Applied');return}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('jobDetailModal')?.classList.contains('on')){$('jobDetailModal').classList.remove('on');$('jobDetailModal').setAttribute('aria-hidden','true')}});
 const JOB_ALERTS_KEY='careerpilot_job_alerts_v1';
 const JOB_ALERT_MATCHES_KEY='careerpilot_job_alert_matches_v1';
 function loadJobAlerts(){try{const a=JSON.parse(localStorage.getItem(JOB_ALERTS_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
