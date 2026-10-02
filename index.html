@@ -184,11 +184,19 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
  .mnav i{font-size:17px;line-height:20px}
  .mnav small{font-size:10px}
  body[data-v=design] .editor{overflow:visible}
- body[data-v=design] #v-design.on{position:fixed;left:8px;right:8px;bottom:calc(68px + env(safe-area-inset-bottom,0px));z-index:44;max-height:min(72dvh,620px);overflow:auto;margin:0;padding:0 4px 10px;background:rgba(15,18,25,.96);border:1px solid var(--gb);border-radius:20px 20px 12px 12px;box-shadow:0 -20px 60px rgba(0,0,0,.42);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
- body.light[data-v=design] #v-design.on{background:rgba(255,255,255,.96)}
- body[data-v=design] #v-design.on .tabs{position:sticky;top:0;z-index:2;padding:4px 4px 8px;margin:0;background:inherit}
- .mobile-sheet-close{position:absolute;right:10px;top:10px;width:38px;height:38px;border-radius:50%;z-index:3}
+ body[data-v=design] #v-design.on{position:fixed;left:8px;right:8px;bottom:calc(68px + env(safe-area-inset-bottom,0px));z-index:44;height:min(80dvh,700px);max-height:min(80dvh,700px);overflow:auto;margin:0;padding:50px 8px 14px;background:rgba(15,18,25,.97);border:1px solid var(--gb);border-radius:20px 20px 12px 12px;box-shadow:0 -20px 60px rgba(0,0,0,.42);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);overscroll-behavior:contain}
+ body.light[data-v=design] #v-design.on{background:rgba(255,255,255,.97)}
+ body[data-v=design] #v-design.on .tabs{position:sticky;top:0;z-index:2;padding:6px 4px 10px;margin:0 -4px 12px;background:inherit;border-bottom:1px solid var(--gb)}
+ body[data-v=design] #v-design.on .tabs button{flex:0 0 auto;min-width:88px}
+ .mobile-sheet-close{position:absolute;right:12px;top:8px;width:38px;height:38px;border-radius:50%;z-index:5;display:grid;place-items:center;font-size:22px;line-height:1;background:rgba(255,255,255,.08);border:1px solid var(--gb)}
+ .mobile-sheet-close:hover{transform:none}
  #v-design .mobile-sheet-inner{padding:0 8px 8px}
+ #v-design .dp{scroll-margin-top:58px}
+ #v-design .row{flex-wrap:wrap}
+ #v-design .row .lb{flex:1 1 30%;min-width:105px}
+ #v-design .tpl-filters{position:sticky;top:54px;z-index:1;background:inherit;padding-top:5px}
+ #v-design .sw{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #v-design .dp.card{margin-bottom:10px}
 }
 @media(min-width:768px){.mobile-sheet-close,.cp-sheet-handle{display:none!important}}
 @media(prefers-reduced-motion:reduce){body{transition:none!important}.view.on{animation:none!important}}
@@ -232,7 +240,7 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
   </main>
 </div>
 <nav class="mnav" id="mnav" aria-label="Mobile"></nav>
-<button class="fab" id="fab" aria-label="Preview CV">👁</button><button id="installApp" class="cp-install-pill" type="button" aria-label="Install CareerPilot">Install App</button><div id="cpOnline" class="cp-online" role="status" aria-live="polite">✓ Back online</div><button class="auth-fab" id="authOpen">Sign in</button><div class="auth-modal" id="authModal"><div class="auth-box"><button class="auth-close" id="authClose">✕</button><div class="ey">CAREERPILOT ACCOUNT</div><h2 id="authTitle">Welcome back</h2><p class="hint">Save your CV and career data securely in the cloud.</p><div class="auth-tabs"><button id="tabLogin" class="on">Login</button><button id="tabSignup">Sign up</button></div><label>Email<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></label><label style="display:block;margin-top:10px">Password<input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••"></label><label id="authNameWrap" style="display:none;margin-top:10px">Full name<input id="authName" autocomplete="name" placeholder="Your name"></label><div class="auth-msg" id="authMsg"></div><button class="pri" id="authSubmit" style="width:100%">Login</button><button id="googleAuth" style="width:100%;margin-top:8px">Continue with Google</button><button id="authLogout" style="display:none;width:100%;margin-top:8px">Logout</button></div></div>
+<button class="fab" id="fab" aria-label="Preview CV">👁</button><button id="installApp" class="cp-install-pill" type="button" aria-label="Install CareerPilot">Install App</button><div id="cpOnline" class="cp-online" role="status" aria-live="polite">✓ Back online</div><button class="auth-fab" id="authOpen">Sign in</button><div class="auth-modal" id="authModal"><div class="auth-box"><button class="auth-close" id="authClose">✕</button><div class="ey">CAREERPILOT ACCOUNT</div><h2 id="authTitle">Welcome back</h2><p class="hint">Save your CV and career data securely in the cloud.</p><div class="auth-tabs"><button id="tabLogin" class="on">Login</button><button id="tabSignup">Sign up</button></div><label>Email<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></label><label style="display:block;margin-top:10px">Password<input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••"></label><label id="authNameWrap" style="display:none;margin-top:10px">Full name<input id="authName" autocomplete="name" placeholder="Your name"></label><div class="auth-msg" id="authMsg"></div><button class="pri" id="authSubmit" style="width:100%">Login</button><button id="googleAuth" style="width:100%;margin-top:8px">Google Sign-in (setup required)</button><button id="authLogout" style="display:none;width:100%;margin-top:8px">Logout</button></div></div>
 <div id="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -916,7 +924,7 @@ function authMessage(m){authMsg.textContent=m||''}
 function openAuth(mode='login'){authMode=mode;$('authTitle').textContent=mode==='login'?'Welcome back':'Create your account';$('authSubmit').textContent=mode==='login'?'Login':'Create account';$('authNameWrap').style.display=mode==='login'?'none':'block';$('tabLogin').classList.toggle('on',mode==='login');$('tabSignup').classList.toggle('on',mode!=='login');$('authLogout').style.display=currentUser?'block':'none';authMessage('');authModal.classList.add('on')}
 $('authOpen').onclick=()=>openAuth(currentUser?'login':'login');$('authClose').onclick=()=>authModal.classList.remove('on');$('tabLogin').onclick=()=>openAuth('login');$('tabSignup').onclick=()=>openAuth('signup');
 $('authSubmit').onclick=async()=>{authMessage('Please wait…');const email=$('authEmail').value.trim(),password=$('authPassword').value,name=$('authName').value.trim();if(!email||password.length<6){authMessage('Enter a valid email and password (6+ characters).');return}try{if(authMode==='signup'){const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name}}});if(error)throw error;authMessage(data.session?'Account created.':'Account created. Check your email to confirm, then login.')}else{const {error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;authModal.classList.remove('on')}}catch(e){authMessage(e.message||'Authentication failed.')}};
-$('googleAuth').onclick=async()=>{try{authMessage('Opening Google…');const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});if(error)throw error}catch(e){authMessage(e.message||'Google login failed. Enable Google in Supabase Auth providers.')}};
+$('googleAuth').onclick=()=>{authMessage('Google Sign-in is not enabled yet. Please use Email + Password to sign in.');$('tabLogin').click();$('authEmail').focus()};
 $('authLogout').onclick=async()=>{await sb.auth.signOut();authModal.classList.remove('on')};
 function updateAccountUI(){const b=$('authOpen');b.textContent=currentUser?'Account':'Sign in';Q('[data-n]').forEach(x=>x.textContent=currentUser?.user_metadata?.full_name||currentUser?.email?.split('@')[0]||'Guest')}
 async function loadCloud(){
