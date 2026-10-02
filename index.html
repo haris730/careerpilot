@@ -23,6 +23,7 @@ button{background:var(--gl);border:1px solid var(--gb);border-radius:10px;paddin
 button:hover{transform:translateY(-1px);background:rgba(255,255,255,.1)}button:active{transform:scale(.97)}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid #818cf8;outline-offset:2px}
 .pri{background:var(--g);border:0;box-shadow:0 6px 18px rgba(99,102,241,.4)}.dg:hover{border-color:#f87171;color:#fca5a5}
+.ad-slot{min-height:90px;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:11px;letter-spacing:.08em;border:1px dashed var(--gb);border-radius:14px;background:rgba(0,0,0,.12)}
 .glass,.card{background:var(--gl);border:1px solid var(--gb);border-radius:16px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--sh)}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 18px}
 .br b{display:block;letter-spacing:.18em;font-size:15px;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}.br small{color:var(--mu);font-size:10px;letter-spacing:.2em}
@@ -529,6 +530,8 @@ $('v-home').innerHTML=`
 <div class="card dstat"><span>🌍</span><b>5</b><small>Job platforms</small></div>
 <div class="card dstat"><span>📊</span><b>90%</b><small>CV profile ready</small><div class="progress"><i style="width:90%"></i></div></div>
 </div>
+<div class="card pad" style="margin-top:12px" data-monetization-card><div class="ey">CAREERPILOT PRO</div><h3 style="margin:4px 0 6px">Unlock the full career toolkit</h3><p class="hint" style="margin:0 0 10px">Premium removes ads and unlocks higher AI limits, advanced career tools and future premium features.</p><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>$2.99 / month</b><button class="pri" data-upgrade>Upgrade to Premium</button><span class="hint">Web checkout will be connected before launch.</span></div></div>
+<div class="ad-slot" data-ad-slot style="margin-top:12px">ADVERTISEMENT</div>
 <div class="card pad" style="margin-top:12px"><div class="ey">QUICK ACTIONS</div><h3 style="margin:4px 0 10px">What do you want to do?</h3><div class="quick-grid">
 <button class="quick" data-v="cv"><span class="qi">✎</span><span><b>Create / Edit CV</b><small>Build an ATS-friendly CV</small></span></button>
 <button class="quick" data-v="cvs"><span class="qi">▤</span><span><b>My CVs</b><small>Manage your CV versions</small></span></button>
@@ -579,7 +582,7 @@ $('aiTask').onchange=updateAIWriterForm;
 $('clearAIWriter').onclick=()=>{$('aiInput').value='';$('aiJob').value='';$('aiOutput').value='';$('aiWriterStatus').textContent='';updateAIWriterForm()};
 $('copyAIWriter').onclick=copyAIResult;
 $('useAIWriter').onclick=()=>{const v=$('aiOutput').value.trim(),task=$('aiTask').value;if(!v){toast('Generate a result first');return}if(task==='summary'){S.d.summary=v;render();fillSide();sync();toast('✓ Summary updated')}else if(task==='bullet'){if(S.d.exp?.length){S.d.exp[0].description=(S.d.exp[0].description?S.d.exp[0].description+'\n':'')+'• '+v;render();fillSide();sync();toast('✓ Added to first experience')}else toast('Add an experience item first')}else{copyAIResult();toast('Tailored content copied — review before using')}};
-$('runAIWriter').onclick=async()=>{const task=$('aiTask').value,input=$('aiInput').value.trim(),job=$('aiJob').value.trim();if(!input){$('aiWriterStatus').textContent='Add some CV content first.';return}if(task==='tailor'&&!job){$('aiWriterStatus').textContent='Paste the job description first.';return}const b=$('runAIWriter');b.disabled=true;$('aiWriterStatus').textContent='Generating…';try{const res=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task,input,jobDescription:job,cvContext:aiWriterContext().slice(0,12000)})});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'AI service is not configured yet.');$('aiOutput').value=data.text||'';$('aiWriterStatus').textContent='Generated securely on the server.'}catch(e){$('aiWriterStatus').textContent=e.message||'AI request failed.'}finally{b.disabled=false}};
+$('runAIWriter').onclick=async()=>{const task=$('aiTask').value,input=$('aiInput').value.trim(),job=$('aiJob').value.trim();if(!input){$('aiWriterStatus').textContent='Add some CV content first.';return}if(task==='tailor'&&!job){$('aiWriterStatus').textContent='Paste the job description first.';return}const b=$('runAIWriter');b.disabled=true;$('aiWriterStatus').textContent='Generating…';try{const res=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json',authorization:'Bearer '+((await sb.auth.getSession()).data.session?.access_token||'')},body:JSON.stringify({task,input,jobDescription:job,cvContext:aiWriterContext().slice(0,12000)})});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'AI service is not configured yet.');$('aiOutput').value=data.text||'';$('aiWriterStatus').textContent='Generated securely on the server.'}catch(e){$('aiWriterStatus').textContent=e.message||'AI request failed.'}finally{b.disabled=false}};
 updateAIWriterForm();
 function copyToolText(id,btn){const el=$(id);if(!el)return;navigator.clipboard?.writeText(el.value||el.innerText||'').then(()=>{const old=btn.textContent;btn.textContent='Copied';setTimeout(()=>btn.textContent=old,1200)}).catch(()=>{})}
 function letterContext(){const d=S.d;return [d.name,d.title,d.email,d.phone,d.location,d.link,d.summary,(d.skills||[]).join(', '),(d.languages||[]).join(', '),(d.projects||[]).join('. '),(d.certs||[]).join(', '),(d.achievements||[]).join('. '),...(d.exp||[]).flatMap(x=>[x.position,x.company,x.start,x.end,x.location,x.description]),...(d.edu||[]).flatMap(x=>[x.degree,x.institute,x.year,x.location])].filter(Boolean).join('\\n')}
@@ -596,7 +599,7 @@ $('makeLetter').onclick=async()=>{
  if(!role||!job){$('letterStatus').textContent='Enter the job title and paste the job description first.';return}
  const b=$('makeLetter');b.disabled=true;$('letterStatus').textContent='Generating…';
  try{
-  const res=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:'letter',role,company,jobDescription:job,cvContext:letterContext().slice(0,12000),input:role})});
+  const res=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json',authorization:'Bearer '+((await sb.auth.getSession()).data.session?.access_token||'')},body:JSON.stringify({task:'letter',role,company,jobDescription:job,cvContext:letterContext().slice(0,12000),input:role})});
   const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'AI service is not configured yet.');
   $('letterOut').value=data.text||'';$('letterStatus').textContent='Generated securely on the server.'
  }catch(e){$('letterStatus').textContent=e.message||'Cover letter generation failed.'}finally{b.disabled=false}
@@ -670,10 +673,11 @@ $('makeInterview').onclick=()=>{
  if(focus.length) qs.splice(4,0,'How would you apply your experience with '+focus.slice(0,3).join(', ')+' to this role?');
  $('intOut').innerHTML='<div class="card ai-panel"><div class="ey">'+escHtml(type)+' INTERVIEW SET</div><ol class="ai-list">'+qs.map(escHtml).map(x=>'<li>'+x+'</li>').join('')+'</ol><p class="hint">Practice answers from your real CV experience. These questions are generated locally; connect an AI provider later for deeper personalized coaching.</p></div>';
 };
-$('v-profile').innerHTML=`<div class="card pad"><div class="ey">ACCOUNT & PLAN</div><div class="plan-bar"><div><b id="planName">Free Plan</b><div class="usage-line" id="planUsage">3 AI actions / month included</div></div><span class="plan-pill" id="planPill">FREE</span></div><div class="premium-grid"><div class="premium-card"><span class="premium-tag">FREE</span><h3>CareerPilot Free</h3><ul><li>CV builder & 10 professional templates</li><li>Basic PDF export</li><li>3 AI actions per month</li><li>Global job links</li></ul></div><div class="premium-card"><span class="premium-tag">PREMIUM</span><h3>CareerPilot Premium</h3><ul><li>Unlimited CV versions</li><li>Premium templates</li><li>AI Job Match & Cover Letters</li><li>Interview Coach</li><li>Priority cloud features</li></ul><button class="pri" id="upgradePlan" style="margin-top:8px">View Premium</button></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button id="loadSaved">Load saved CV</button><button class="pri" id="saveCV2">Save CV</button><button id="exportCV2">Export PDF</button></div></div>`;
+$('v-profile').innerHTML=`<div class="card pad"><div class="ey">ACCOUNT & PLAN</div><div class="plan-bar"><div><b id="planName">Free Plan</b><div class="usage-line" id="planUsage">3 AI actions / month included</div></div><span class="plan-pill" id="planPill">FREE</span></div><div class="premium-grid"><div class="premium-card"><span class="premium-tag">FREE</span><h3>CareerPilot Free</h3><ul><li>30 professional CV templates</li><li>Basic PDF export</li><li>3 AI actions per month</li><li>Global job search</li></ul></div><div class="premium-card"><span class="premium-tag">PREMIUM</span><h3>CareerPilot Premium</h3><ul><li>All 30 professional CV templates</li><li>Unlimited AI actions</li><li>Advanced career tools</li><li>Ad-free workspace</li><li>Priority cloud features</li></ul><button class="pri" id="upgradePlan" style="margin-top:8px">Upgrade to Premium</button></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button id="loadSaved">Load saved CV</button><button class="pri" id="saveCV2">Save CV</button><button id="exportCV2">Export PDF</button></div><div class="ad-slot" data-ad-slot style="margin-top:14px">ADVERTISEMENT</div></div>`;
 $('loadSaved').onclick=()=>{const x=activeCV();if(!x){toast('No saved CV found');return}openCV(x.id)};
 $('saveCV2').onclick=()=>$('bS').click();$('exportCV2').onclick=exportPDF;
-$('upgradePlan').onclick=()=>{const box=document.createElement('div');box.className='card upgrade-modal';box.innerHTML='<div class="ey">CAREERPILOT PREMIUM</div><h2>Build a stronger career toolkit</h2><p class="hint">Premium is prepared for the future payment and AI API layer. No payment is taken yet.</p><div class="price-card"><h3>Premium</h3><ul><li>All professional CV templates</li><li>Unlimited CV versions</li><li>Advanced AI career tools</li><li>Cloud-first career workspace</li></ul><button id="premiumReady" class="pri">Premium checkout coming next</button> <button id="premiumClose">Close</button></div>';$('v-profile').prepend(box);$('premiumClose').onclick=()=>box.remove();$('premiumReady').onclick=()=>toast('Payment integration is the next step.');};
+function openUpgrade(){const box=document.createElement('div');box.className='card upgrade-modal';box.innerHTML='<div class="ey">CAREERPILOT PREMIUM</div><h2>Premium career toolkit</h2><p class="hint">Premium is planned at <b>$2.99/month</b>. It will unlock unlimited AI actions, ad-free use and all premium career features.</p><div class="price-card"><h3>$2.99 / month</h3><ul><li>Unlimited AI actions</li><li>All 30 professional CV templates</li><li>Ad-free workspace</li><li>Advanced career tools</li></ul><button id="premiumReady" class="pri">Checkout coming next</button> <button id="premiumClose">Close</button></div>';$('v-profile').prepend(box);$('premiumClose').onclick=()=>box.remove();$('premiumReady').onclick=()=>toast('Web payment provider setup is required before checkout can go live.');}
+$('upgradePlan').onclick=openUpgrade;Q('[data-upgrade]').forEach(b=>b.onclick=openUpgrade);
 
 /* ---------- global jobs + saved CV views ---------- */
 const JOBS=[
@@ -1067,6 +1071,23 @@ const SUPABASE_URL='https://gxixgacuryslyoawhrej.supabase.co';
 const SUPABASE_KEY='sb_publishable_cjEbbJ_VUoT_vKMOR-vBmA_It8gXYQd';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let authMode='login', cloudTimer=null;
+async function loadPlanStatus(){
+  if(!currentUser)return;
+  try{
+    const {data:ent}=await sb.rpc('ensure_my_entitlement');
+    const plan=ent?.plan==='premium'&&(!ent?.premium_until||new Date(ent.premium_until)>new Date())?'premium':'free';
+    const period=new Date();period.setDate(1);period.setHours(0,0,0,0);
+    const {data:usage}=await sb.from('ai_usage').select('ai_count').eq('user_id',currentUser.id).eq('period_start',period.toISOString().slice(0,10)).maybeSingle();
+    const count=Number(usage?.ai_count||0),remaining=Math.max(0,3-count);
+    const name=$('planName'),pill=$('planPill'),line=$('planUsage');
+    if(name)name.textContent=plan==='premium'?'Premium Plan':'Free Plan';
+    if(pill){pill.textContent=plan==='premium'?'PREMIUM':'FREE';pill.classList.toggle('premium',plan==='premium')}
+    if(line)line.textContent=plan==='premium'?'Unlimited AI actions':'AI actions: '+remaining+' of 3 remaining this month';
+    Q('[data-n]').forEach(x=>x.closest('.usr')?.querySelector('small')&&(x.closest('.usr').querySelector('small').textContent=plan==='premium'?'Premium Plan':'Free Plan'));
+    Q('[data-ad-slot]').forEach(x=>x.style.display=plan==='premium'?'none':'flex');
+  }catch(e){console.warn('Plan status unavailable',e)}
+}
+
 const authModal=$('authModal'),authMsg=$('authMsg');
 function authMessage(m){authMsg.textContent=m||''}
 function openAuth(mode='login'){authMode=mode;$('authTitle').textContent=mode==='login'?'Welcome back':'Create your account';$('authSubmit').textContent=mode==='login'?'Login':'Create account';$('authNameWrap').style.display=mode==='login'?'none':'block';$('tabLogin').classList.toggle('on',mode==='login');$('tabSignup').classList.toggle('on',mode!=='login');$('authLogout').style.display=currentUser?'block':'none';authMessage('');authModal.classList.add('on')}
@@ -1106,8 +1127,8 @@ async function deleteCloudCV(id){
   const {error}=await sb.from('cvs').delete().eq('id',id).eq('user_id',currentUser.id);
   if(error)toast('Cloud delete failed');
 }
-async function hydrateAuth(){const {data}=await sb.auth.getSession();currentUser=data.session?.user||null;updateAccountUI();renderCVLibrary();if(currentUser){await loadCloud()}}
-sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||null;updateAccountUI();renderCVLibrary();if(currentUser){authModal.classList.remove('on');await loadCloud();await syncServerJobAlerts();toast('Signed in')}});
+async function hydrateAuth(){const {data}=await sb.auth.getSession();currentUser=data.session?.user||null;updateAccountUI();renderCVLibrary();if(currentUser){await loadCloud();await loadPlanStatus()}}
+sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||null;updateAccountUI();renderCVLibrary();if(currentUser){authModal.classList.remove('on');await loadCloud();await loadPlanStatus();await syncServerJobAlerts();toast('Signed in')}});
 const oldSync=sync;sync=function(){oldSync();syncActiveLibrary();scheduleCloudSave()};
 hydrateAuth();
 setTimeout(()=>{if(currentUser)syncServerJobAlerts()},1200);
