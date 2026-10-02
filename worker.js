@@ -10,10 +10,10 @@ function bearer(request){const auth=request.headers.get('Authorization')||'';ret
 async function supabaseRpc(request,name,body){const auth=bearer(request);if(!auth)return null;const res=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:{apikey:SUPABASE_KEY,authorization:auth,'content-type':'application/json',accept:'application/json'},body:JSON.stringify(body||{})});if(!res.ok)return null;try{return await res.json()}catch{return null}}
 async function hmacHex(secret,rawBody){const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);const sig=new Uint8Array(await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(rawBody)));return [...sig].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function safeEqual(a,b){if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0}
-async function supabaseAdmin(env,path,options={}){if(!env.SUPABASE_SERVICE_ROLE_KEY)return null;const res=await fetch(SUPABASE_URL+path,{...options,headers:{apikey:env.SUPABASE_SERVICE_ROLE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY,accept:'application/json','content-type':'application/json',...(options.headers||{})}});if(!res.ok)return null;try{return await res.json()}catch{return null}}
+async function supabaseAdmin(env,path,options={}){if(!env.SUPABASE_SERVICE_ROLE_KEY)return null;const res=await fetch(SUPABASE_URL+path,{...options,headers:{apikey:env.SUPABASE_SERVICE_ROLE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY,accept:'application/json','content-type':'application/json',...(options.headers||{})}});if(!res.ok)return null;const raw=await res.text();if(!raw)return {ok:true};try{return JSON.parse(raw)}catch{return {ok:true}}}
 async function handleBillingWebhook(request,env){
   const secret=env.LEMONSQUEEZY_WEBHOOK_SECRET;
-  if(!secret)return apiJson({error:'Billing webhook is not configured.'},503,'*');
+  if(!secret||!env.SUPABASE_SERVICE_ROLE_KEY)return apiJson({error:'Billing webhook is not configured.'},503,'*');
   const raw=await request.text();
   const signature=request.headers.get('X-Signature')||'';
   const digest=await hmacHex(secret,raw);
