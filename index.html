@@ -10,7 +10,7 @@
 <!-- CareerPilot premium font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=Lato:wght@400;700;900&family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;600;700&family=Nunito+Sans:wght@400;600;700;800&family=Merriweather:wght@400;700&family=Libre+Baskerville:wght@400;700&family=EB+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root{--bg:#0a0c11;--gl:rgba(255,255,255,.055);--gb:rgba(255,255,255,.1);--tx:#f1f5f9;--mu:#94a3b8;--g:linear-gradient(135deg,#3b82f6,#8b5cf6);--sh:0 10px 30px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.4);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
@@ -81,6 +81,18 @@ input[type=range]{width:100%}
 .T-mi .hd{border-bottom:1px solid #d1d5db}.T-mi .nm{font-weight:600}
 .T-cr .hd{background:linear-gradient(135deg,var(--ac),color-mix(in srgb,var(--ac) 55%,#0ea5e9));border:0}.T-cr .nm,.T-cr .tt,.T-cr .ct{color:#fff}
 /* 2026 professional template families */
+/* Extended free professional template families */
+.T-aptos .hd{border-bottom:3px solid var(--ac)}.T-aptos .nm{font-size:31px;font-weight:800}.T-aptos h3{font-size:11px}
+.T-plex .hd{border-left:8px solid var(--ac);padding-left:20px}.T-plex .nm{letter-spacing:.02em}.T-plex h3{font-weight:700}
+.T-source .hd{border-bottom:1px solid #cbd5e1}.T-source .nm{font-weight:700}.T-source h3{letter-spacing:.08em}
+.T-lato .hd{border-bottom:5px solid var(--ac)}.T-lato .nm{font-weight:900}.T-lato .tt{font-weight:700}
+.T-roboto .hd{padding-bottom:15px;border-bottom:2px solid var(--ac)}.T-roboto .nm{font-weight:700}.T-roboto h3{font-size:11px}
+.T-editorial{font-family:Merriweather,Georgia,serif}.T-editorial .hd{text-align:center;border-bottom:1px solid #9ca3af}.T-editorial .nm{font-size:28px}.T-editorial .tt{font-family:Source Sans 3,Arial,sans-serif}
+.T-baskerville{font-family:'Libre Baskerville',Georgia,serif}.T-baskerville .hd{border-bottom:2px solid var(--ac)}.T-baskerville .nm{font-size:27px}.T-baskerville h3{font-size:11px}
+.T-garamond{font-family:'EB Garamond',Georgia,serif}.T-garamond .hd{text-align:center;border-top:5px solid var(--ac);border-bottom:1px solid #d6d3d1}.T-garamond .nm{font-size:32px}.T-garamond h3{font-size:13px}
+.T-portfolio .hd{background:linear-gradient(135deg,var(--ac),color-mix(in srgb,var(--ac) 55%,#0ea5e9));border:0;padding:30px var(--mg)}.T-portfolio .nm,.T-portfolio .tt,.T-portfolio .ct{color:#fff}.T-portfolio .lc{background:#f8fafc}
+.T-impact .hd{background:#111827;border-bottom:8px solid var(--ac);padding:30px var(--mg)}.T-impact .nm,.T-impact .tt,.T-impact .ct{color:#fff}.T-impact .nm{text-transform:uppercase;letter-spacing:.04em}
+
 .L3 .bd{grid-template-columns:1fr var(--cw)}.L3 .lc{order:2;padding-left:22px;padding-right:var(--mg)}.L3 .rc{order:1;padding-left:var(--mg);padding-right:30px}
 .L4 .hd{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;border-bottom:0;border-top:8px solid var(--ac);padding-top:18px}.L4 .ct{justify-content:flex-end;text-align:right}.T-el .nm{font-family:Georgia,serif;font-weight:700}.T-el .tt{font-style:italic}
 .L5 .bd{grid-template-columns:220px 1fr;gap:18px}.L5 .lc{padding:18px}.L5 .rc{padding:18px}.T-cmp #paper{font-size:11px}.T-cmp .hd{padding:22px 26px 14px}.T-cmp .nm{font-size:28px}.T-cmp #paper h3{font-size:11px;margin-bottom:5px}.T-cmp .it{margin-bottom:7px}.T-cmp #paper section{margin-bottom:10px}
@@ -306,7 +318,7 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
 
 
 const $=i=>document.getElementById(i),Q=(s,r)=>Array.from((r||document).querySelectorAll(s)),KEY='careerpilot_cv_builder_2026',OLD='careerpilot_cv_builder_v2';
-const FONTS=[['','Template default'],['Inter,Segoe UI,Arial,sans-serif','Modern sans'],['Georgia,serif','Georgia'],['Arial,Helvetica,sans-serif','Arial'],['Trebuchet MS,sans-serif','Trebuchet'],['Times New Roman,serif','Times'],['Courier New,monospace','Courier']];
+const FONTS=[['','Template default'],['Inter,Segoe UI,Arial,sans-serif','Inter — Modern'],['Source Sans 3,Segoe UI,Arial,sans-serif','Source Sans 3 — Clean'],['IBM Plex Sans,Segoe UI,Arial,sans-serif','IBM Plex Sans — Professional'],['Lato,Segoe UI,Arial,sans-serif','Lato — Humanist'],['Roboto,Arial,sans-serif','Roboto — Universal'],['Open Sans,Arial,sans-serif','Open Sans — Classic'],['Nunito Sans,Arial,sans-serif','Nunito Sans — Friendly'],['Calibri,Arial,sans-serif','Calibri — Business'],['Helvetica,Arial,sans-serif','Helvetica — Corporate'],['Arial,Helvetica,sans-serif','Arial — Safe'],['Georgia,serif','Georgia — Serif'],['Cambria,Georgia,serif','Cambria — Executive'],['Merriweather,Georgia,serif','Merriweather — Editorial'],['Libre Baskerville,Georgia,serif','Libre Baskerville — Traditional'],['EB Garamond,Georgia,serif','EB Garamond — Elegant'],['Times New Roman,serif','Times New Roman'],['Trebuchet MS,sans-serif','Trebuchet MS'],['Courier New,monospace','Courier New — Mono']];
 const BGS=[['#ffffff','White'],['#fffaf0','Warm ivory'],['#f3f4f6','Light gray'],['#f2f7ff','Soft blue']];
 const COL=[['Midnight','#1e3a5f'],['Ocean','#0284c7'],['Royal','#6d28d9'],['Emerald','#059669'],['Slate','#475569'],['Monochrome','#111111']];
 const TPL=[
@@ -328,7 +340,17 @@ const TPL=[
 ['Creative Accent',{ac:'#ea580c',ff:FONTS[1][0],lay:'s',tpl:'accent',cat:'Creative'}],
 ['Executive Gold',{ac:'#7c2d12',ff:FONTS[2][0],lay:'4',tpl:'gold',cat:'Executive'}],
 ['International CV',{ac:'#0f766e',ff:FONTS[1][0],lay:'2',tpl:'intl',cat:'Professional'}],
-['Clean Recruiter',{ac:'#374151',ff:FONTS[1][0],lay:'1',tpl:'clean',cat:'ATS-friendly'}]
+['Clean Recruiter',{ac:'#374151',ff:FONTS[1][0],lay:'1',tpl:'clean',cat:'ATS-friendly'}],
+['Aptos Professional',{ac:'#1f2937',ff:FONTS[8][0],lay:'1',tpl:'aptos',cat:'ATS-friendly'}],
+['Plex Executive',{ac:'#0f172a',ff:FONTS[3][0],lay:'4',tpl:'plex',cat:'Executive'}],
+['Source Minimal',{ac:'#2563eb',ff:FONTS[2][0],lay:'1',tpl:'source',cat:'ATS-friendly'}],
+['Lato Modern',{ac:'#0f766e',ff:FONTS[4][0],lay:'2',tpl:'lato',cat:'Professional'}],
+['Roboto Clean',{ac:'#334155',ff:FONTS[5][0],lay:'1',tpl:'roboto',cat:'Professional'}],
+['Editorial Serif',{ac:'#7c2d12',ff:FONTS[13][0],lay:'1',tpl:'editorial',cat:'Professional'}],
+['Baskerville Classic',{ac:'#1e293b',ff:FONTS[14][0],lay:'1',tpl:'baskerville',cat:'Executive'}],
+['Garamond Elegant',{ac:'#7f1d1d',ff:FONTS[15][0],lay:'2',tpl:'garamond',cat:'Executive'}],
+['Portfolio Split',{ac:'#0369a1',ff:FONTS[1][0],lay:'s',tpl:'portfolio',cat:'Creative'}],
+['Bold Impact',{ac:'#111827',ff:FONTS[1][0],lay:'4',tpl:'impact',cat:'Creative'}]
 ];
 const F=[['name','Full Name','👤'],['title','Professional Title','💼'],['email','Email','✉️'],['phone','Phone','📞'],['location','Location','📍'],['link','Portfolio / LinkedIn','🔗']];
 const XF=[['position','Job Title'],['company','Company'],['start','Start Date'],['end','End Date'],['location','Location']];
@@ -915,7 +937,7 @@ $('ed').addEventListener('input',e=>{
 /* ---------- design panel ---------- */
 const LAY=[['1','One Column'],['2','Two Column'],['s','Sidebar'],['3','Reverse'],['4','Editorial'],['5','Compact']],RG=[['mg','Margins',20,60],['sp','Section spacing',8,36],['cw','Column width',180,320],['gp','Column gap',0,40]];
 $('v-design').innerHTML=`<div class="tabs" role="tablist">${['Templates','Colors','Typography','Layout'].map((t,i)=>`<button role="tab" data-dt="${i}" class="${i?'':'on'}">${t}</button>`).join('')}</div>
-<div class="dp on card pad"><div class="ey" style="margin-bottom:8px">20-PRESET PROFESSIONAL CV LIBRARY</div><p class="hint" style="margin:0 0 10px">Switch templates without losing content. Every template uses live HTML text for selectable, A4-ready PDF output.</p><div class="tpl-filters" role="tablist" aria-label="Template categories"><button class="on" data-tfilter="All">All <b>20</b></button><button data-tfilter="ATS-friendly">ATS-friendly <b>7</b></button><button data-tfilter="Creative">Creative <b>5</b></button><button data-tfilter="Executive">Executive <b>4</b></button><button data-tfilter="Professional">Professional <b>4</b></button></div><div class="car" id="templateGallery">${TPL.map(([n,p],i)=>`<button class="tc tpl-card" data-tp="${i}" data-cat="${p.cat}" title="${n} CV template"><div class="th th-${p.lay} th-${p.tpl}" style="--c:${p.ac}"><i></i><s></s><s></s></div><b style="display:block;font-size:12px">${n}</b><small class="hint">${p.cat}</small></button>`).join('')}</div></div>
+<div class="dp on card pad"><div class="ey" style="margin-bottom:8px">30-PRESET PROFESSIONAL CV LIBRARY</div><p class="hint" style="margin:0 0 10px">Switch templates without losing content. Every template uses live HTML text for selectable, A4-ready PDF output.</p><div class="tpl-filters" role="tablist" aria-label="Template categories"><button class="on" data-tfilter="All">All <b>30</b></button><button data-tfilter="ATS-friendly">ATS-friendly <b>10</b></button><button data-tfilter="Creative">Creative <b>6</b></button><button data-tfilter="Executive">Executive <b>6</b></button><button data-tfilter="Professional">Professional <b>8</b></button></div><div class="car" id="templateGallery">${TPL.map(([n,p],i)=>`<button class="tc tpl-card" data-tp="${i}" data-cat="${p.cat}" title="${n} CV template"><div class="th th-${p.lay} th-${p.tpl}" style="--c:${p.ac}"><i></i><s></s><s></s></div><b style="display:block;font-size:12px">${n}</b><small class="hint">${p.cat}</small></button>`).join('')}</div></div>
 <div class="dp card pad"><div class="sw">${COL.map(([n,c])=>`<button class="sc" data-col="${c}"><i style="background:${c}"></i>${n}</button>`).join('')}</div><label>Custom accent color<input type="color" id="tAc"></label><label>CV background<select id="tBg"></select></label></div>
 <div class="dp card pad"><label>Template font<select id="tFf"></select></label><p class="hint">Select any text in the CV to change its font, size, weight, letter spacing and line height. Only that element changes.</p></div>
 <div class="dp card pad"><div class="row">${LAY.map(([v,l])=>`<button class="lb" data-lay="${v}">${l}</button>`).join('')}</div>${RG.map(([k,l,a,b])=>`<label>${l}<input type="range" data-l="${k}" min="${a}" max="${b}"></label>`).join('')}</div>`;
@@ -937,7 +959,7 @@ if(designView){
 $('v-design').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.dt!=null){Q('[data-dt]').forEach(x=>x.classList.toggle('on',x===b));Q('#v-design .dp').forEach((x,i)=>x.classList.toggle('on',i===+b.dataset.dt))}
-  if(b.dataset.tp!=null){const ti=+b.dataset.tp;if(ti>=5&&!window.careerPilotPremium){const box=document.createElement('div');box.className='card upgrade-modal';box.innerHTML='<div class="ey">PREMIUM TEMPLATE</div><h2>Unlock the full CV library</h2><p class="hint">Templates 1–5 are available in Free. Premium unlocks the complete 20-template professional library and future AI features.</p><div class="price-card"><b>CareerPilot Premium</b><ul><li>All 20 professional CV templates</li><li>Unlimited CV versions</li><li>AI Job Match, Cover Letter & Interview Coach</li><li>Priority cloud features</li></ul><button class="pri" id="upgradeNow">Continue to Premium</button> <button id="closeUpgrade">Not now</button></div>';$('v-design').prepend(box);$('closeUpgrade').onclick=()=>box.remove();$('upgradeNow').onclick=()=>{box.remove();go('profile');setTimeout(()=>$('upgradePlan')?.click(),50)};return}Object.assign(S.t,TPL[ti][1]);applyT();sync()}
+  if(b.dataset.tp!=null){const ti=+b.dataset.tp;if(false&&ti>=5&&!window.careerPilotPremium){const box=document.createElement('div');box.className='card upgrade-modal';box.innerHTML='<div class="ey">PREMIUM TEMPLATE</div><h2>Unlock the full CV library</h2><p class="hint">Templates 1–5 are available in Free. Premium unlocks the complete 30-template professional library and future AI features.</p><div class="price-card"><b>CareerPilot Premium</b><ul><li>All 30 professional CV templates</li><li>Unlimited CV versions</li><li>AI Job Match, Cover Letter & Interview Coach</li><li>Priority cloud features</li></ul><button class="pri" id="upgradeNow">Continue to Premium</button> <button id="closeUpgrade">Not now</button></div>';$('v-design').prepend(box);$('closeUpgrade').onclick=()=>box.remove();$('upgradeNow').onclick=()=>{box.remove();go('profile');setTimeout(()=>$('upgradePlan')?.click(),50)};return}Object.assign(S.t,TPL[ti][1]);applyT();sync()}
   if(b.dataset.col){S.t.ac=b.dataset.col;applyT();sync()}
   if(b.dataset.lay){S.t.lay=b.dataset.lay;applyT();sync()}
 });
