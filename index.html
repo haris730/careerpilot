@@ -1076,8 +1076,8 @@ async function loadPlanStatus(){
   try{
     const {data:ent}=await sb.rpc('ensure_my_entitlement');
     const plan=ent?.plan==='premium'&&(!ent?.premium_until||new Date(ent.premium_until)>new Date())?'premium':'free';
-    const period=new Date();period.setDate(1);period.setHours(0,0,0,0);
-    const {data:usage}=await sb.from('ai_usage').select('ai_count').eq('user_id',currentUser.id).eq('period_start',period.toISOString().slice(0,10)).maybeSingle();
+    const now=new Date();const periodStart=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),1));
+    const {data:usage}=await sb.from('ai_usage').select('ai_count').eq('user_id',currentUser.id).eq('period_start',periodStart.toISOString().slice(0,10)).maybeSingle();
     const count=Number(usage?.ai_count||0),remaining=Math.max(0,3-count);
     const name=$('planName'),pill=$('planPill'),line=$('planUsage');
     if(name)name.textContent=plan==='premium'?'Premium Plan':'Free Plan';
