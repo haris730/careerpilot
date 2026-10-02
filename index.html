@@ -652,7 +652,7 @@ function jobExperience(j){
 function jobLocationText(j){
   return Array.isArray(j.candidate_required_location)?j.candidate_required_location.join(', '):(j.candidate_required_location||'Remote');
 }
-function jobDescriptionText(j){return String(j.description||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/\\s+/g,' ').trim()}
+function jobDescriptionText(j){return String(j.description||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/\s+/g,' ').trim()}
 function addJobToTracker(j,status='Saved'){const a=loadTracks(),url=j.url||'';if(a.some(x=>x.link&&url&&x.link===url)){toast('Already in Application Tracker');return false}a.unshift({role:j.title||'Untitled role',company:j.company_name||'',status,link:url,jobKey:jobKey(j),createdAt:Date.now()});saveTracks(a);renderTracks();toast('✓ Added to Application Tracker');return true}
 function openJobDetails(j){
  const modal=$('jobDetailModal');if(!modal)return;
