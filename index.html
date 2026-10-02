@@ -394,13 +394,13 @@ const F=[['name','Full Name','👤'],['title','Professional Title','💼'],['ema
 const XF=[['position','Job Title'],['company','Company'],['start','Start Date'],['end','End Date'],['location','Location']];
 const DF=[['degree','Degree / Qualification'],['institute','Institute'],['year','Year'],['location','Location']];
 const LISTS=['skills','languages','achievements','certs','projects'];
-const dflt=()=>({d:{name:'Muhammad Haris',title:'Graphic Designer & E-commerce Specialist',email:'muhammad.haris@example.com',phone:'+92 300 0000000',location:'Karachi, Pakistan',link:'linkedin.com/in/muhammadharis-design/',
-summary:'Creative and results-oriented Graphic Designer and E-commerce Specialist with hands-on experience creating digital content, e-commerce creatives, social media designs, and short-form videos. Skilled in combining design, content, and AI-powered tools to support online businesses and digital brands. Comfortable working with remote teams and international clients.',
-skills:['Graphic Design','E-commerce','Content Creation','Video Editing','Social Media Design','Canva & Adobe Photoshop','AI Productivity Tools','Digital Marketing'],languages:['English – Professional','Urdu – Native'],
-achievements:['Created digital creatives for multiple online business projects','Developed e-commerce websites and product-focused digital experiences','Built a portfolio combining graphic design, e-commerce, and AI-assisted workflows'],certs:['E-commerce Professional Certificate · 2024'],
-projects:['E-commerce Store Website – responsive online store experience','Personal Portfolio Website – professional project showcase','Social Media Content System – reusable graphics and short-form video content'],
-exp:[{position:'Graphic Designer & E-commerce Specialist',company:'Digital Creative Studio',start:'2024',end:'Present',location:'Karachi, Pakistan',description:'• Created social media graphics, promotional creatives, and digital marketing materials.\n• Designed e-commerce product visuals for online stores and marketplaces.\n• Edited short-form videos for social media campaigns.\n• Used AI-powered tools to improve creative workflows and content production.'}],
-edu:[{degree:'Bachelor of Commerce',institute:'Karachi Business Institute',year:'2022',location:'Karachi, Pakistan'}]},st:{},t:{ac:'#1f4e79',bg:'#ffffff',ff:FONTS[1][0],tpl:'mo',lay:'2',mg:40,sp:18,cw:245,gp:0}});
+const dflt=()=>({d:{name:'Muhammad Haris',title:'Graphic Designer | E-commerce & AI Digital Creator',email:'',phone:'',location:'Karachi, Pakistan',link:'linkedin.com/in/muhammadharis-design/',
+summary:'Graphic Designer with hands-on experience in e-commerce creatives, social media design, short-form video editing and AI-assisted digital workflows. Experienced with Canva, Adobe Photoshop and CapCut, with additional practical work in e-commerce, website creation and online content projects. Comfortable working on remote and digital projects.',
+skills:['Graphic Design','Canva','Adobe Photoshop','CapCut Video Editing','E-commerce Design','Social Media Design','AI-Assisted Workflows','Website Creation','Product & Content Design','E-commerce Operations'],languages:['Urdu – Native','English – Basic'],
+achievements:['Worked in graphic design roles at Eco Technologies, Glowmesh and Netpulse Digital','Created e-commerce and social media creatives for online business projects','Built and worked on websites and digital projects using AI-assisted workflows, GitHub and Cloudflare'],certs:['E-commerce / Shopify Course'],
+projects:['CareerPilot – AI Job & CV Assistant web app','KickVibe – footwear e-commerce website','RESHAM – Pakistani women’s fashion website','Pinterest fashion and footwear content project'],
+exp:[{position:'Graphic Designer',company:'Netpulse Digital',start:'',end:'4 months',location:'Karachi, Pakistan',description:'Created social media and e-commerce graphics using Canva and Photoshop, supporting visual content for digital campaigns and online brands.'},{position:'Graphic Designer',company:'Glowmesh',start:'',end:'4 months',location:'Karachi, Pakistan',description:'Designed digital creatives and social media content to support online brand communication and e-commerce content.'},{position:'Graphic Designer',company:'Eco Technologies',start:'',end:'4 months',location:'Karachi, Pakistan',description:'Created marketing graphics and digital content using Canva and Photoshop.'}],
+edu:[{degree:'Diploma of Associate Engineering (Mechanical)',institute:'Technical Diploma',year:'2018',location:'Pakistan'},{degree:'Matriculation',institute:'Secondary School',year:'',location:'Pakistan'}]},st:{},t:{ac:'#1f4e79',bg:'#ffffff',ff:FONTS[1][0],tpl:'mo',lay:'2',mg:40,sp:18,cw:245,gp:0}});
 const mk=k=>k.replace('cv-link','cv-portfolio').replace(/^cv-h-(\w+)$/,'cv-$1-heading').replace(/^cv-skills-(\d)/,'cv-skill-$1').replace('-institute','-school');
 function norm(o){const b=dflt(),st={};for(const k in (o.st||{}))st[mk(k)]=o.st[k];return{d:Object.assign(b.d,o.d),st,t:Object.assign(b.t,o.t)}}
 const ls=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
@@ -525,7 +525,7 @@ $('v-home').innerHTML=`
 <div class="dash-head"><div><div class="ey">CAREERPILOT DASHBOARD</div><h2 style="margin:3px 0">Build your career in one place.</h2><p>CVs, professional templates, global jobs and career tools.</p></div><button class="pri" data-v="cv">✎ Build / Edit CV</button></div>
 <div class="dashboard-grid">
 <div class="card dstat"><span>📄</span><b data-cv-count>1</b><small>CVs created</small></div>
-<div class="card dstat"><span>🎨</span><b>12</b><small>Professional CV templates</small></div>
+<div class="card dstat"><span>🎨</span><b>30</b><small>Professional CV templates</small></div>
 <div class="card dstat"><span>🌍</span><b>5</b><small>Job platforms</small></div>
 <div class="card dstat"><span>📊</span><b>58%</b><small>CV profile ready</small><div class="progress"><i></i></div></div>
 </div>
