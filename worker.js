@@ -1,5 +1,6 @@
 const MODEL = '@cf/meta/llama-3.1-8b-instruct-fp8';
 const FREE_AI_LIMIT = 3;
+const PREMIUM_AI_LIMIT = 100;
 
 const SUPABASE_URL = 'https://gxixgacuryslyoawhrej.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_cjEbbJ_VUoT_vKMOR-vBmA_It8gXYQd';
@@ -145,7 +146,7 @@ export default {
       if (body.task !== 'letter' && !String(body.input || '').trim()) return json({ error: 'Input is required.' }, 400);
       if (body.task === 'tailor' && !String(body.jobDescription || '').trim()) return json({ error: 'Job description is required for tailoring.' }, 400);
       if (body.task === 'letter' && (!String(body.role || '').trim() || !String(body.jobDescription || '').trim())) return json({ error: 'Job title and job description are required.' }, 400);
-      const quota = await supabaseRpc(request,'consume_ai_credit',{p_kind:String(body.task||'ai'),p_free_limit:FREE_AI_LIMIT});
+      const quota = await supabaseRpc(request,'consume_ai_credit',{p_kind:String(body.task||'ai'),p_free_limit:FREE_AI_LIMIT,p_premium_limit:PREMIUM_AI_LIMIT});
       if (!quota) return json({ error: 'Usage service unavailable. Please try again.' }, 503);
       if (!quota.allowed) return json({ error: 'Free AI limit reached. Upgrade to Premium for more AI actions.' , code:'AI_LIMIT_REACHED', plan:quota.plan, remaining:quota.remaining}, 402);
       try {
