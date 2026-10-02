@@ -1,13 +1,13 @@
 const MODEL = '@cf/meta/llama-3.1-8b-instruct-fp8';
-const LIMIT = 6;
-const WINDOW_MS = 60 * 60 * 1000;
-const buckets = new Map();
+const FREE_AI_LIMIT = 3;
 
 const SUPABASE_URL = 'https://gxixgacuryslyoawhrej.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_cjEbbJ_VUoT_vKMOR-vBmA_It8gXYQd';
 function corsHeaders(origin){return{'access-control-allow-origin':origin,'access-control-allow-methods':'GET, POST, DELETE, OPTIONS','access-control-allow-headers':'content-type, authorization','cache-control':'no-store'}}
 function apiJson(data,status,origin){return new Response(JSON.stringify(data),{status,headers:{...corsHeaders(origin),'content-type':'application/json; charset=utf-8'}})}
 async function supabaseUser(request){const auth=request.headers.get('Authorization')||'';if(!auth.startsWith('Bearer '))return null;const res=await fetch(SUPABASE_URL+'/auth/v1/user',{headers:{apikey:SUPABASE_KEY,authorization:auth,accept:'application/json'}});if(!res.ok)return null;try{return await res.json()}catch{return null}}
+function bearer(request){const auth=request.headers.get('Authorization')||'';return auth.startsWith('Bearer ')?auth:null}
+async function supabaseRpc(request,name,body){const auth=bearer(request);if(!auth)return null;const res=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:{apikey:SUPABASE_KEY,authorization:auth,'content-type':'application/json',accept:'application/json'},body:JSON.stringify(body||{})});if(!res.ok)return null;try{return await res.json()}catch{return null}}
 function alertJobKey(j){return String(j.id||j.url||((j.title||'')+'|'+(j.company_name||'')))}
 function alertSalaryMax(j){const s=String(j.salary||'').replace(/,/g,'');const nums=[...s.matchAll(/(?:\$|€|£)?\s*(\d+(?:\.\d+)?)\s*([kKmM])?/g)].map(m=>{let n=Number(m[1]);if((m[2]||'').toLowerCase()==='k')n*=1000;if((m[2]||'').toLowerCase()==='m')n*=1000000;return n});return nums.length?Math.max(...nums):0}
 function alertJobExperience(j){const t=String(j.title||'').toLowerCase();if(/senior|sr\.?|lead|principal|staff|manager|director|head|architect/.test(t))return'senior';if(/junior|jr\.?|entry|intern|trainee|graduate/.test(t))return'entry';return'mid'}
@@ -29,18 +29,6 @@ function allowed(request) {
   const origin = request.headers.get('Origin');
   if (!origin) return true;
   try { return new URL(origin).origin === new URL(request.url).origin; } catch { return false; }
-}
-
-function rateLimited(ip) {
-  const now = Date.now();
-  const old = buckets.get(ip) || { start: now, count: 0 };
-  if (now - old.start >= WINDOW_MS) { old.start = now; old.count = 0; }
-  old.count++;
-  buckets.set(ip, old);
-  if (buckets.size > 5000) {
-    for (const [key, value] of buckets) if (now - value.start >= WINDOW_MS) buckets.delete(key);
-  }
-  return old.count > LIMIT;
 }
 
 function buildPrompt(body) {
@@ -104,14 +92,17 @@ export default {
       if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
       if (!allowed(request)) return json({ error: 'Origin not allowed' }, 403);
       if (!env.AI || typeof env.AI.run !== 'function') return json({ error: 'AI service is not configured. Add the Workers AI binding named AI in Cloudflare.' }, 503);
-      const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-      if (rateLimited(ip)) return json({ error: 'Hourly AI limit reached. Please try again later.' }, 429);
+      const user = await supabaseUser(request);
+      if (!user?.id) return json({ error: 'Sign in required for AI tools.' }, 401);
       let body;
       try { body = await request.json(); } catch { return json({ error: 'Invalid JSON request.' }, 400); }
       if (!['bullet','summary','tailor','letter'].includes(body.task)) return json({ error: 'Invalid AI task.' }, 400);
       if (body.task !== 'letter' && !String(body.input || '').trim()) return json({ error: 'Input is required.' }, 400);
       if (body.task === 'tailor' && !String(body.jobDescription || '').trim()) return json({ error: 'Job description is required for tailoring.' }, 400);
       if (body.task === 'letter' && (!String(body.role || '').trim() || !String(body.jobDescription || '').trim())) return json({ error: 'Job title and job description are required.' }, 400);
+      const quota = await supabaseRpc(request,'consume_ai_credit',{p_kind:String(body.task||'ai'),p_free_limit:FREE_AI_LIMIT});
+      if (!quota) return json({ error: 'Usage service unavailable. Please try again.' }, 503);
+      if (!quota.allowed) return json({ error: 'Free AI limit reached. Upgrade to Premium for more AI actions.' , code:'AI_LIMIT_REACHED', plan:quota.plan, remaining:quota.remaining}, 402);
       try {
         const result = await env.AI.run(MODEL, { prompt: buildPrompt(body), max_tokens: 700, temperature: 0.35 });
         const text = typeof result === 'string' ? result : (result?.response || result?.text || result?.output_text || '');
