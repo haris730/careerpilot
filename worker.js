@@ -125,6 +125,39 @@ export default {
         if (!res.ok) return json({ error: 'Job provider unavailable.' }, 502);
         const data = await res.json();
         let sourceJobs = Array.isArray(data.jobs) ? data.jobs : [];
+        let source = 'Remotive';
+
+        // Remotive is the primary source. If it returns an empty feed,
+        // use Jobicy as a server-side fallback so the live search does not
+        // show 0 jobs when the primary provider is temporarily empty.
+        if (!sourceJobs.length) {
+          try {
+            const fallback = new URL('https://jobicy.com/api/v2/remote-jobs');
+            fallback.searchParams.set('count', '100');
+            if (q) fallback.searchParams.set('tag', q);
+            const fr = await fetch(fallback.toString(), { headers: { 'accept': 'application/json', 'user-agent': 'CareerPilot/1.0' } });
+            if (fr.ok) {
+              const fd = await fr.json();
+              if (Array.isArray(fd.jobs) && fd.jobs.length) {
+                sourceJobs = fd.jobs.map(j => ({
+                  id: j.id,
+                  title: j.jobTitle,
+                  company_name: j.companyName,
+                  category: Array.isArray(j.jobIndustry) ? j.jobIndustry.join(', ') : String(j.jobIndustry || ''),
+                  job_type: Array.isArray(j.jobType) ? String(j.jobType[0] || '').toLowerCase().replace('-', '_') : String(j.jobType || '').toLowerCase().replace('-', '_'),
+                  candidate_required_location: j.jobGeo || 'Remote',
+                  salary: j.salaryMin || j.salaryMax ? `${j.salaryMin || ''}${j.salaryMin && j.salaryMax ? ' - ' : ''}${j.salaryMax || ''} ${j.salaryCurrency || ''}`.trim() : '',
+                  publication_date: j.pubDate,
+                  url: j.url,
+                  description: j.jobDescription || j.jobExcerpt || '',
+                  tags: Array.isArray(j.jobIndustry) ? j.jobIndustry : []
+                }));
+                source = 'Jobicy';
+              }
+            }
+          } catch {}
+        }
+
         if (type) sourceJobs = sourceJobs.filter(j => String(j.job_type || '') === type);
         const jobs = sourceJobs.slice(0, limit).map(j => ({
           id: j.id, title: j.title, company_name: j.company_name, category: j.category,
@@ -132,7 +165,7 @@ export default {
           salary: j.salary, publication_date: j.publication_date, url: j.url,
           description: j.description || '', tags: Array.isArray(j.tags) ? j.tags : []
         }));
-        return json({ jobs, source: 'Remotive', fetched_at: new Date().toISOString() });
+        return json({ jobs, source, fetched_at: new Date().toISOString() });
       } catch {
         return json({ error: 'Job search failed. Please try again.' }, 502);
       }
