@@ -116,48 +116,47 @@ export default {
       const q = String(url.searchParams.get('search') || '').slice(0, 120);
       const type = String(url.searchParams.get('type') || '').slice(0, 30);
       const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 20), 1), 30);
-      const upstream = new URL('https://remotive.com/api/remote-jobs');
-      if (q) upstream.searchParams.set('search', q);
-      // Remotive documents category/search/company/limit filters, not a "type"
-      // query parameter. Fetch a wider pool and apply employment type locally
-      // so a type filter cannot accidentally return zero jobs.
-      upstream.searchParams.set('limit', '100');
+      // Use Jobicy as the primary public jobs feed. Its current public API
+      // provides recent remote listings without an API key. Keep Remotive as a
+      // fallback so the live search still works if Jobicy is temporarily unavailable.
       try {
-        const res = await fetch(upstream.toString(), { headers: { 'accept': 'application/json', 'user-agent': 'CareerPilot/1.0' } });
-        if (!res.ok) return new Response(JSON.stringify({ error: 'Job provider unavailable.' }), { status: 502, headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': jobsOrigin, 'cache-control': 'no-store' } });
-        const data = await res.json();
-        let sourceJobs = Array.isArray(data.jobs) ? data.jobs : [];
-        let source = 'Remotive';
+        const primary = new URL('https://jobicy.com/api/v2/remote-jobs');
+        primary.searchParams.set('count', '100');
+        if (q) primary.searchParams.set('tag', q);
+        const pr = await fetch(primary.toString(), { headers: { 'accept': 'application/json', 'user-agent': 'CareerPilot/1.0' } });
+        let sourceJobs = [];
+        let source = 'Jobicy';
+        if (pr.ok) {
+          const pd = await pr.json();
+          if (Array.isArray(pd.jobs)) {
+            sourceJobs = pd.jobs.map(j => ({
+              id: j.id,
+              title: j.jobTitle,
+              company_name: j.companyName,
+              category: Array.isArray(j.jobIndustry) ? j.jobIndustry.join(', ') : String(j.jobIndustry || ''),
+              job_type: Array.isArray(j.jobType) ? String(j.jobType[0] || '').toLowerCase().replace(/-/g, '_') : String(j.jobType || '').toLowerCase().replace(/-/g, '_'),
+              candidate_required_location: j.jobGeo || 'Remote',
+              salary: j.salaryMin || j.salaryMax ? String(j.salaryMin || '') + (j.salaryMin && j.salaryMax ? ' - ' : '') + String(j.salaryMax || '') + ' ' + String(j.salaryCurrency || '') : '',
+              publication_date: j.pubDate,
+              url: j.url,
+              description: j.jobDescription || j.jobExcerpt || '',
+              tags: Array.isArray(j.jobIndustry) ? j.jobIndustry : []
+            }));
+          }
+        }
 
-        // Remotive is the primary source. If it returns an empty feed,
-        // use Jobicy as a server-side fallback so the live search does not
-        // show 0 jobs when the primary provider is temporarily empty.
         if (!sourceJobs.length) {
-          try {
-            const fallback = new URL('https://jobicy.com/api/v2/remote-jobs');
-            fallback.searchParams.set('count', '100');
-            if (q) fallback.searchParams.set('tag', q);
-            const fr = await fetch(fallback.toString(), { headers: { 'accept': 'application/json', 'user-agent': 'CareerPilot/1.0' } });
-            if (fr.ok) {
-              const fd = await fr.json();
-              if (Array.isArray(fd.jobs) && fd.jobs.length) {
-                sourceJobs = fd.jobs.map(j => ({
-                  id: j.id,
-                  title: j.jobTitle,
-                  company_name: j.companyName,
-                  category: Array.isArray(j.jobIndustry) ? j.jobIndustry.join(', ') : String(j.jobIndustry || ''),
-                  job_type: Array.isArray(j.jobType) ? String(j.jobType[0] || '').toLowerCase().replace('-', '_') : String(j.jobType || '').toLowerCase().replace('-', '_'),
-                  candidate_required_location: j.jobGeo || 'Remote',
-                  salary: j.salaryMin || j.salaryMax ? `${j.salaryMin || ''}${j.salaryMin && j.salaryMax ? ' - ' : ''}${j.salaryMax || ''} ${j.salaryCurrency || ''}`.trim() : '',
-                  publication_date: j.pubDate,
-                  url: j.url,
-                  description: j.jobDescription || j.jobExcerpt || '',
-                  tags: Array.isArray(j.jobIndustry) ? j.jobIndustry : []
-                }));
-                source = 'Jobicy';
-              }
+          const fallback = new URL('https://remotive.com/api/remote-jobs');
+          if (q) fallback.searchParams.set('search', q);
+          fallback.searchParams.set('limit', '100');
+          const fr = await fetch(fallback.toString(), { headers: { 'accept': 'application/json', 'user-agent': 'CareerPilot/1.0' } });
+          if (fr.ok) {
+            const fd = await fr.json();
+            if (Array.isArray(fd.jobs)) {
+              sourceJobs = fd.jobs;
+              source = 'Remotive';
             }
-          } catch {}
+          }
         }
 
         if (type) sourceJobs = sourceJobs.filter(j => String(j.job_type || '') === type);
