@@ -108,9 +108,11 @@ export default {
     if (url.pathname === '/api/checkout') return createLemonCheckout(request, env, url);
     if (url.pathname === '/api/job-alerts') return handleServerAlerts(request, env, url);
     if (url.pathname === '/api/jobs') {
-      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { 'access-control-allow-origin': url.origin, 'access-control-allow-methods': 'GET, OPTIONS', 'access-control-allow-headers': 'content-type' } });
-      if (request.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
-      if (!allowed(request)) return json({ error: 'Origin not allowed' }, 403);
+      const jobsOrigin = 'https://careerpilot.pages.dev';
+      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { 'access-control-allow-origin': jobsOrigin, 'access-control-allow-methods': 'GET, OPTIONS', 'access-control-allow-headers': 'content-type', 'access-control-max-age': '86400' } });
+      if (request.method !== 'GET') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': jobsOrigin, 'cache-control': 'no-store' } });
+      const requestOrigin = request.headers.get('Origin');
+      if (requestOrigin && requestOrigin !== jobsOrigin) return new Response(JSON.stringify({ error: 'Origin not allowed' }), { status: 403, headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': jobsOrigin, 'cache-control': 'no-store' } });
       const q = String(url.searchParams.get('search') || '').slice(0, 120);
       const type = String(url.searchParams.get('type') || '').slice(0, 30);
       const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 20), 1), 30);
@@ -122,7 +124,7 @@ export default {
       upstream.searchParams.set('limit', '100');
       try {
         const res = await fetch(upstream.toString(), { headers: { 'accept': 'application/json', 'user-agent': 'CareerPilot/1.0' } });
-        if (!res.ok) return json({ error: 'Job provider unavailable.' }, 502);
+        if (!res.ok) return new Response(JSON.stringify({ error: 'Job provider unavailable.' }), { status: 502, headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': jobsOrigin, 'cache-control': 'no-store' } });
         const data = await res.json();
         let sourceJobs = Array.isArray(data.jobs) ? data.jobs : [];
         let source = 'Remotive';
@@ -165,9 +167,9 @@ export default {
           salary: j.salary, publication_date: j.publication_date, url: j.url,
           description: j.description || '', tags: Array.isArray(j.tags) ? j.tags : []
         }));
-        return json({ jobs, source, fetched_at: new Date().toISOString() });
+        return new Response(JSON.stringify({ jobs, source, fetched_at: new Date().toISOString() }), { status: 200, headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': jobsOrigin, 'cache-control': 'no-store' } });
       } catch {
-        return json({ error: 'Job search failed. Please try again.' }, 502);
+        return new Response(JSON.stringify({ error: 'Job search failed. Please try again.' }), { status: 502, headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': jobsOrigin, 'cache-control': 'no-store' } });
       }
     }
     if (url.pathname === '/api/ai') {
