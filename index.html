@@ -801,7 +801,7 @@ async function loadLiveJobs(){
     let rows=Array.isArray(data.jobs)?data.jobs:[];
     window.__careerPilotLiveJobs=rows;
     const needle=loc.toLowerCase();
-    if(needle)rows=rows.filter(j=>jobLocationText(j).toLowerCase().includes(needle)||String(j.title||'').toLowerCase().includes(needle)||String(j.company_name||'').toLowerCase().includes(needle));
+    if(needle)rows=rows.filter(j=>needle==='remote'||jobLocationText(j).toLowerCase().includes(needle)||String(j.title||'').toLowerCase().includes(needle)||String(j.company_name||'').toLowerCase().includes(needle));
     if(exp)rows=rows.filter(j=>jobExperience(j)===exp);
     if(salary)rows=rows.filter(j=>jobSalaryMax(j)>=salary);
     if(sort==='salary')rows.sort((a,b)=>jobSalaryMax(b)-jobSalaryMax(a));
