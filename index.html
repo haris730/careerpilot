@@ -153,10 +153,12 @@ input[type=range]{width:100%}
 .seg{display:flex;gap:3px;margin-top:4px}.seg button{margin:0;flex:1;padding:6px 0}.seg button.on{background:var(--g);border:0}
 .mnav,.fab{display:none}
 @media(max-width:767px){
+/* Mobile: Templates and Design are separate entry points. */
 #v-design[data-mobile-mode="templates"] .tabs [data-dt]:not(:first-child),
-#v-design[data-mobile-mode="templates"] .dp:not(:first-of-type){display:none}
+#v-design[data-mobile-mode="templates"] .tabs~.dp:not(:first-of-type){display:none}
 #v-design[data-mobile-mode="design"] .tabs [data-dt]:first-child,
-#v-design[data-mobile-mode="design"] .dp:first-of-type{display:none}
+#v-design[data-mobile-mode="design"] .tabs + .dp{display:none}
+#v-design[data-mobile-mode="design"] .tabs [data-dt]{display:inline-flex}
 }
 #toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(10px);background:#1e2230;border:1px solid var(--gb);padding:9px 16px;border-radius:12px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:50}#toast.on{opacity:1;transform:translateX(-50%)}
 body.prev .shell{grid-template-columns:230px 0 1fr}body.prev .editor{display:none}
