@@ -116,18 +116,22 @@ export default {
       const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 20), 1), 30);
       const upstream = new URL('https://remotive.com/api/remote-jobs');
       if (q) upstream.searchParams.set('search', q);
-      if (type) upstream.searchParams.set('type', type);
-      upstream.searchParams.set('limit', String(limit));
+      // Remotive documents category/search/company/limit filters, not a "type"
+      // query parameter. Fetch a wider pool and apply employment type locally
+      // so a type filter cannot accidentally return zero jobs.
+      upstream.searchParams.set('limit', '100');
       try {
         const res = await fetch(upstream.toString(), { headers: { 'accept': 'application/json', 'user-agent': 'CareerPilot/1.0' } });
         if (!res.ok) return json({ error: 'Job provider unavailable.' }, 502);
         const data = await res.json();
-        const jobs = Array.isArray(data.jobs) ? data.jobs.slice(0, limit).map(j => ({
+        let sourceJobs = Array.isArray(data.jobs) ? data.jobs : [];
+        if (type) sourceJobs = sourceJobs.filter(j => String(j.job_type || '') === type);
+        const jobs = sourceJobs.slice(0, limit).map(j => ({
           id: j.id, title: j.title, company_name: j.company_name, category: j.category,
           job_type: j.job_type, candidate_required_location: j.candidate_required_location,
           salary: j.salary, publication_date: j.publication_date, url: j.url,
           description: j.description || '', tags: Array.isArray(j.tags) ? j.tags : []
-        })) : [];
+        }));
         return json({ jobs, source: 'Remotive', fetched_at: new Date().toISOString() });
       } catch {
         return json({ error: 'Job search failed. Please try again.' }, 502);
