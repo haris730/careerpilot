@@ -452,21 +452,6 @@ $('bU').onclick=()=>{if(hi>0){hi--;restore()}};$('bR').onclick=()=>{if(hi<H.leng
 })();
 
 
-/* ---------- reliable browser PDF printing ---------- */
-@media print{
-  @page{size:A4;margin:0}
-  html,body{width:210mm!important;min-width:210mm!important;height:auto!important;min-height:297mm!important;margin:0!important;padding:0!important;background:#fff!important}
-  body.cp-printing{display:block!important;color:#111!important;overflow:visible!important}
-  body.cp-printing > *{display:none!important}
-  body.cp-printing .shell{display:block!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important}
-  body.cp-printing .canvas{display:block!important;width:210mm!important;height:auto!important;min-height:297mm!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;overflow:visible!important}
-  body.cp-printing .ctb,body.cp-printing #esel{display:none!important}
-  body.cp-printing .stage{display:block!important;width:210mm!important;height:auto!important;min-height:297mm!important;margin:0!important;padding:0!important;overflow:visible!important;background:#fff!important}
-  body.cp-printing #fit{display:block!important;width:210mm!important;height:auto!important;margin:0!important;transform:none!important}
-  body.cp-printing #paper{display:block!important;width:210mm!important;min-height:297mm!important;height:auto!important;margin:0!important;padding:0!important;transform:none!important;zoom:1!important;box-shadow:none!important;overflow:visible!important;background:#fff!important;color:#111!important}
-  body.cp-printing #paper *{box-shadow:none!important;filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-  body.cp-printing .el{outline:none!important;caret-color:transparent!important}
-}
 /* ---------- shell: nav + views ---------- */
 const NAV=[['home','⌂','Dashboard'],['cv','✎','CV Builder'],['cvs','▤','My CVs'],['design','▦','Templates'],['jobs','🌐','Live Jobs'],['match','◎','Job Match'],['writer','✦','AI Writing Helper'],['letter','✉','Cover Letter'],['interview','☏','Interview Prep'],['profile','⚙','Settings']];
 $('nav').innerHTML=NAV.map(([v,i,l])=>`<button class="nb" ${v?`data-v="${v}"`:'data-soon="1"'}><i>${i}</i><span>${l}</span>${v?'':'<em>COMING SOON</em>'}</button>`).join('')+'<div class="usr"><div><b data-n></b><small>Free Plan</small></div><button data-soon="1" class="pri">Upgrade</button></div>';
@@ -578,7 +563,22 @@ function printCoverLetter(){
  const w=window.open('','_blank','width=900,height=800');if(!w){toast('Please allow pop-ups to export PDF');return}
  const escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
  const body=escHtml(text).replace(/\\n/g,'<br>');
- w.document.open();w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+escHtml(role)+' — Cover Letter</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,Helvetica,sans-serif;color:#111827;font-size:12pt;line-height:1.65;margin:0}main{white-space:normal}h1{font-size:20pt;margin:0 0 16px}p{margin:0 0 12px}</style></head><body><h1>'+escHtml(role)+' — Cover Letter</h1><main>'+body+'</main></body></html>');w.document.close();setTimeout(()=>{w.focus();w.print()},500)
+ w.document.open();w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+escHtml(role)+' — Cover Letter</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,Helvetica,sans-serif;color:#111827;font-size:12pt;line-height:1.65;margin:0}main{white-space:normal}h1{font-size:20pt;margin:0 0 16px}p{margin:0 0 12px}
+@media print{
+  @page{size:A4;margin:0}
+  html,body{width:210mm!important;min-width:210mm!important;height:auto!important;min-height:297mm!important;margin:0!important;padding:0!important;background:#fff!important}
+  body.cp-printing{display:block!important;color:#111!important;overflow:visible!important}
+  body.cp-printing > *{display:none!important}
+  body.cp-printing .shell{display:block!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important}
+  body.cp-printing .canvas{display:block!important;width:210mm!important;height:auto!important;min-height:297mm!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;overflow:visible!important}
+  body.cp-printing .ctb,body.cp-printing #esel{display:none!important}
+  body.cp-printing .stage{display:block!important;width:210mm!important;height:auto!important;min-height:297mm!important;margin:0!important;padding:0!important;overflow:visible!important;background:#fff!important}
+  body.cp-printing #fit{display:block!important;width:210mm!important;height:auto!important;margin:0!important;transform:none!important}
+  body.cp-printing #paper{display:block!important;width:210mm!important;min-height:297mm!important;height:auto!important;margin:0!important;padding:0!important;transform:none!important;zoom:1!important;box-shadow:none!important;overflow:visible!important;background:#fff!important;color:#111!important}
+  body.cp-printing #paper *{box-shadow:none!important;filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  body.cp-printing .el{outline:none!important;caret-color:transparent!important}
+}
+</style></head><body><h1>'+escHtml(role)+' — Cover Letter</h1><main>'+body+'</main></body></html>');w.document.close();setTimeout(()=>{w.focus();w.print()},500)
 }
 $('makeLetter').onclick=async()=>{
  const role=$('letterRole').value.trim(),company=$('letterCompany').value.trim(),job=$('letterDesc').value.trim();
