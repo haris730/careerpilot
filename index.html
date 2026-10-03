@@ -173,6 +173,16 @@ input,select,textarea{min-height:44px;font-size:16px}
 .mnav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11px;color:var(--mu)}.mnav button.on{color:#fff}.mnav i{font-style:normal;font-size:18px}
 body[data-v=cv]:not(.prev) .fab{display:block}.fab{position:fixed;right:16px;bottom:calc(78px + env(safe-area-inset-bottom,0px));width:54px;height:54px;border-radius:50%;background:var(--g);border:0;box-shadow:0 10px 24px rgba(99,102,241,.5);z-index:40;font-size:20px}
 }
+@media(max-width:767px){
+  .canvas{width:100%;max-width:100%;min-width:0}
+  .ctb{width:100%;max-width:100%;min-width:0;justify-content:flex-start;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x}
+  .ctb::-webkit-scrollbar{display:none}
+  .ctb button,.ctb span{flex:0 0 auto}
+  .ctb button{touch-action:manipulation}
+  .ctb .mo{display:inline-block}
+  .stage{width:100%;min-width:0;overflow:auto}
+  #fit{max-width:none}
+}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media print{@page{size:A4;margin:0}html,body{background:#fff!important;height:auto}.top,.side,.editor,.ctb,#esel,.mnav,.fab,#toast{display:none!important}.shell{display:block;padding:0}.canvas{display:block!important;background:none;border:0;box-shadow:none;overflow:visible;height:auto}.stage{padding:0;overflow:visible}#fit{width:auto!important;height:auto!important}#paper{transform:none!important;box-shadow:none;width:210mm;min-height:297mm}.el:hover,.el.sel{outline:none}.el:empty{display:none}}
 .ai-panel{padding:16px}.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ai-score{font-size:38px;font-weight:800}.ai-list{margin:8px 0 0;padding-left:18px}.ai-list li{margin:6px 0}.ai-actions{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:767px){.ai-grid{grid-template-columns:1fr}}.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.dstat{padding:14px}.dstat b{display:block;font-size:22px;margin-top:5px}.dstat small,.dash-head p,.quick small,.portal small{color:var(--mu)}.quick-grid,.portal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.quick{display:flex;align-items:center;gap:10px;text-align:left;padding:14px}.qi{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:rgba(99,102,241,.15);font-size:19px}.portal-grid{grid-template-columns:repeat(3,1fr)}.portal{padding:12px}.portal b{display:block;margin-bottom:4px}.portal small{display:block;min-height:34px}.progress{height:6px;background:rgba(255,255,255,.08);border-radius:9px;overflow:hidden;margin-top:7px}.progress i{display:block;height:100%;width:58%;background:var(--g)}@media(max-width:900px){.dashboard-grid{grid-template-columns:repeat(2,1fr)}.portal-grid{grid-template-columns:1fr 1fr}}@media(max-width:767px){.dashboard-grid,.quick-grid,.portal-grid{grid-template-columns:1fr}.dash-head{display:block}.dash-head button{margin-top:10px}}\n
@@ -328,7 +338,7 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
     <div class="view on" id="v-home"></div><div class="view" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div><div class="view" id="v-jobs"></div><div class="view" id="v-cvs"></div><div class="view" id="v-match"></div><div class="view" id="v-writer"></div><div class="view" id="v-letter"></div><div class="view" id="v-interview"></div><div class="view" id="v-tracker"></div>
   </section>
   <main class="canvas">
-    <div class="ctb glass"><button class="mo" data-v="cv">Edit</button><button id="zm" aria-label="Zoom out">−</button><span id="zv">100%</span><button id="zp" aria-label="Zoom in">+</button><button id="zf">Fit</button><button class="mo" data-v="design">Design</button><button class="mo" id="bX2">Export</button></div>
+    <div class="ctb glass"><button type="button" class="mo" data-v="cv">Edit</button><button type="button" id="zm" aria-label="Zoom out">−</button><span id="zv">100%</span><button type="button" id="zp" aria-label="Zoom in">+</button><button type="button" id="zf">Fit</button><button type="button" class="mo" data-v="design">Design</button><button type="button" class="mo" id="bX2">Export</button></div>
     <div class="stage" id="stage"><div id="fit"><div id="paper"></div></div></div>
     <div id="esel" class="glass" role="dialog" aria-label="Selected element">
       <div class="eh"><span>Selected: <b id="sn">—</b></span><button id="sx" aria-label="Close">×</button></div>
@@ -1041,6 +1051,10 @@ function applyStyle(el){
 }
 function fit(){const w=$('stage').clientWidth-32;if(w<=0)return;cz=Z||Math.min(1,w/794);paper.style.transform=`scale(${cz})`;$('fit').style.width=794*cz+'px';$('fit').style.height=paper.offsetHeight*cz+'px';$('zv').textContent=Math.round(cz*100)+'%'}
 $('zm').onclick=()=>{Z=Math.max(.3,+(cz-.1).toFixed(2));fit()};$('zp').onclick=()=>{Z=Math.min(2,+(cz+.1).toFixed(2));fit()};$('zf').onclick=()=>{Z=null;fit()};
+/* Mobile CV preview toolbar: keep actions inside the preview and prevent the
+   global navigation click handler from hijacking toolbar taps. */
+Q('.ctb button').forEach(b=>b.addEventListener('click',e=>e.stopPropagation()));
+
 window.addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(fit).observe(paper);
 
 /* ---------- selected element (styles keyed by unique element id) ---------- */
