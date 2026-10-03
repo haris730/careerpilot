@@ -713,12 +713,28 @@ const JOBS=[
  ['Indeed','Global job search with keyword and location search.','https://www.indeed.com/','Worldwide'],
  ['Glassdoor Jobs','Jobs plus company and workplace information.','https://www.glassdoor.com/Job/','Worldwide'],
  ['EURES','Official European job portal and mobility services.','https://eures.europa.eu/','Europe'],
- ['Jobs.com.pk','Pakistan-focused jobs portal.','https://www.jobs.com.pk/','Pakistan']
+ ['Arbeitnow','European jobs aggregator with Germany/Europe-focused listings.','https://www.arbeitnow.com/','Europe'],
+ ['EuroJobs','European job search portal.','https://www.eurojobs.com/','Europe'],
+ ['Europe Language Jobs','Jobs across Europe with language and international roles.','https://www.europelanguagejobs.com/','Europe'],
+ ['Relocate.me','International tech jobs and relocation opportunities.','https://relocate.me/','Europe / Worldwide'],
+ ['EURACTIV Jobs','Jobs across European policy and professional sectors.','https://jobs.euractiv.com/','Europe'],
+ ['Jobs.com.pk','Pakistan-focused jobs portal.','https://www.jobs.com.pk/','Pakistan'],
+ ['National Jobs Portal (NJP)','Pakistan government jobs portal.','https://www.njp.gov.pk/','Pakistan'],
+ ['Rozee.pk','Pakistan jobs and recruitment platform.','https://www.rozee.pk/','Pakistan'],
+ ['USAJOBS','Official U.S. federal government jobs portal.','https://www.usajobs.gov/','USA'],
+ ['ZipRecruiter','U.S. and international job search platform.','https://www.ziprecruiter.com/','USA / Worldwide'],
+ ['Dice','Technology and IT jobs in the United States.','https://www.dice.com/jobs','USA'],
+ ['Wellfound','Startup and technology jobs.','https://wellfound.com/jobs','USA / Worldwide'],
+ ['Adzuna','Job search and aggregation across multiple countries.','https://www.adzuna.com/','USA / Europe / Worldwide'],
+ ['Jooble','International job search engine.','https://jooble.org/','USA / Europe / Worldwide'],
+ ['We Work Remotely','Remote jobs from companies worldwide.','https://weworkremotely.com/','Remote / Worldwide'],
+ ['Remote OK','Remote jobs from around the world.','https://remoteok.com/','Remote / Worldwide'],
+ ['Remotive','Remote jobs from international employers.','https://remotive.com/','Remote / Worldwide']
 ];
 $('v-jobs').innerHTML=`<div class="jobs-quick-nav"><button class="on" data-jobs-tab="live">🌐 Live Jobs</button><button data-jobs-tab="saved">☆ Saved Jobs</button><button data-jobs-tab="alerts">🔔 Job Alerts</button><button data-jobs-tab="tracker">✓ Application Tracker</button></div><div class="card pad">
 <div class="ey" style="margin-bottom:5px">LIVE GLOBAL JOB SEARCH</div>
 <h2 style="margin:0 0 6px">Find real jobs from multiple sources</h2>
-<p class="hint">Search live remote jobs inside CareerPilot. Job details and applications stay with the original job provider.</p>
+<p class="hint">Search live jobs from multiple sources. Job details and applications stay with the original job provider.</p>
 <div class="row"><input id="jobQ" placeholder="Job title, skill or keyword" style="margin:0"><input id="jobLoc" placeholder="Country, region or Remote" style="margin:0"></div>
 <div class="row" style="margin-top:8px"><select id="jobType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><select id="jobExp" style="margin:0"><option value="">All experience levels</option><option value="entry">Entry / Junior</option><option value="mid">Mid-level</option><option value="senior">Senior / Lead</option></select></div>
 <div class="row" style="margin-top:8px"><select id="jobSalary" style="margin:0"><option value="0">Any salary</option><option value="30000">$30k+ / year</option><option value="50000">$50k+ / year</option><option value="75000">$75k+ / year</option><option value="100000">$100k+ / year</option><option value="150000">$150k+ / year</option></select><select id="jobSort" style="margin:0"><option value="recent">Newest first</option><option value="salary">Highest salary</option><option value="match">Best CV match</option></select><button class="pri" id="jobSearchBtn">Search Live Jobs</button></div>
@@ -788,20 +804,48 @@ function jobCard(j){
   const loc=jobLocationText(j);
   const tags=[jobTypeLabel(j.job_type),loc,jobExperience(j)==='entry'?'Entry / Junior':jobExperience(j)==='senior'?'Senior / Lead':'Mid-level'].filter(Boolean).map(jobEsc).join(' · ');
   const saved=isJobSaved(j),m=cvMatch(j);
-  return '<div class="card pad" data-job-card="'+jobEsc(jobKey(j))+'" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0"><div class="ey">'+jobEsc(j.category||'REMOTE JOB')+'</div><h3 style="margin:3px 0 5px">'+jobEsc(j.title)+'</h3><div style="font-weight:600">'+jobEsc(j.company_name||'Company')+'</div><div class="hint" style="margin-top:4px">'+tags+'</div><div class="hint" style="margin-top:4px">💰 '+jobEsc(salary)+' · CV Match '+m.score+'%</div></div><div class="job-card-actions"><button data-job-detail="'+jobEsc(jobKey(j))+'">Details</button><button data-job-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-job-save="'+jobEsc(jobKey(j))+'">'+(saved?'✓ Saved':'☆ Save')+'</button><button data-job-track="'+jobEsc(jobKey(j))+'">+ Tracker</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button class="pri">Apply ↗</button></a></div></div><div class="hint" style="margin-top:10px">Source: Remotive · '+jobEsc(j.publication_date?new Date(j.publication_date).toLocaleDateString():'Recently listed')+'</div><div data-job-match-panel style="display:none"></div></div>'
+  return '<div class="card pad" data-job-card="'+jobEsc(jobKey(j))+'" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0"><div class="ey">'+jobEsc(j.category||'REMOTE JOB')+'</div><h3 style="margin:3px 0 5px">'+jobEsc(j.title)+'</h3><div style="font-weight:600">'+jobEsc(j.company_name||'Company')+'</div><div class="hint" style="margin-top:4px">'+tags+'</div><div class="hint" style="margin-top:4px">💰 '+jobEsc(salary)+' · CV Match '+m.score+'%</div></div><div class="job-card-actions"><button data-job-detail="'+jobEsc(jobKey(j))+'">Details</button><button data-job-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-job-save="'+jobEsc(jobKey(j))+'">'+(saved?'✓ Saved':'☆ Save')+'</button><button data-job-track="'+jobEsc(jobKey(j))+'">+ Tracker</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button class="pri">Apply ↗</button></a></div></div><div class="hint" style="margin-top:10px">Source: '+jobEsc(j.source||'Live Jobs')+' · '+jobEsc(j.publication_date?new Date(j.publication_date).toLocaleDateString():'Recently listed')+'</div><div data-job-match-panel style="display:none"></div></div>'
 }
+function normalizeArbeitnowJob(j){
+  const types=Array.isArray(j.job_types)?j.job_types.join(' '):String(j.job_types||'');
+  const tags=Array.isArray(j.tags)?j.tags:[];
+  const text=(j.title||'')+' '+types+' '+tags.join(' ');
+  const lower=text.toLowerCase();
+  const job_type=/freelance|freelancer|contract/.test(lower)?'freelance':/part[- ]?time/.test(lower)?'part_time':/temporary|fixed[- ]term/.test(lower)?'contract':'full_time';
+  const experience=/senior|lead|manager|director|head|principal/.test(lower)?'senior':/junior|entry|intern|trainee|graduate/.test(lower)?'entry':'mid';
+  return {
+    id:'arbeitnow-'+(j.slug||j.url||j.title||'job'),
+    title:j.title||'Untitled job',
+    company_name:j.company_name||'Company',
+    category:tags[0]||'EUROPE JOB',
+    job_type,
+    location:j.location||'Europe',
+    url:j.url||'https://www.arbeitnow.com/',
+    salary:(j.salary_min||j.salary_max)?((j.salary_min?'€'+j.salary_min:'')+(j.salary_min&&j.salary_max?' – ':'')+(j.salary_max?'€'+j.salary_max:'')):'Salary not listed',
+    salary_min:Number(j.salary_min||0),
+    salary_max:Number(j.salary_max||0),
+    publication_date:j.created_at?new Date(Number(j.created_at)*1000).toISOString():'',
+    description:j.description||'',
+    tags,
+    source:'Arbeitnow',
+    job_experience:experience,
+    remote:!!j.remote
+  };
+}
+
 async function loadLiveJobs(){
   const q=($('jobQ')?.value||'').trim(),loc=($('jobLoc')?.value||'').trim(),type=$('jobType')?.value||'',exp=$('jobExp')?.value||'',salary=Number($('jobSalary')?.value||0),sort=$('jobSort')?.value||'recent';
   const status=$('jobStatus'),cards=$('jobCards');if(!status||!cards)return;
-  status.textContent='Loading live jobs…';cards.innerHTML='<div class="card pad"><div class="hint">Searching live listings…</div></div>';
+  status.textContent='Loading live jobs from multiple sources…';cards.innerHTML='<div class="card pad"><div class="hint">Searching live listings…</div></div>';
   const p=new URLSearchParams();if(q)p.set('search',q);if(type)p.set('type',type);p.set('limit','30');
   try{
     const r=await fetch('https://careerpilot.mohammadhariscom7.workers.dev/api/jobs?'+p.toString(),{headers:{accept:'application/json'}});
     const data=await r.json();if(!r.ok)throw new Error(data.error||'Job service unavailable');
     let rows=Array.isArray(data.jobs)?data.jobs:[];
-    /* If the Worker returns an empty list, retry the same Remotive source
-       directly. This keeps the existing Worker/API path intact while
-       preventing a transient Worker/provider response from showing 0 jobs. */
+
+    /* Keep the existing CareerPilot Worker/API path intact. If it is empty,
+       retain the existing Remotive fallback, then add the public European
+       Arbeitnow feed as a second live source. */
     if(!rows.length){
       const direct=new URL('https://remotive.com/api/remote-jobs');
       if(q)direct.searchParams.set('search',q);
@@ -809,20 +853,35 @@ async function loadLiveJobs(){
       const dr=await fetch(direct.toString(),{headers:{accept:'application/json'}});
       if(dr.ok){
         const dd=await dr.json();
-        rows=Array.isArray(dd.jobs)?dd.jobs:[];
+        rows=Array.isArray(dd.jobs)?dd.jobs.map(j=>({...j,source:'Remotive'})):[];
       }
     }
+
+    /* Add live Europe listings from Arbeitnow without changing the existing
+       Worker deployment, Supabase settings, CV data or other CareerPilot features. */
+    try{
+      const eu=new URL('https://www.arbeitnow.com/api/job-board-api');
+      if(q)eu.searchParams.set('search',q);
+      const er=await fetch(eu.toString(),{headers:{accept:'application/json'}});
+      if(er.ok){
+        const ed=await er.json();
+        const euRows=Array.isArray(ed.data)?ed.data.map(normalizeArbeitnowJob):[];
+        rows=rows.concat(euRows);
+      }
+    }catch(_e){}
+
     if(type)rows=rows.filter(j=>String(j.job_type||'')===type);
     window.__careerPilotLiveJobs=rows;
     const needle=loc.toLowerCase();
     if(needle)rows=rows.filter(j=>needle==='remote'||jobLocationText(j).toLowerCase().includes(needle)||String(j.title||'').toLowerCase().includes(needle)||String(j.company_name||'').toLowerCase().includes(needle));
-    if(exp)rows=rows.filter(j=>jobExperience(j)===exp);
+    if(exp)rows=rows.filter(j=>(j.job_experience||jobExperience(j))===exp);
     if(salary)rows=rows.filter(j=>jobSalaryMax(j)>=salary);
     if(sort==='salary')rows.sort((a,b)=>jobSalaryMax(b)-jobSalaryMax(a));
     else if(sort==='match')rows.sort((a,b)=>cvMatch(b).score-cvMatch(a).score);
     else rows.sort((a,b)=>new Date(b.publication_date||0)-new Date(a.publication_date||0));
     cards.innerHTML=rows.length?rows.map(jobCard).join(''):'<div class="card pad"><div class="hint">No live jobs matched these filters. Try broader filters or remove the salary/experience requirement.</div></div>';
-    status.textContent=rows.length+' live job'+(rows.length===1?'':'s')+' found · Source: '+(data.source||'Live API');
+    const sourceLabel=(data.source&&rows.some(j=>j.source===data.source))?data.source:'Multiple live sources';
+    status.textContent=rows.length+' live job'+(rows.length===1?'':'s')+' found · '+sourceLabel;
   }catch(e){
     cards.innerHTML='<div class="card pad"><div class="hint">Live job search is temporarily unavailable. You can still use the job portals below.</div></div>';
     status.textContent='Live search unavailable right now.';
