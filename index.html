@@ -861,19 +861,18 @@ async function loadLiveJobs(){
       const direct=new URL('https://remotive.com/api/remote-jobs');
       if(q)direct.searchParams.set('search',q);
       direct.searchParams.set('limit','100');
-      const dr=await fetch(direct.toString(),{headers:{accept:'application/json'}});
+      const dr=await fetch(direct.toString(),{headers:{accept:'application/json'},mode:'cors'});
       if(dr.ok){
         const dd=await dr.json();
         rows=Array.isArray(dd.jobs)?dd.jobs.map(j=>({...j,source:'Remotive'})):[];
       }
     }
 
-    /* Add live Europe listings from Arbeitnow without changing the existing
-       Worker deployment, Supabase settings, CV data or other CareerPilot features. */
+    /* Add live Europe listings from Arbeitnow as an independent fallback/source. */
     try{
       const eu=new URL('https://www.arbeitnow.com/api/job-board-api');
       if(q)eu.searchParams.set('search',q);
-      const er=await fetch(eu.toString(),{headers:{accept:'application/json'}});
+      const er=await fetch(eu.toString(),{headers:{accept:'application/json'},mode:'cors'});
       if(er.ok){
         const ed=await er.json();
         const euRows=Array.isArray(ed.data)?ed.data.map(normalizeArbeitnowJob):[];
