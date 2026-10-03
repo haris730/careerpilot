@@ -799,6 +799,20 @@ async function loadLiveJobs(){
     const r=await fetch('/api/jobs?'+p.toString(),{headers:{accept:'application/json'}});
     const data=await r.json();if(!r.ok)throw new Error(data.error||'Job service unavailable');
     let rows=Array.isArray(data.jobs)?data.jobs:[];
+    /* If the Worker returns an empty list, retry the same Remotive source
+       directly. This keeps the existing Worker/API path intact while
+       preventing a transient Worker/provider response from showing 0 jobs. */
+    if(!rows.length){
+      const direct=new URL('https://remotive.com/api/remote-jobs');
+      if(q)direct.searchParams.set('search',q);
+      direct.searchParams.set('limit','100');
+      const dr=await fetch(direct.toString(),{headers:{accept:'application/json'}});
+      if(dr.ok){
+        const dd=await dr.json();
+        rows=Array.isArray(dd.jobs)?dd.jobs:[];
+      }
+    }
+    if(type)rows=rows.filter(j=>String(j.job_type||'')===type);
     window.__careerPilotLiveJobs=rows;
     const needle=loc.toLowerCase();
     if(needle)rows=rows.filter(j=>needle==='remote'||jobLocationText(j).toLowerCase().includes(needle)||String(j.title||'').toLowerCase().includes(needle)||String(j.company_name||'').toLowerCase().includes(needle));
