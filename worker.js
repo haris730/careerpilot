@@ -57,7 +57,62 @@ function alertSalaryMax(j){const s=String(j.salary||'').replace(/,/g,'');const n
 function alertJobExperience(j){const t=String(j.title||'').toLowerCase();if(/senior|sr\.?|lead|principal|staff|manager|director|head|architect/.test(t))return'senior';if(/junior|jr\.?|entry|intern|trainee|graduate/.test(t))return'entry';return'mid'}
 function alertJobLocation(j){return Array.isArray(j.candidate_required_location)?j.candidate_required_location.join(', '):String(j.candidate_required_location||'Remote')}
 function alertMatchesJob(j,a){const q=String(a.keyword||'').toLowerCase(),loc=String(a.location||'').toLowerCase(),t=[j.title,j.category,j.company_name,j.job_type,alertJobLocation(j)].join(' ').toLowerCase();if(q&&!t.includes(q))return false;if(loc&&!alertJobLocation(j).toLowerCase().includes(loc)&&!String(j.title||'').toLowerCase().includes(loc)&&!String(j.company_name||'').toLowerCase().includes(loc))return false;if(a.job_type&&String(j.job_type||'')!==a.job_type)return false;if(a.experience&&alertJobExperience(j)!==a.experience)return false;if(Number(a.min_salary||0)&&alertSalaryMax(j)<Number(a.min_salary))return false;return true}
-async function fetchRemoteJobs(){const upstream=new URL('https://remotive.com/api/remote-jobs');upstream.searchParams.set('limit','100');const res=await fetch(upstream.toString(),{headers:{accept:'application/json','user-agent':'CareerPilot/1.0'}});if(!res.ok)throw new Error('Job provider unavailable');const data=await res.json();return Array.isArray(data.jobs)?data.jobs.map(j=>({id:j.id,title:j.title,company_name:j.company_name,category:j.category,job_type:j.job_type,candidate_required_location:j.candidate_required_location,salary:j.salary,publication_date:j.publication_date,url:j.url,description:j.description||'',tags:Array.isArray(j.tags)?j.tags:[]})):[]}
+async function fetchRemoteJobs(){
+  const providers = [
+    {
+      name: 'Himalayas',
+      url: 'https://himalayas.app/jobs/api?limit=20&offset=0',
+      map: j => ({
+        id: j.guid || j.applicationLink || (j.title+'|'+j.companyName),
+        title: j.title,
+        company_name: j.companyName,
+        category: Array.isArray(j.parentCategories) ? j.parentCategories.join(', ') : '',
+        job_type: String(j.employmentType || '').toLowerCase().replace(/\\s+/g,'_'),
+        candidate_required_location: Array.isArray(j.locationRestrictions) && j.locationRestrictions.length ? j.locationRestrictions.join(', ') : 'Remote',
+        salary: j.minSalary || j.maxSalary ? String(j.minSalary || '') + (j.minSalary && j.maxSalary ? ' - ' : '') + String(j.maxSalary || '') + ' ' + String(j.currency || '') : '',
+        publication_date: j.pubDate ? new Date(Number(j.pubDate)*1000).toISOString() : '',
+        url: j.applicationLink || j.guid || '',
+        description: j.description || j.excerpt || '',
+        tags: Array.isArray(j.categories) ? j.categories : []
+      })
+    },
+    {
+      name: 'Jobicy',
+      url: 'https://jobicy.com/api/v2/remote-jobs?count=100',
+      map: j => ({
+        id: j.id,
+        title: j.jobTitle,
+        company_name: j.companyName,
+        category: Array.isArray(j.jobIndustry) ? j.jobIndustry.join(', ') : String(j.jobIndustry || ''),
+        job_type: Array.isArray(j.jobType) ? String(j.jobType[0] || '').toLowerCase().replace(/-/g,'_') : String(j.jobType || '').toLowerCase().replace(/-/g,'_'),
+        candidate_required_location: j.jobGeo || 'Remote',
+        salary: j.salaryMin || j.salaryMax ? String(j.salaryMin || '') + (j.salaryMin && j.salaryMax ? ' - ' : '') + String(j.salaryMax || '') + ' ' + String(j.salaryCurrency || '') : '',
+        publication_date: j.pubDate,
+        url: j.url,
+        description: j.jobDescription || j.jobExcerpt || '',
+        tags: Array.isArray(j.jobIndustry) ? j.jobIndustry : []
+      })
+    },
+    {
+      name: 'Remotive',
+      url: 'https://remotive.com/api/remote-jobs?limit=100',
+      map: j => ({
+        id:j.id,title:j.title,company_name:j.company_name,category:j.category,job_type:j.job_type,
+        candidate_required_location:j.candidate_required_location,salary:j.salary,publication_date:j.publication_date,
+        url:j.url,description:j.description||'',tags:Array.isArray(j.tags)?j.tags:[]
+      })
+    }
+  ];
+  for (const provider of providers) {
+    try {
+      const res = await fetch(provider.url, {headers:{accept:'application/json','user-agent':'CareerPilot/1.0'}});
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (Array.isArray(data.jobs) && data.jobs.length) return data.jobs.map(provider.map);
+    } catch {}
+  }
+  throw new Error('Job provider unavailable');
+}
 async function processServerAlerts(env,onlyIds){if(!env.ALERTS_DB)throw new Error('Alert database is not configured.');const now=Date.now();const where=onlyIds?.length?'WHERE active=1 AND id IN ('+onlyIds.map(()=>'?').join(',')+')':'WHERE active=1';const stmt=onlyIds?.length?env.ALERTS_DB.prepare('SELECT * FROM job_alerts '+where).bind(...onlyIds):env.ALERTS_DB.prepare('SELECT * FROM job_alerts '+where);const {results:alerts=[]}=await stmt.all();if(!alerts.length)return{processed:0,newMatches:0,alerts:[]};const jobs=await fetchRemoteJobs();let newTotal=0;const output=[];for(const a of alerts){const gap=a.frequency==='weekly'?7*86400000:86400000;if(!onlyIds?.length&&a.last_checked&&now-Number(a.last_checked)<gap)continue;const matches=jobs.filter(j=>alertMatchesJob(j,a));let newCount=0;for(const j of matches){const key=alertJobKey(j);const r=await env.ALERTS_DB.prepare('INSERT OR IGNORE INTO job_alert_matches (alert_id,job_key,job_json,first_seen,is_new) VALUES (?,?,?,?,1)').bind(a.id,key,JSON.stringify(j),now).run();if(r.meta?.changes){newCount++;newTotal++}}await env.ALERTS_DB.prepare('UPDATE job_alerts SET last_checked=? WHERE id=?').bind(now,a.id).run();output.push({id:a.id,newCount,checkedAt:now})}return{processed:output.length,newMatches:newTotal,alerts:output}}
 async function handleServerAlerts(request,env,url){const origin=url.origin;if(request.method==='OPTIONS')return apiJson({},204,origin);if(!allowed(request))return apiJson({error:'Origin not allowed'},403,origin);if(!env.ALERTS_DB)return apiJson({error:'Alert database is not configured.'},503,origin);const user=await supabaseUser(request);if(!user?.id)return apiJson({error:'Sign in required.'},401,origin);if(request.method==='GET'){const {results:alerts=[]}=await env.ALERTS_DB.prepare('SELECT id,email,keyword,location,job_type,experience,min_salary,frequency,active,last_checked,created_at FROM job_alerts WHERE user_id=? ORDER BY created_at DESC').bind(user.id).all();const {results:matches=[]}=await env.ALERTS_DB.prepare('SELECT m.alert_id,m.job_key,m.job_json,m.first_seen,m.is_new FROM job_alert_matches m JOIN job_alerts a ON a.id=m.alert_id WHERE a.user_id=? ORDER BY m.first_seen DESC LIMIT 50').bind(user.id).all();return apiJson({alerts,matches:matches.map(m=>({...m,job:JSON.parse(m.job_json||'{}')}))},200,origin)}if(request.method==='POST'){let body;try{body=await request.json()}catch{return apiJson({error:'Invalid JSON request.'},400,origin)}const id=String(body.id||'').slice(0,80),keyword=String(body.keyword||'').slice(0,120),location=String(body.location||'').slice(0,120),jobType=String(body.job_type||'').slice(0,30),experience=String(body.experience||'').slice(0,30);const minSalary=Math.max(0,Math.min(Number(body.min_salary||0),10000000)),frequency=body.frequency==='weekly'?'weekly':'daily';if(!id||(!keyword&&!location))return apiJson({error:'Add a job keyword or location.'},400,origin);const email=String(user.email||'').slice(0,320);const existing=await env.ALERTS_DB.prepare('SELECT user_id FROM job_alerts WHERE id=?').bind(id).first();if(existing&&existing.user_id!==user.id)return apiJson({error:'Alert id already exists.'},409,origin);await env.ALERTS_DB.prepare('INSERT INTO job_alerts (id,user_id,email,keyword,location,job_type,experience,min_salary,frequency,active,last_checked,created_at) VALUES (?,?,?,?,?,?,?,?,?,1,0,?) ON CONFLICT(id) DO UPDATE SET keyword=excluded.keyword,location=excluded.location,job_type=excluded.job_type,experience=excluded.experience,min_salary=excluded.min_salary,frequency=excluded.frequency,active=1,email=excluded.email').bind(id,user.id,email,keyword,location,jobType,experience,minSalary,frequency,Date.now()).run();const checked=await processServerAlerts(env,[id]);return apiJson({ok:true,...checked},200,origin)}if(request.method==='DELETE'){const id=String(url.searchParams.get('id')||'').slice(0,80);if(!id)return apiJson({error:'Alert id is required.'},400,origin);await env.ALERTS_DB.prepare('DELETE FROM job_alerts WHERE id=? AND user_id=?').bind(id,user.id).run();return apiJson({ok:true},200,origin)}return apiJson({error:'Method not allowed'},405)}
 
@@ -109,66 +164,34 @@ export default {
     if (url.pathname === '/api/job-alerts') return handleServerAlerts(request, env, url);
     if (url.pathname === '/api/jobs') {
       const jobsOrigin = 'https://careerpilot.pages.dev';
-      if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { 'access-control-allow-origin': jobsOrigin, 'access-control-allow-methods': 'GET, OPTIONS', 'access-control-allow-headers': 'content-type', 'access-control-max-age': '86400' } });
-      if (request.method !== 'GET') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': jobsOrigin, 'cache-control': 'no-store' } });
-      const requestOrigin = request.headers.get('Origin');
-      if (requestOrigin && requestOrigin !== jobsOrigin) return new Response(JSON.stringify({ error: 'Origin not allowed' }), { status: 403, headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': jobsOrigin, 'cache-control': 'no-store' } });
-      const q = String(url.searchParams.get('search') || '').slice(0, 120);
-      const type = String(url.searchParams.get('type') || '').slice(0, 30);
-      const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 20), 1), 30);
-      // Use Jobicy as the primary public jobs feed. Its current public API
-      // provides recent remote listings without an API key. Keep Remotive as a
-      // fallback so the live search still works if Jobicy is temporarily unavailable.
+      const cors = {'content-type':'application/json; charset=utf-8','access-control-allow-origin':jobsOrigin,'cache-control':'no-store'};
+      if (request.method === 'OPTIONS') return new Response(null,{status:204,headers:{'access-control-allow-origin':jobsOrigin,'access-control-allow-methods':'GET, OPTIONS','access-control-allow-headers':'content-type','access-control-max-age':'86400'}});
+      if (request.method !== 'GET') return new Response(JSON.stringify({error:'Method not allowed'}),{status:405,headers:cors});
+      const requestOrigin=request.headers.get('Origin');
+      if (requestOrigin && requestOrigin!==jobsOrigin) return new Response(JSON.stringify({error:'Origin not allowed'}),{status:403,headers:cors});
+      const q=String(url.searchParams.get('search')||'').slice(0,120);
+      const type=String(url.searchParams.get('type')||'').slice(0,30);
+      const limit=Math.min(Math.max(Number(url.searchParams.get('limit')||20),1),30);
       try {
-        const primary = new URL('https://jobicy.com/api/v2/remote-jobs');
-        primary.searchParams.set('count', '100');
-        if (q) primary.searchParams.set('tag', q);
-        const pr = await fetch(primary.toString(), { headers: { 'accept': 'application/json', 'user-agent': 'CareerPilot/1.0' } });
-        let sourceJobs = [];
-        let source = 'Jobicy';
-        if (pr.ok) {
-          const pd = await pr.json();
-          if (Array.isArray(pd.jobs)) {
-            sourceJobs = pd.jobs.map(j => ({
-              id: j.id,
-              title: j.jobTitle,
-              company_name: j.companyName,
-              category: Array.isArray(j.jobIndustry) ? j.jobIndustry.join(', ') : String(j.jobIndustry || ''),
-              job_type: Array.isArray(j.jobType) ? String(j.jobType[0] || '').toLowerCase().replace(/-/g, '_') : String(j.jobType || '').toLowerCase().replace(/-/g, '_'),
-              candidate_required_location: j.jobGeo || 'Remote',
-              salary: j.salaryMin || j.salaryMax ? String(j.salaryMin || '') + (j.salaryMin && j.salaryMax ? ' - ' : '') + String(j.salaryMax || '') + ' ' + String(j.salaryCurrency || '') : '',
-              publication_date: j.pubDate,
-              url: j.url,
-              description: j.jobDescription || j.jobExcerpt || '',
-              tags: Array.isArray(j.jobIndustry) ? j.jobIndustry : []
-            }));
-          }
+        let sourceJobs=[];
+        let source='Himalayas';
+        const providers=[
+          {name:'Himalayas',url:'https://himalayas.app/jobs/api?limit=20&offset=0',map:j=>({id:j.guid||j.applicationLink||(j.title+'|'+j.companyName),title:j.title,company_name:j.companyName,category:Array.isArray(j.parentCategories)?j.parentCategories.join(', '):'',job_type:String(j.employmentType||'').toLowerCase().replace(/\\s+/g,'_'),candidate_required_location:Array.isArray(j.locationRestrictions)&&j.locationRestrictions.length?j.locationRestrictions.join(', '):'Remote',salary:j.minSalary||j.maxSalary?String(j.minSalary||'')+(j.minSalary&&j.maxSalary?' - ':'')+String(j.maxSalary||'')+' '+String(j.currency||''):'',publication_date:j.pubDate?new Date(Number(j.pubDate)*1000).toISOString():'',url:j.applicationLink||j.guid||'',description:j.description||j.excerpt||'',tags:Array.isArray(j.categories)?j.categories:[]})},
+          {name:'Jobicy',url:'https://jobicy.com/api/v2/remote-jobs?count=100',map:j=>({id:j.id,title:j.jobTitle,company_name:j.companyName,category:Array.isArray(j.jobIndustry)?j.jobIndustry.join(', '):String(j.jobIndustry||''),job_type:Array.isArray(j.jobType)?String(j.jobType[0]||'').toLowerCase().replace(/-/g,'_'):String(j.jobType||'').toLowerCase().replace(/-/g,'_'),candidate_required_location:j.jobGeo||'Remote',salary:j.salaryMin||j.salaryMax?String(j.salaryMin||'')+(j.salaryMin&&j.salaryMax?' - ':'')+String(j.salaryMax||'')+' '+String(j.salaryCurrency||''):'',publication_date:j.pubDate,url:j.url,description:j.jobDescription||j.jobExcerpt||'',tags:Array.isArray(j.jobIndustry)?j.jobIndustry:[]})},
+          {name:'Remotive',url:'https://remotive.com/api/remote-jobs?limit=100',map:j=>({id:j.id,title:j.title,company_name:j.company_name,category:j.category,job_type:j.job_type,candidate_required_location:j.candidate_required_location,salary:j.salary,publication_date:j.publication_date,url:j.url,description:j.description||'',tags:Array.isArray(j.tags)?j.tags:[]})}
+        ];
+        for(const p of providers){
+          try{
+            const u=new URL(p.url); if(q&&p.name!=='Himalayas')u.searchParams.set(p.name==='Jobicy'?'tag':'search',q);
+            const r=await fetch(u.toString(),{headers:{accept:'application/json','user-agent':'CareerPilot/1.0'}});
+            if(r.ok){const d=await r.json();if(Array.isArray(d.jobs)&&d.jobs.length){sourceJobs=d.jobs.map(p.map);source=p.name;break}}
+          }catch{}
         }
-
-        if (!sourceJobs.length) {
-          const fallback = new URL('https://remotive.com/api/remote-jobs');
-          if (q) fallback.searchParams.set('search', q);
-          fallback.searchParams.set('limit', '100');
-          const fr = await fetch(fallback.toString(), { headers: { 'accept': 'application/json', 'user-agent': 'CareerPilot/1.0' } });
-          if (fr.ok) {
-            const fd = await fr.json();
-            if (Array.isArray(fd.jobs)) {
-              sourceJobs = fd.jobs;
-              source = 'Remotive';
-            }
-          }
-        }
-
-        if (type) sourceJobs = sourceJobs.filter(j => String(j.job_type || '') === type);
-        const jobs = sourceJobs.slice(0, limit).map(j => ({
-          id: j.id, title: j.title, company_name: j.company_name, category: j.category,
-          job_type: j.job_type, candidate_required_location: j.candidate_required_location,
-          salary: j.salary, publication_date: j.publication_date, url: j.url,
-          description: j.description || '', tags: Array.isArray(j.tags) ? j.tags : []
-        }));
-        return new Response(JSON.stringify({ jobs, source, fetched_at: new Date().toISOString() }), { status: 200, headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': jobsOrigin, 'cache-control': 'no-store' } });
-      } catch {
-        return new Response(JSON.stringify({ error: 'Job search failed. Please try again.' }), { status: 502, headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': jobsOrigin, 'cache-control': 'no-store' } });
+        if(type)sourceJobs=sourceJobs.filter(j=>String(j.job_type||'')===type);
+        const jobs=sourceJobs.slice(0,limit);
+        return new Response(JSON.stringify({jobs,source,fetched_at:new Date().toISOString()}),{status:200,headers:cors});
+      }catch{
+        return new Response(JSON.stringify({error:'Job search failed. Please try again.'}),{status:502,headers:cors});
       }
     }
     if (url.pathname === '/api/ai') {
