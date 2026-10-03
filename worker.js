@@ -57,6 +57,8 @@ function alertSalaryMax(j){const s=String(j.salary||'').replace(/,/g,'');const n
 function alertJobExperience(j){const t=String(j.title||'').toLowerCase();if(/senior|sr\.?|lead|principal|staff|manager|director|head|architect/.test(t))return'senior';if(/junior|jr\.?|entry|intern|trainee|graduate/.test(t))return'entry';return'mid'}
 function alertJobLocation(j){return Array.isArray(j.candidate_required_location)?j.candidate_required_location.join(', '):String(j.candidate_required_location||'Remote')}
 function alertMatchesJob(j,a){const q=String(a.keyword||'').toLowerCase(),loc=String(a.location||'').toLowerCase(),t=[j.title,j.category,j.company_name,j.job_type,alertJobLocation(j)].join(' ').toLowerCase();if(q&&!t.includes(q))return false;if(loc&&!alertJobLocation(j).toLowerCase().includes(loc)&&!String(j.title||'').toLowerCase().includes(loc)&&!String(j.company_name||'').toLowerCase().includes(loc))return false;if(a.job_type&&String(j.job_type||'')!==a.job_type)return false;if(a.experience&&alertJobExperience(j)!==a.experience)return false;if(Number(a.min_salary||0)&&alertSalaryMax(j)<Number(a.min_salary))return false;return true}
+
+function providerJobs(data){if(Array.isArray(data?.jobs))return data.jobs;if(Array.isArray(data?.data))return data.data;if(Array.isArray(data))return data;return []}
 async function fetchRemoteJobs(){
   const providers = [
     {
@@ -67,7 +69,7 @@ async function fetchRemoteJobs(){
         title: j.title,
         company_name: j.companyName,
         category: Array.isArray(j.parentCategories) ? j.parentCategories.join(', ') : '',
-        job_type: String(j.employmentType || '').toLowerCase().replace(/\\s+/g,'_'),
+        job_type: String(j.employmentType || '').toLowerCase().replace(/\s+/g,'_'),
         candidate_required_location: Array.isArray(j.locationRestrictions) && j.locationRestrictions.length ? j.locationRestrictions.join(', ') : 'Remote',
         salary: j.minSalary || j.maxSalary ? String(j.minSalary || '') + (j.minSalary && j.maxSalary ? ' - ' : '') + String(j.maxSalary || '') + ' ' + String(j.currency || '') : '',
         publication_date: j.pubDate ? new Date(Number(j.pubDate)*1000).toISOString() : '',
@@ -76,6 +78,8 @@ async function fetchRemoteJobs(){
         tags: Array.isArray(j.categories) ? j.categories : []
       })
     },
+          {name:'Remote OK',url:'https://remoteok.com/api',map:j=>({id:j.id||j.slug||j.url,title:j.position,company_name:j.company,category:Array.isArray(j.tags)?j.tags.join(', '):'',job_type:(Array.isArray(j.tags)?j.tags:[]).find(x=>/full[ -]?time|part[ -]?time|contract|freelance/i.test(String(x)))?.toLowerCase().replace(/\s+/g,'_')||'',candidate_required_location:j.location||'Remote',salary:j.salary_min||j.salary_max?String(j.salary_min||'')+(j.salary_min&&j.salary_max?' - ':'')+String(j.salary_max||'')+' USD':'',publication_date:j.date||'',url:j.apply_url||j.url||'',description:j.description||'',tags:Array.isArray(j.tags)?j.tags:[]})},
+          {name:'Arbeitnow',url:'https://www.arbeitnow.com/api/job-board-api',map:j=>({id:j.slug||j.url||(j.title+'|'+j.company_name),title:j.title,company_name:j.company_name,category:Array.isArray(j.tags)?j.tags.join(', '):'',job_type:Array.isArray(j.job_types)?String(j.job_types[0]||'').toLowerCase().replace(/\s+/g,'_'):String(j.job_types||'').toLowerCase().replace(/\s+/g,'_'),candidate_required_location:j.remote?'Remote':(j.location||'Remote'),salary:'',publication_date:j.created_at?new Date(Number(j.created_at)*1000).toISOString():'',url:j.url||'',description:j.description||'',tags:Array.isArray(j.tags)?j.tags:[]})},
     {
       name: 'Jobicy',
       url: 'https://jobicy.com/api/v2/remote-jobs?count=100',
@@ -84,7 +88,7 @@ async function fetchRemoteJobs(){
         title: j.jobTitle,
         company_name: j.companyName,
         category: Array.isArray(j.jobIndustry) ? j.jobIndustry.join(', ') : String(j.jobIndustry || ''),
-        job_type: Array.isArray(j.jobType) ? String(j.jobType[0] || '').toLowerCase().replace(/-/g,'_') : String(j.jobType || '').toLowerCase().replace(/-/g,'_'),
+        job_type: Array.isArray(j.jobType) ? String(j.jobType[0] || '').toLowerCase().replace(/[-\s]+/g,'_') : String(j.jobType || '').toLowerCase().replace(/-/g,'_'),
         candidate_required_location: j.jobGeo || 'Remote',
         salary: j.salaryMin || j.salaryMax ? String(j.salaryMin || '') + (j.salaryMin && j.salaryMax ? ' - ' : '') + String(j.salaryMax || '') + ' ' + String(j.salaryCurrency || '') : '',
         publication_date: j.pubDate,
@@ -108,7 +112,7 @@ async function fetchRemoteJobs(){
       const res = await fetch(provider.url, {headers:{accept:'application/json','user-agent':'CareerPilot/1.0'}});
       if (!res.ok) continue;
       const data = await res.json();
-      if (Array.isArray(data.jobs) && data.jobs.length) return data.jobs.map(provider.map);
+      const raw=providerJobs(data); if(raw.length) return raw.map(provider.map);
     } catch {}
   }
   throw new Error('Job provider unavailable');
@@ -174,7 +178,7 @@ export default {
       const limit=Math.min(Math.max(Number(url.searchParams.get('limit')||20),1),30);
       try {
         let sourceJobs=[];
-        let source='Himalayas';
+        let source='';
         const providers=[
           {name:'Himalayas',url:'https://himalayas.app/jobs/api?limit=20&offset=0',map:j=>({id:j.guid||j.applicationLink||(j.title+'|'+j.companyName),title:j.title,company_name:j.companyName,category:Array.isArray(j.parentCategories)?j.parentCategories.join(', '):'',job_type:String(j.employmentType||'').toLowerCase().replace(/\\s+/g,'_'),candidate_required_location:Array.isArray(j.locationRestrictions)&&j.locationRestrictions.length?j.locationRestrictions.join(', '):'Remote',salary:j.minSalary||j.maxSalary?String(j.minSalary||'')+(j.minSalary&&j.maxSalary?' - ':'')+String(j.maxSalary||'')+' '+String(j.currency||''):'',publication_date:j.pubDate?new Date(Number(j.pubDate)*1000).toISOString():'',url:j.applicationLink||j.guid||'',description:j.description||j.excerpt||'',tags:Array.isArray(j.categories)?j.categories:[]})},
           {name:'Jobicy',url:'https://jobicy.com/api/v2/remote-jobs?count=100',map:j=>({id:j.id,title:j.jobTitle,company_name:j.companyName,category:Array.isArray(j.jobIndustry)?j.jobIndustry.join(', '):String(j.jobIndustry||''),job_type:Array.isArray(j.jobType)?String(j.jobType[0]||'').toLowerCase().replace(/-/g,'_'):String(j.jobType||'').toLowerCase().replace(/-/g,'_'),candidate_required_location:j.jobGeo||'Remote',salary:j.salaryMin||j.salaryMax?String(j.salaryMin||'')+(j.salaryMin&&j.salaryMax?' - ':'')+String(j.salaryMax||'')+' '+String(j.salaryCurrency||''):'',publication_date:j.pubDate,url:j.url,description:j.jobDescription||j.jobExcerpt||'',tags:Array.isArray(j.jobIndustry)?j.jobIndustry:[]})},
@@ -184,9 +188,10 @@ export default {
           try{
             const u=new URL(p.url); if(q&&p.name!=='Himalayas')u.searchParams.set(p.name==='Jobicy'?'tag':'search',q);
             const r=await fetch(u.toString(),{headers:{accept:'application/json','user-agent':'CareerPilot/1.0'}});
-            if(r.ok){const d=await r.json();if(Array.isArray(d.jobs)&&d.jobs.length){sourceJobs=d.jobs.map(p.map);source=p.name;break}}
+            if(r.ok){const d=await r.json();const raw=providerJobs(d);if(raw.length){sourceJobs=raw.map(p.map);source=p.name;break}}
           }catch{}
         }
+        if(!sourceJobs.length)return new Response(JSON.stringify({error:'No live job provider is currently reachable.'}),{status:502,headers:cors});
         if(type)sourceJobs=sourceJobs.filter(j=>String(j.job_type||'')===type);
         const jobs=sourceJobs.slice(0,limit);
         return new Response(JSON.stringify({jobs,source,fetched_at:new Date().toISOString()}),{status:200,headers:cors});
