@@ -880,7 +880,7 @@ async function loadLiveJobs(){
       }
     }catch(_e){}
 
-    if(type)rows=rows.filter(j=>String(j.job_type||'')===type);
+    if(type&&type!=='all')rows=rows.filter(j=>String(j.job_type||'')===type);
     window.__careerPilotLiveJobs=rows;
     const needle=loc.toLowerCase();
     if(needle)rows=rows.filter(j=>needle==='remote'||jobLocationText(j).toLowerCase().includes(needle)||String(j.title||'').toLowerCase().includes(needle)||String(j.company_name||'').toLowerCase().includes(needle));
