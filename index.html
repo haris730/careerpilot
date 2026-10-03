@@ -451,7 +451,6 @@ $('bU').onclick=()=>{if(hi>0){hi--;restore()}};$('bR').onclick=()=>{if(hi<H.leng
  btn.onclick=()=>{document.body.classList.toggle('light');localStorage.setItem('careerpilot_theme_2026',document.body.classList.contains('light')?'light':'dark');paint()};
 })();
 
-
 /* ---------- shell: nav + views ---------- */
 const NAV=[['home','⌂','Dashboard'],['cv','✎','CV Builder'],['cvs','▤','My CVs'],['design','▦','Templates'],['jobs','🌐','Live Jobs'],['match','◎','Job Match'],['writer','✦','AI Writing Helper'],['letter','✉','Cover Letter'],['interview','☏','Interview Prep'],['profile','⚙','Settings']];
 $('nav').innerHTML=NAV.map(([v,i,l])=>`<button class="nb" ${v?`data-v="${v}"`:'data-soon="1"'}><i>${i}</i><span>${l}</span>${v?'':'<em>COMING SOON</em>'}</button>`).join('')+'<div class="usr"><div><b data-n></b><small>Free Plan</small></div><button data-soon="1" class="pri">Upgrade</button></div>';
@@ -468,26 +467,75 @@ $('bS').onclick=()=>{syncActiveLibrary();persist();scheduleCloudSave();toast('CV
 function exportPDF(){
   const source=$('paper');
   if(!source){toast('CV preview is not ready');return}
-  const oldTransform=source.style.transform;
-  const oldFitTransform=$('fit')?.style.transform||'';
-  const oldScroll=window.scrollY;
-  document.body.classList.add('cp-printing');
-  source.style.transform='none';
-  if($('fit'))$('fit').style.transform='none';
-  const cleanup=()=>{
-    document.body.classList.remove('cp-printing');
-    source.style.transform=oldTransform;
-    if($('fit'))$('fit').style.transform=oldFitTransform;
-    window.scrollTo(0,oldScroll);
-    fit();
-  };
-  const afterPrint=()=>{
-    cleanup();
-    window.removeEventListener('afterprint',afterPrint);
-  };
-  window.addEventListener('afterprint',afterPrint);
-  setTimeout(()=>window.print(),150);
-  setTimeout(()=>{if(document.body.classList.contains('cp-printing'))cleanup()},120000);
+  const w=window.open('','_blank','width=1100,height=850');
+  if(!w){toast('Please allow pop-ups to export PDF');return}
+
+  const styles=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n');
+  const clone=source.cloneNode(true);
+
+  // Keep the CV as real HTML text. Never convert it to canvas/image.
+  Q('.el.sel',clone).forEach(x=>x.classList.remove('sel'));
+  Q('.el:hover',clone).forEach(x=>x.classList.remove('hover'));
+  Q('[contenteditable]',clone).forEach(x=>{
+    x.removeAttribute('contenteditable');
+    x.removeAttribute('spellcheck');
+    x.removeAttribute('tabindex');
+  });
+
+  const printCss=`
+    @page{size:A4;margin:0}
+    *{
+      -webkit-print-color-adjust:exact!important;
+      print-color-adjust:exact!important;
+      text-rendering:auto!important;
+      filter:none!important;
+      backdrop-filter:none!important;
+      -webkit-backdrop-filter:none!important;
+      mix-blend-mode:normal!important;
+      perspective:none!important;
+      will-change:auto!important;
+    }
+    html,body{
+      margin:0!important;padding:0!important;
+      width:210mm!important;min-height:297mm!important;
+      background:#fff!important;color:#111827!important;
+      -webkit-user-select:text!important;user-select:text!important;
+    }
+    body{display:block!important}
+    .pdf-wrap{
+      width:210mm!important;min-height:297mm!important;
+      margin:0!important;padding:0!important;
+      overflow:visible!important;background:#fff!important;
+    }
+    .pdf-wrap #paper{
+      width:210mm!important;min-height:297mm!important;height:auto!important;
+      margin:0!important;padding:0!important;
+      transform:none!important;zoom:1!important;box-shadow:none!important;
+      overflow:visible!important;position:relative!important;isolation:auto!important;
+    }
+    .pdf-wrap #paper,.pdf-wrap #paper *{
+      -webkit-user-select:text!important;user-select:text!important;
+    }
+    .el{cursor:default!important;outline:none!important;caret-color:transparent!important}
+    .it,section,.hd{break-inside:avoid!important;page-break-inside:avoid!important}
+    @media print{html,body{width:210mm!important;background:#fff!important}.pdf-wrap{width:210mm!important}}
+  `;
+
+  w.document.open();
+  w.document.write(
+    '<!doctype html><html><head><meta charset="utf-8"><title>CareerPilot CV — '+
+    esc(S.d.name||'CV')+
+    '</title><style>'+styles+'\n'+printCss+
+    '</style></head><body><div class="pdf-wrap">'+
+    clone.outerHTML+
+    '</div></body></html>'
+  );
+  w.document.close();
+
+  const print=()=>{w.focus();w.print()};
+  if(w.document.fonts&&w.document.fonts.ready){
+    w.document.fonts.ready.then(()=>setTimeout(print,500)).catch(()=>setTimeout(print,800));
+  }else setTimeout(print,800);
 }
 $('bX').onclick=$('bX2').onclick=exportPDF;
 function escHtml(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
@@ -563,22 +611,7 @@ function printCoverLetter(){
  const w=window.open('','_blank','width=900,height=800');if(!w){toast('Please allow pop-ups to export PDF');return}
  const escHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
  const body=escHtml(text).replace(/\\n/g,'<br>');
- w.document.open();w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+escHtml(role)+' — Cover Letter</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,Helvetica,sans-serif;color:#111827;font-size:12pt;line-height:1.65;margin:0}main{white-space:normal}h1{font-size:20pt;margin:0 0 16px}p{margin:0 0 12px}
-@media print{
-  @page{size:A4;margin:0}
-  html,body{width:210mm!important;min-width:210mm!important;height:auto!important;min-height:297mm!important;margin:0!important;padding:0!important;background:#fff!important}
-  body.cp-printing{display:block!important;color:#111!important;overflow:visible!important}
-  body.cp-printing > *{display:none!important}
-  body.cp-printing .shell{display:block!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important}
-  body.cp-printing .canvas{display:block!important;width:210mm!important;height:auto!important;min-height:297mm!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;overflow:visible!important}
-  body.cp-printing .ctb,body.cp-printing #esel{display:none!important}
-  body.cp-printing .stage{display:block!important;width:210mm!important;height:auto!important;min-height:297mm!important;margin:0!important;padding:0!important;overflow:visible!important;background:#fff!important}
-  body.cp-printing #fit{display:block!important;width:210mm!important;height:auto!important;margin:0!important;transform:none!important}
-  body.cp-printing #paper{display:block!important;width:210mm!important;min-height:297mm!important;height:auto!important;margin:0!important;padding:0!important;transform:none!important;zoom:1!important;box-shadow:none!important;overflow:visible!important;background:#fff!important;color:#111!important}
-  body.cp-printing #paper *{box-shadow:none!important;filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-  body.cp-printing .el{outline:none!important;caret-color:transparent!important}
-}
-</style></head><body><h1>'+escHtml(role)+' — Cover Letter</h1><main>'+body+'</main></body></html>');w.document.close();setTimeout(()=>{w.focus();w.print()},500)
+ w.document.open();w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+escHtml(role)+' — Cover Letter</title><style>@page{size:A4;margin:18mm}body{font-family:Arial,Helvetica,sans-serif;color:#111827;font-size:12pt;line-height:1.65;margin:0}main{white-space:normal}h1{font-size:20pt;margin:0 0 16px}p{margin:0 0 12px}</style></head><body><h1>'+escHtml(role)+' — Cover Letter</h1><main>'+body+'</main></body></html>');w.document.close();setTimeout(()=>{w.focus();w.print()},500)
 }
 $('makeLetter').onclick=async()=>{
  const role=$('letterRole').value.trim(),company=$('letterCompany').value.trim(),job=$('letterDesc').value.trim();
@@ -734,7 +767,7 @@ function jobExperience(j){
 function jobLocationText(j){
   return Array.isArray(j.candidate_required_location)?j.candidate_required_location.join(', '):(j.candidate_required_location||'Remote');
 }
-function jobDescriptionText(j){return String(j.description||'').replace(/<script[\s\S]*?<\x2Fscript>/gi,' ').replace(/<style[\s\S]*?<\x2Fstyle>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/\s+/g,' ').trim()}
+function jobDescriptionText(j){return String(j.description||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/\s+/g,' ').trim()}
 function addJobToTracker(j,status='Saved'){const a=loadTracks(),url=j.url||'';if(a.some(x=>x.link&&url&&x.link===url)){toast('Already in Application Tracker');return false}a.unshift({role:j.title||'Untitled role',company:j.company_name||'',status,link:url,jobKey:jobKey(j),createdAt:Date.now()});saveTracks(a);renderTracks();toast('✓ Added to Application Tracker');return true}
 function openJobDetails(j){
  const modal=$('jobDetailModal');if(!modal)return;
