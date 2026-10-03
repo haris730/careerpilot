@@ -56,7 +56,7 @@ function alertJobKey(j){return String(j.id||j.url||((j.title||'')+'|'+(j.company
 function alertSalaryMax(j){const s=String(j.salary||'').replace(/,/g,'');const nums=[...s.matchAll(/(?:\$|€|£)?\s*(\d+(?:\.\d+)?)\s*([kKmM])?/g)].map(m=>{let n=Number(m[1]);if((m[2]||'').toLowerCase()==='k')n*=1000;if((m[2]||'').toLowerCase()==='m')n*=1000000;return n});return nums.length?Math.max(...nums):0}
 function alertJobExperience(j){const t=String(j.title||'').toLowerCase();if(/senior|sr\.?|lead|principal|staff|manager|director|head|architect/.test(t))return'senior';if(/junior|jr\.?|entry|intern|trainee|graduate/.test(t))return'entry';return'mid'}
 function alertJobLocation(j){return Array.isArray(j.candidate_required_location)?j.candidate_required_location.join(', '):String(j.candidate_required_location||'Remote')}
-function alertMatchesJob(j,a){const q=String(a.keyword||'').toLowerCase(),loc=String(a.location||'').toLowerCase(),t=[j.title,j.category,j.company_name,j.job_type,alertJobLocation(j)].join(' ').toLowerCase();if(q&&!t.includes(q))return false;if(loc&&!alertJobLocation(j).toLowerCase().includes(loc)&&!String(j.title||'').toLowerCase().includes(loc)&&!String(j.company_name||'').toLowerCase().includes(loc))return false;if(a.job_type&&String(j.job_type||'')!==a.job_type)return false;if(a.experience&&alertJobExperience(j)!==a.experience)return false;if(Number(a.min_salary||0)&&alertSalaryMax(j)<Number(a.min_salary))return false;return true}
+function alertMatchesJob(j,a){const q=String(a.keyword||'').toLowerCase(),loc=String(a.location||'').toLowerCase(),t=[j.title,j.category,j.company_name,j.job_type,alertJobLocation(j),j.description,...(Array.isArray(j.tags)?j.tags:[])].join(' ').toLowerCase();if(q&&!t.includes(q))return false;if(loc&&!alertJobLocation(j).toLowerCase().includes(loc)&&!String(j.title||'').toLowerCase().includes(loc)&&!String(j.company_name||'').toLowerCase().includes(loc)&&!String(j.description||'').toLowerCase().includes(loc))return false;if(a.job_type&&String(j.job_type||'')!==a.job_type)return false;if(a.experience&&alertJobExperience(j)!==a.experience)return false;if(Number(a.min_salary||0)&&alertSalaryMax(j)<Number(a.min_salary))return false;return true}
 
 function providerJobs(data){if(Array.isArray(data?.jobs))return data.jobs;if(Array.isArray(data?.data))return data.data;if(Array.isArray(data))return data;return []}
 async function fetchRemoteJobs(){
@@ -192,7 +192,7 @@ export default {
       if (requestOrigin && requestOrigin!==jobsOrigin) return new Response(JSON.stringify({error:'Origin not allowed'}),{status:403,headers:cors});
       const q=String(url.searchParams.get('search')||'').trim().toLowerCase().slice(0,120);
       const type=String(url.searchParams.get('type')||'').slice(0,30);
-      const limit=Math.min(Math.max(Number(url.searchParams.get('limit')||20),1),30);
+      const limit=Math.min(Math.max(Number(url.searchParams.get('limit')||30),1),60);
       try {
         const providers=[
           {name:'Remotive',url:'https://remotive.com/api/remote-jobs?limit=100',map:j=>({id:j.id,title:j.title,company_name:j.company_name,category:j.category,job_type:String(j.job_type||'').toLowerCase().replace(/[-\s]+/g,'_'),candidate_required_location:j.candidate_required_location||'Remote',salary:j.salary||'',publication_date:j.publication_date||'',url:j.url,description:j.description||'',tags:Array.isArray(j.tags)?j.tags:[]})},
