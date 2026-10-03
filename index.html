@@ -796,7 +796,7 @@ async function loadLiveJobs(){
   status.textContent='Loading live jobs…';cards.innerHTML='<div class="card pad"><div class="hint">Searching live listings…</div></div>';
   const p=new URLSearchParams();if(q)p.set('search',q);if(type)p.set('type',type);p.set('limit','30');
   try{
-    const r=await fetch('/api/jobs?'+p.toString(),{headers:{accept:'application/json'}});
+    const r=await fetch('https://careerpilot.mohammadhariscom7.workers.dev/api/jobs?'+p.toString(),{headers:{accept:'application/json'}});
     const data=await r.json();if(!r.ok)throw new Error(data.error||'Job service unavailable');
     let rows=Array.isArray(data.jobs)?data.jobs:[];
     /* If the Worker returns an empty list, retry the same Remotive source
