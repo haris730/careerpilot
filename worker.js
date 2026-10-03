@@ -206,7 +206,7 @@ export default {
         jobs=jobs.filter(j=>{const k=String(j.id||j.url||j.title+'|'+j.company_name);if(seen.has(k))return false;seen.add(k);return true});
         jobs.sort((a,b)=>new Date(b.publication_date||0)-new Date(a.publication_date||0));
         const sources=[...new Set(jobs.map(j=>j._source))];
-        jobs=jobs.slice(0,limit).map(({_source,...j})=>j);
+        jobs=jobs.slice(0,limit).map(({_source,...j})=>({...j,source:_source}));
         if(!jobs.length)return new Response(JSON.stringify({jobs:[],source:sources.join(', ')||'Live providers',fetched_at:new Date().toISOString()}),{status:200,headers:cors});
         return new Response(JSON.stringify({jobs,source:sources.join(', '),fetched_at:new Date().toISOString()}),{status:200,headers:cors});
       }catch{
