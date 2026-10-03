@@ -822,7 +822,7 @@ async function loadLiveJobs(){
     else if(sort==='match')rows.sort((a,b)=>cvMatch(b).score-cvMatch(a).score);
     else rows.sort((a,b)=>new Date(b.publication_date||0)-new Date(a.publication_date||0));
     cards.innerHTML=rows.length?rows.map(jobCard).join(''):'<div class="card pad"><div class="hint">No live jobs matched these filters. Try broader filters or remove the salary/experience requirement.</div></div>';
-    status.textContent=rows.length+' live job'+(rows.length===1?'':'s')+' found · Source: Remotive';
+    status.textContent=rows.length+' live job'+(rows.length===1?'':'s')+' found · Source: '+(data.source||'Live API');
   }catch(e){
     cards.innerHTML='<div class="card pad"><div class="hint">Live job search is temporarily unavailable. You can still use the job portals below.</div></div>';
     status.textContent='Live search unavailable right now.';
