@@ -219,7 +219,7 @@ export default {
         }));
         let jobs=results.flatMap(x=>x.jobs.map(j=>({...j,_source:x.source})));
         if(q){const words=q.split(/\s+/).filter(Boolean);jobs=jobs.filter(j=>{const text=[j.title,j.company_name,j.category,j.description,...(j.tags||[]),j.candidate_required_location].join(' ').toLowerCase();return words.every(w=>text.includes(w))});}
-        if(type)jobs=jobs.filter(j=>String(j.job_type||'')===type);
+        if(type&&type!=='all')jobs=jobs.filter(j=>String(j.job_type||'')===type);
         const seen=new Set();
         jobs=jobs.filter(j=>{const k=String(j.id||j.url||j.title+'|'+j.company_name);if(seen.has(k))return false;seen.add(k);return true});
         jobs.sort((a,b)=>new Date(b.publication_date||0)-new Date(a.publication_date||0));
