@@ -156,6 +156,17 @@ input[type=range]{width:100%}
 body.prev .shell{grid-template-columns:230px 0 1fr}body.prev .editor{display:none}
 @media(max-width:1199px){.shell{grid-template-columns:68px 360px 1fr}.side{align-items:center}.side span,.side em,.usr>div{display:none}.usr{padding:6px}body.prev .shell{grid-template-columns:68px 0 1fr}}
 @media(max-width:767px){
+/* Mobile CV preview toolbar fix — keep all controls inside the viewport */
+.canvas{height:calc(100dvh - 92px);min-height:420px;overflow:hidden;display:flex;flex-direction:column}
+body.prev .canvas{height:calc(100dvh - 92px);min-height:420px}
+.ctb{position:sticky;top:0;z-index:35;flex:0 0 auto;width:100%;max-width:100%;justify-content:flex-start;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;white-space:nowrap;-webkit-overflow-scrolling:touch;touch-action:pan-x;padding:7px 8px;gap:5px}
+.ctb button,.ctb span{flex:0 0 auto;min-width:42px}
+.ctb span{min-width:48px}
+.ctb .mo{display:inline-flex}
+.stage{flex:1;min-height:0;width:100%;max-width:100%;overflow:auto;-webkit-overflow-scrolling:touch;padding:16px 8px 40px;touch-action:pan-x pan-y}
+#fit{flex:0 0 auto}
+#paper{max-width:none}
+}
 /* Mobile performance + touch UX */
 html{scroll-behavior:auto;-webkit-text-size-adjust:100%}
 body{display:block;height:auto}.top{position:sticky;top:0;z-index:20;background:rgba(10,12,17,.85);backdrop-filter:blur(12px);padding:8px 14px}.ct2,.ac button:not(#bS),.st em{display:none}
@@ -328,7 +339,7 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
     <div class="view on" id="v-home"></div><div class="view" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div><div class="view" id="v-jobs"></div><div class="view" id="v-cvs"></div><div class="view" id="v-match"></div><div class="view" id="v-writer"></div><div class="view" id="v-letter"></div><div class="view" id="v-interview"></div><div class="view" id="v-tracker"></div>
   </section>
   <main class="canvas">
-    <div class="ctb glass"><button class="mo" data-v="cv">Edit</button><button id="zm" aria-label="Zoom out">−</button><span id="zv">100%</span><button id="zp" aria-label="Zoom in">+</button><button id="zf">Fit</button><button class="mo" data-v="design">Design</button><button class="mo" id="bX2">Export</button></div>
+    <div class="ctb glass"><button type="button" class="mo" data-v="cv">Edit</button><button type="button" id="zm" aria-label="Zoom out">−</button><span id="zv">100%</span><button type="button" id="zp" aria-label="Zoom in">+</button><button type="button" id="zf">Fit</button><button type="button" class="mo" data-v="design">Design</button><button type="button" class="mo" id="bX2">Export</button></div>
     <div class="stage" id="stage"><div id="fit"><div id="paper"></div></div></div>
     <div id="esel" class="glass" role="dialog" aria-label="Selected element">
       <div class="eh"><span>Selected: <b id="sn">—</b></span><button id="sx" aria-label="Close">×</button></div>
