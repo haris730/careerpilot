@@ -491,12 +491,10 @@ function exportPDF(){
     'body.cp-pdf-printing .el{cursor:default!important;outline:none!important;caret-color:transparent!important}';
 
   document.head.appendChild(style);
-  paper.querySelectorAll('.sel').forEach(x=>x.classList.remove('sel'));
-  paper.querySelectorAll('[contenteditable]').forEach(x=>{
-    x.removeAttribute('contenteditable');
-    x.removeAttribute('spellcheck');
-    x.removeAttribute('tabindex');
-  });
+  // Keep the editor state intact while printing. Do not remove contenteditable
+  // attributes here: doing so makes CV fields stop being editable after the first export.
+  const selectedEls=[...paper.querySelectorAll('.sel')];
+  selectedEls.forEach(x=>x.classList.remove('sel'));
 
   document.body.classList.add('cp-pdf-printing');
   paper.style.transform='none';
