@@ -1,4 +1,4 @@
-const CACHE='careerpilot-shell-v18';
+const CACHE='careerpilot-shell-v19';
 const ASSETS=['./','./index.html','./manifest.json'];
 
 self.addEventListener('install',event=>{
