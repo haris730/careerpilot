@@ -180,6 +180,12 @@ export default {
         if (live.ok) return new Response(await live.text(), { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
       } catch {}
     }
+    if (request.method === 'GET' && url.pathname === '/sw.js') {
+      try {
+        const live = await fetch('https://raw.githubusercontent.com/haris730/careerpilot/main/sw.js', { headers: { accept: 'application/javascript' } });
+        if (live.ok) return new Response(await live.text(), { status: 200, headers: { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'no-store' } });
+      } catch {}
+    }
     if (url.pathname === '/api/billing/webhook') return handleBillingWebhook(request, env);
     if (url.pathname === '/api/checkout') return createLemonCheckout(request, env, url);
     if (url.pathname === '/api/job-alerts') return handleServerAlerts(request, env, url);
