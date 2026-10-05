@@ -1036,7 +1036,7 @@ function bizProfileUrl(name,city,field,target){
 function renderBusinessResults(rows){
  const box=$('bizResults');if(!box)return;
  if(!rows.length){box.innerHTML='<div class="hint">No live businesses found for this search. Try a broader field or city.</div>';return}
- box.innerHTML='<div class="business-note" style="margin-bottom:3px">LIVE RESULTS · Google Places</div>'+
+ box.innerHTML='<div class="business-note" style="margin-bottom:3px">LIVE RESULTS · Geoapify</div>'+
  rows.map((r,idx)=>{
    const maps=bizMapsUrl([r.name,r.address].filter(Boolean).join(', '));
    const li=bizProfileUrl(r.name,r.city||bizText('bizCity'),r.field||bizText('bizField'),$('bizTarget')?.value||'any');
@@ -1065,7 +1065,7 @@ async function searchBusinessNetwork(){
    const res=await fetch('/api/businesses?'+q.toString(),{headers:{accept:'application/json'}});
    const data=await res.json().catch(()=>({}));
    if(data.configured===false){
-     if(box)box.innerHTML='<div class="business-card"><h3>Live Business Search is ready</h3><div class="hint">The search interface is connected, but the Google Places provider still needs its secure Cloudflare API key.</div><div class="business-note" style="margin-top:8px">No key is exposed in the browser. This keeps the provider credential server-side.</div></div>';
+     if(box)box.innerHTML='<div class="business-card"><h3>Live Business Search is ready</h3><div class="hint">The search interface is connected, but the Geoapify provider still needs its secure Cloudflare API key.</div><div class="business-note" style="margin-top:8px">No key is exposed in the browser. This keeps the provider credential server-side.</div></div>';
      if(status)status.textContent='Provider setup required before live business cards can load.';
      return;
    }
