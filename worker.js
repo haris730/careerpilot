@@ -167,6 +167,14 @@ function buildPrompt(body) {
   if (task === 'summary') {
     return rules.join('\\n') + '\\nTask: Write a professional 3-4 sentence CV summary based only on the supplied background. Do not invent years of experience or achievements.\\nCV context:\\n' + cv + '\\nInput:\\n' + input;
   }
+  if (task === 'outreach') {
+    const businessName = String(body.businessName || '').slice(0, 300);
+    const personName = String(body.personName || '').slice(0, 300);
+    const field = String(body.businessField || '').slice(0, 300);
+    const city = String(body.city || '').slice(0, 200);
+    const website = String(body.website || '').slice(0, 500);
+    return rules.join('\\n') + '\\nTask: Write a short, professional first-contact outreach message for a business or business decision-maker. Personalize only from supplied facts. Do not claim prior contact, clients, results, or services that are not supported by the CV context. Avoid spammy language. Keep it suitable for LinkedIn, email, or a professional DM. End with a simple invitation to discuss how the user can help.\\nBusiness name:\\n' + businessName + '\\nContact person:\\n' + personName + '\\nBusiness field:\\n' + field + '\\nCity:\\n' + city + '\\nWebsite:\\n' + website + '\\nCV context:\\n' + cv + '\\nInput:\\n' + input;
+  }
   if (task === 'letter') {
     const role = String(body.role || '').slice(0, 300);
     const company = String(body.company || '').slice(0, 300);
@@ -230,7 +238,7 @@ export default {
       if (!user?.id) return json({ error: 'Sign in required for AI tools.' }, 401);
       let body;
       try { body = await request.json(); } catch { return json({ error: 'Invalid JSON request.' }, 400); }
-      if (!['bullet','summary','tailor','letter'].includes(body.task)) return json({ error: 'Invalid AI task.' }, 400);
+      if (!['bullet','summary','tailor','letter','outreach'].includes(body.task)) return json({ error: 'Invalid AI task.' }, 400);
       if (body.task !== 'letter' && !String(body.input || '').trim()) return json({ error: 'Input is required.' }, 400);
       if (body.task === 'tailor' && !String(body.jobDescription || '').trim()) return json({ error: 'Job description is required for tailoring.' }, 400);
       if (body.task === 'letter' && (!String(body.role || '').trim() || !String(body.jobDescription || '').trim())) return json({ error: 'Job title and job description are required.' }, 400);
