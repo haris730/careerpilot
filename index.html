@@ -826,7 +826,7 @@ $('v-business').innerHTML=`<div class="card pad">
 <div class="card pad" style="margin-top:12px">
 <div class="ey">SAFE WORKFLOW</div>
 <p class="business-note" style="margin-top:7px">Search → verify the public business/person → save the lead → generate a tailored message → review → send yourself. LinkedIn profiles and contact details are not copied automatically into CareerPilot.</p>
-</div>;
+</div>`;
 function jobEsc(v){return escHtml(String(v||''))}
 document.body.insertAdjacentHTML('beforeend','<div class="job-detail-backdrop" id="jobDetailModal" aria-hidden="true"><div class="job-detail-modal" id="jobDetailContent"></div></div>');
 function jobTypeLabel(v){return String(v||'').replace(/_/g,' ').replace(/\\b\\w/g,m=>m.toUpperCase())}
