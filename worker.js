@@ -113,7 +113,7 @@ async function fetchRemoteJobs(){
       if (!res.ok) return [];
       const data = await res.json();
       const raw = providerJobs(data);
-      return raw.map(provider.map).filter(j => j && j.title && j.url);
+      return raw.map(provider.map).filter(j => j && j.title && j.url).map(j => ({...j, source: j.source || provider.name}));
     } catch {
       return [];
     }
@@ -190,12 +190,13 @@ export default {
     if (url.pathname === '/api/checkout') return createLemonCheckout(request, env, url);
     if (url.pathname === '/api/job-alerts') return handleServerAlerts(request, env, url);
     if (url.pathname === '/api/jobs') {
-      const jobsOrigin = 'https://careerpilot.pages.dev';
-      const cors = {'content-type':'application/json; charset=utf-8','access-control-allow-origin':jobsOrigin,'cache-control':'no-store'};
+      const jobsOrigins = new Set(['https://careerpilot.pages.dev','https://careerpilot.mohammadhariscom7.workers.dev']);
+      const requestOrigin = request.headers.get('Origin') || '';
+      const jobsOrigin = jobsOrigins.has(requestOrigin) ? requestOrigin : 'https://careerpilot.mohammadhariscom7.workers.dev';
+      const cors = {'content-type':'application/json; charset=utf-8','access-control-allow-origin':jobsOrigin,'vary':'Origin','cache-control':'no-store'};
       if (request.method === 'OPTIONS') return new Response(null,{status:204,headers:{'access-control-allow-origin':jobsOrigin,'access-control-allow-methods':'GET, OPTIONS','access-control-allow-headers':'content-type','access-control-max-age':'86400'}});
       if (request.method !== 'GET') return new Response(JSON.stringify({error:'Method not allowed'}),{status:405,headers:cors});
-      const requestOrigin=request.headers.get('Origin');
-      if (requestOrigin && requestOrigin!==jobsOrigin) return new Response(JSON.stringify({error:'Origin not allowed'}),{status:403,headers:cors});
+      if (requestOrigin && !jobsOrigins.has(requestOrigin)) return new Response(JSON.stringify({error:'Origin not allowed'}),{status:403,headers:cors});
       const q=String(url.searchParams.get('search')||'').trim().toLowerCase().slice(0,120);
       const type=String(url.searchParams.get('type')||'').slice(0,30);
       const limit=Math.min(Math.max(Number(url.searchParams.get('limit')||30),1),60);
