@@ -201,6 +201,48 @@ export default {
     if (url.pathname === '/api/billing/webhook') return handleBillingWebhook(request, env);
     if (url.pathname === '/api/checkout') return createLemonCheckout(request, env, url);
     if (url.pathname === '/api/job-alerts') return handleServerAlerts(request, env, url);
+    if (url.pathname === '/api/businesses') {
+      const businessOrigins = new Set(['https://careerpilot.pages.dev','https://careerpilot.mohammadhariscom7.workers.dev']);
+      const requestOrigin = request.headers.get('Origin') || '';
+      const businessOrigin = businessOrigins.has(requestOrigin) ? requestOrigin : 'https://careerpilot.mohammadhariscom7.workers.dev';
+      const headers = {'content-type':'application/json; charset=utf-8','access-control-allow-origin':businessOrigin,'vary':'Origin','cache-control':'no-store'};
+      if(request.method === 'OPTIONS') return new Response(null,{status:204,headers:{...headers,'access-control-allow-methods':'GET, OPTIONS','access-control-allow-headers':'content-type','access-control-max-age':'86400'}});
+      if(request.method !== 'GET') return new Response(JSON.stringify({error:'Method not allowed'}),{status:405,headers});
+      if(requestOrigin && !businessOrigins.has(requestOrigin)) return new Response(JSON.stringify({error:'Origin not allowed'}),{status:403,headers});
+      const field=String(url.searchParams.get('field')||'').trim().slice(0,120);
+      const city=String(url.searchParams.get('city')||'').trim().slice(0,120);
+      const country=String(url.searchParams.get('country')||'').trim().slice(0,120);
+      const target=String(url.searchParams.get('target')||'any').trim().slice(0,40);
+      if(!field || !city) return new Response(JSON.stringify({error:'Business field and city are required.'}),{status:400,headers});
+      if(!env.GOOGLE_PLACES_API_KEY) return new Response(JSON.stringify({configured:false,provider:'Google Places',businesses:[],message:'Live business search is not configured yet. Add the GOOGLE_PLACES_API_KEY secret in Cloudflare.'}),{status:200,headers});
+      const terms=target==='founder'?'founder owner CEO':target==='marketing'?'marketing sales':target==='hr'?'HR recruiter':'founder owner CEO marketing sales';
+      const textQuery=[field,terms,city,country].filter(Boolean).join(' ');
+      try{
+        const res=await fetch('https://places.googleapis.com/v1/places:searchText',{
+          method:'POST',
+          headers:{
+            'content-type':'application/json',
+            'x-goog-api-key':env.GOOGLE_PLACES_API_KEY,
+            'x-goog-fieldmask':'places.id,places.displayName,places.formattedAddress,places.primaryType,places.websiteUri'
+          },
+          body:JSON.stringify({textQuery,pageSize:20,languageCode:'en'})
+        });
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok) return new Response(JSON.stringify({configured:true,error:'Business provider returned an error.',details:String(data.error?.message||'Search failed.')}),{status:502,headers});
+        const businesses=(Array.isArray(data.places)?data.places:[]).map(p=>({
+          place_id:p.id||'',
+          name:p.displayName?.text||'',
+          address:p.formattedAddress||'',
+          category:p.primaryType||'Business',
+          website:p.websiteUri||'',
+          city, country, field,
+          provider:'Google Places'
+        })).filter(x=>x.place_id&&x.name);
+        return new Response(JSON.stringify({configured:true,provider:'Google Places',query:textQuery,businesses}),{status:200,headers});
+      }catch{
+        return new Response(JSON.stringify({configured:true,error:'Live business search failed. Please try again.'}),{status:502,headers});
+      }
+    }
     if (url.pathname === '/api/jobs') {
       const jobsOrigins = new Set(['https://careerpilot.pages.dev','https://careerpilot.mohammadhariscom7.workers.dev']);
       const requestOrigin = request.headers.get('Origin') || '';
