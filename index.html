@@ -1007,6 +1007,7 @@ const BIZ_KEY='careerpilot_business_leads_2026_v2';
 function loadBusinessLeads(){try{const raw=localStorage.getItem(BIZ_KEY)||localStorage.getItem('careerpilot_business_leads_2026')||'[]';const x=JSON.parse(raw);return Array.isArray(x)?x:[]}catch{return[]}}
 function saveBusinessLeads(v){try{localStorage.setItem(BIZ_KEY,JSON.stringify(v.slice(0,100)))}catch{}}
 function bizEsc(v){return escHtml(String(v||''))}
+function secureId(prefix){return String(prefix||'id')+'-'+(crypto.randomUUID?crypto.randomUUID():[...crypto.getRandomValues(new Uint32Array(3))].map(x=>x.toString(36)).join('-'))}
 function safeExternalUrl(v){const s=String(v||'').trim();if(!s)return'';const u=/^https?:\/\//i.test(s)?s:'https://'+s;try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:''}catch{return''}}
 function bizText(id){return ($(id)?.value||'').trim()}
 function bizQuery(){return [bizText('bizField'),bizText('bizCity'),bizText('bizCountry')].filter(Boolean).join(' ')}
