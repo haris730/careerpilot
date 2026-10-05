@@ -207,7 +207,7 @@ export default {
       const origins=new Set(['https://careerpilot.pages.dev','https://careerpilot.mohammadhariscom7.workers.dev']);
       const requestOrigin=request.headers.get('Origin')||'';
       const allowOrigin=origins.has(requestOrigin)?requestOrigin:'https://careerpilot.mohammadhariscom7.workers.dev';
-      const headers={'content-type':'application/json; charset=utf-8','access-control-allow-origin':allowOrigin,'vary':'Origin','cache-control':'no-store'};
+      const headers={...SECURITY_HEADERS,'content-type':'application/json; charset=utf-8','access-control-allow-origin':allowOrigin,'vary':'Origin','cache-control':'no-store'};
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'access-control-allow-methods':'GET, OPTIONS','access-control-allow-headers':'content-type','access-control-max-age':'86400'}});
       if(request.method!=='GET')return new Response(JSON.stringify({error:'Method not allowed'}),{status:405,headers});
       if(requestOrigin&&!origins.has(requestOrigin))return new Response(JSON.stringify({error:'Origin not allowed'}),{status:403,headers});
@@ -277,7 +277,7 @@ export default {
       const jobsOrigins = new Set(['https://careerpilot.pages.dev','https://careerpilot.mohammadhariscom7.workers.dev']);
       const requestOrigin = request.headers.get('Origin') || '';
       const jobsOrigin = jobsOrigins.has(requestOrigin) ? requestOrigin : 'https://careerpilot.mohammadhariscom7.workers.dev';
-      const cors = {'content-type':'application/json; charset=utf-8','access-control-allow-origin':jobsOrigin,'vary':'Origin','cache-control':'no-store'};
+      const cors = {...SECURITY_HEADERS,'content-type':'application/json; charset=utf-8','access-control-allow-origin':jobsOrigin,'vary':'Origin','cache-control':'no-store'};
       if (request.method === 'OPTIONS') return new Response(null,{status:204,headers:{'access-control-allow-origin':jobsOrigin,'access-control-allow-methods':'GET, OPTIONS','access-control-allow-headers':'content-type','access-control-max-age':'86400'}});
       if (request.method !== 'GET') return new Response(JSON.stringify({error:'Method not allowed'}),{status:405,headers:cors});
       if (requestOrigin && !jobsOrigins.has(requestOrigin)) return new Response(JSON.stringify({error:'Origin not allowed'}),{status:403,headers:cors});
