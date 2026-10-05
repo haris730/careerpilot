@@ -847,39 +847,45 @@ function normalizeArbeitnowJob(j){
 async function loadLiveJobs(){
   const q=($('jobQ')?.value||'').trim(),loc=($('jobLoc')?.value||'').trim(),type=$('jobType')?.value||'',exp=$('jobExp')?.value||'',salary=Number($('jobSalary')?.value||0),sort=$('jobSort')?.value||'recent';
   const status=$('jobStatus'),cards=$('jobCards');if(!status||!cards)return;
-  status.textContent='Loading live jobs from multiple sources…';cards.innerHTML='<div class="card pad"><div class="hint">Searching live listings…</div></div>';
-  const p=new URLSearchParams();if(q)p.set('search',q);if(type)p.set('type',type);p.set('limit','60');
+  status.textContent=q?'Searching the live job list…':'Loading live jobs from multiple sources…';
+  const p=new URLSearchParams();p.set('limit','60');
   try{
+    /* Always fetch the base live list first. Search/filtering is done here in
+       the browser so a provider's strict search parameter cannot turn a
+       working job list into an unexpected 0-result screen. */
     const r=await fetch('https://careerpilot.mohammadhariscom7.workers.dev/api/jobs?'+p.toString(),{headers:{accept:'application/json'}});
     const data=await r.json();if(!r.ok)throw new Error(data.error||'Job service unavailable');
     let rows=Array.isArray(data.jobs)?data.jobs:[];
 
-    /* Keep the existing CareerPilot Worker/API path intact. If it is empty,
-       retain the existing Remotive fallback, then add the public European
-       Arbeitnow feed as a second live source. */
+    /* Keep the existing direct fallbacks, but only use them when the Worker
+       returns no jobs at all. */
     if(!rows.length){
-      const direct=new URL('https://remotive.com/api/remote-jobs');
-      if(q)direct.searchParams.set('search',q);
-      direct.searchParams.set('limit','100');
-      const dr=await fetch(direct.toString(),{headers:{accept:'application/json'},mode:'cors'});
-      if(dr.ok){
-        const dd=await dr.json();
-        rows=Array.isArray(dd.jobs)?dd.jobs.map(j=>({...j,source:'Remotive'})):[];
-      }
+      try{
+        const direct=new URL('https://remotive.com/api/remote-jobs');
+        direct.searchParams.set('limit','100');
+        const dr=await fetch(direct.toString(),{headers:{accept:'application/json'},mode:'cors'});
+        if(dr.ok){
+          const dd=await dr.json();
+          rows=Array.isArray(dd.jobs)?dd.jobs.map(j=>({...j,source:'Remotive'})):[];
+        }
+      }catch(_e){}
+    }
+    if(!rows.length){
+      try{
+        const eu=new URL('https://www.arbeitnow.com/api/job-board-api');
+        const er=await fetch(eu.toString(),{headers:{accept:'application/json'},mode:'cors'});
+        if(er.ok){
+          const ed=await er.json();
+          rows=Array.isArray(ed.data)?ed.data.map(normalizeArbeitnowJob):[];
+        }
+      }catch(_e){}
     }
 
-    /* Add live Europe listings from Arbeitnow as an independent fallback/source. */
-    try{
-      const eu=new URL('https://www.arbeitnow.com/api/job-board-api');
-      if(q)eu.searchParams.set('search',q);
-      const er=await fetch(eu.toString(),{headers:{accept:'application/json'},mode:'cors'});
-      if(er.ok){
-        const ed=await er.json();
-        const euRows=Array.isArray(ed.data)?ed.data.map(normalizeArbeitnowJob):[];
-        rows=rows.concat(euRows);
-      }
-    }catch(_e){}
-
+    const words=q.toLowerCase().split(/\s+/).filter(Boolean);
+    if(words.length)rows=rows.filter(j=>{
+      const text=[j.title,j.company_name,j.category,j.description,...(Array.isArray(j.tags)?j.tags:[]),jobLocationText(j)].join(' ').toLowerCase();
+      return words.every(w=>text.includes(w));
+    });
     if(type&&type!=='all')rows=rows.filter(j=>String(j.job_type||'')===type);
     window.__careerPilotLiveJobs=rows;
     const needle=loc.toLowerCase();
@@ -889,12 +895,28 @@ async function loadLiveJobs(){
     if(sort==='salary')rows.sort((a,b)=>jobSalaryMax(b)-jobSalaryMax(a));
     else if(sort==='match')rows.sort((a,b)=>cvMatch(b).score-cvMatch(a).score);
     else rows.sort((a,b)=>new Date(b.publication_date||0)-new Date(a.publication_date||0));
-    cards.innerHTML=rows.length?rows.map(jobCard).join(''):'<div class="card pad"><div class="hint">No live jobs matched these filters. Try broader filters or remove the salary/experience requirement.</div></div>';
-    const sourceLabel=(data.source&&rows.some(j=>j.source===data.source))?data.source:'Multiple live sources';
-    status.textContent=rows.length+' live job'+(rows.length===1?'':'s')+' found · '+sourceLabel;
+
+    if(rows.length){
+      cards.innerHTML=rows.map(jobCard).join('');
+      const sourceLabel=(data.source&&rows.some(j=>j.source===data.source))?data.source:'Multiple live sources';
+      status.textContent=rows.length+' live job'+(rows.length===1?'':'s')+' found · '+sourceLabel;
+    }else{
+      /* Do not erase the last visible jobs while a search has no match. */
+      const previous=Array.isArray(window.__careerPilotLastLiveRows)?window.__careerPilotLastLiveRows:[];
+      if(previous.length){
+        cards.innerHTML=previous.map(jobCard).join('');
+        status.textContent='0 matching jobs found · showing the previous live jobs. Try a broader search.';
+      }else{
+        cards.innerHTML='<div class="card pad"><div class="hint">No live jobs matched these filters. Try a broader search or remove the salary/experience requirement.</div></div>';
+        status.textContent='0 live jobs found';
+      }
+    }
+    if(rows.length)window.__careerPilotLastLiveRows=rows.slice();
   }catch(e){
-    cards.innerHTML='<div class="card pad"><div class="hint">Live job search is temporarily unavailable. You can still use the job portals below.</div></div>';
     status.textContent='Live search unavailable right now.';
+    if(!Array.isArray(window.__careerPilotLastLiveRows)||!window.__careerPilotLastLiveRows.length){
+      cards.innerHTML='<div class="card pad"><div class="hint">Live job search is temporarily unavailable. You can still use the job portals below.</div></div>';
+    }
   }
 }
 function renderSavedJobs(){
