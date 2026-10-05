@@ -758,41 +758,75 @@ $('v-jobs').innerHTML=`<div class="jobs-quick-nav"><button class="on" data-jobs-
 <div class="card pad" id="savedJobsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">SAVED JOBS</div><p class="hint" style="margin:4px 0 0">Keep interesting jobs here before you apply.</p></div><b id="savedJobCount">0</b></div><div id="savedJobCards" style="margin-top:12px"></div></div>
 <div class="card pad" id="jobAlertsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">JOB ALERTS</div><p class="hint" style="margin:4px 0 0">Save your preferred jobs and detect new matching listings.</p></div><b id="jobAlertNewCount">0</b></div><div class="row" style="margin-top:10px"><input id="alertQ" placeholder="Job title or skill" style="margin:0"><input id="alertLoc" placeholder="Country, region or Remote" style="margin:0"></div><div class="row" style="margin-top:8px"><select id="alertType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><select id="alertExp" style="margin:0"><option value="">All experience levels</option><option value="entry">Entry / Junior</option><option value="mid">Mid-level</option><option value="senior">Senior / Lead</option></select></div><div class="row" style="margin-top:8px"><select id="alertSalary" style="margin:0"><option value="0">Any salary</option><option value="30000">$30k+ / year</option><option value="50000">$50k+ / year</option><option value="75000">$75k+ / year</option><option value="100000">$100k+ / year</option><option value="150000">$150k+ / year</select><select id="alertFreq" style="margin:0"><option value="daily">Check daily</option><option value="weekly">Check weekly</option></select><button class="pri" id="createJobAlert">Create Job Alert</button></div><div id="jobAlertStatus" class="hint" style="margin-top:9px">Alerts are saved on this device.</div><div id="jobAlertList" style="margin-top:12px"></div><div id="jobAlertMatches" style="margin-top:12px"></div><div style="margin-top:10px"><button id="checkJobAlerts">Check New Jobs</button></div></div><div class="card pad"><div class="ey">OTHER JOB PLATFORMS</div><p class="hint" style="margin:4px 0 10px">You can also open established job portals directly.</p><div id="jobPortals"></div></div>`;
 $('v-business').innerHTML=`<div class="card pad">
-<div class="ey">BUSINESS NETWORK</div>
-<h2 style="margin:0 0 6px">Find businesses and potential clients</h2>
-<p class="hint">Search a business field and city, then discover companies and decision-makers through public business directories and web search.</p>
-<div class="row" style="margin-top:10px"><input id="bizField" placeholder="Business field e.g. Fashion, E-commerce, Software" style="margin:0"><input id="bizCity" placeholder="City e.g. Karachi, Dubai, London" style="margin:0"></div>
-<div class="row" style="margin-top:8px"><input id="bizCountry" placeholder="Country (optional)" style="margin:0"><button class="pri" id="bizSearchBtn">Find Businesses</button></div>
-<div id="bizStatus" class="hint" style="margin-top:9px">Search links are generated from your field and city. LinkedIn profiles are opened through web search rather than scraped into CareerPilot.</div>
+<div class="ey">BUSINESS NETWORK · CLIENT DISCOVERY</div>
+<h2 style="margin:0 0 6px">Find businesses, decision-makers and potential clients</h2>
+<p class="hint">Search a business field and city, discover public business pages or professional profiles, save the prospects you care about, then prepare a personalized message.</p>
+<div class="row" style="margin-top:10px">
+<input id="bizField" placeholder="Business field e.g. Fashion, E-commerce, Software" aria-label="Business field" style="margin:0">
+<input id="bizCity" placeholder="City e.g. Karachi, Dubai, London" aria-label="City" style="margin:0">
 </div>
+<div class="row" style="margin-top:8px">
+<input id="bizCountry" placeholder="Country (optional)" aria-label="Country" style="margin:0">
+<select id="bizTarget" aria-label="Target contact" style="margin:0">
+<option value="any">Any decision-maker</option>
+<option value="founder">Founder / Owner / CEO</option>
+<option value="marketing">Marketing / Sales</option>
+<option value="hr">HR / Recruiter</option>
+</select>
+<button class="pri" id="bizSearchBtn">Find Businesses</button>
+</div>
+<div id="bizStatus" class="hint" style="margin-top:9px">Use public discovery sources only. CareerPilot does not scrape LinkedIn or send messages automatically.</div>
+</div>
+
 <div class="business-grid">
 <div>
 <div class="card pad">
-<div class="ey">DISCOVERY</div>
-<p class="business-note">Use these searches to find real businesses, owners, founders, marketing managers and other public professional contacts.</p>
-<div class="business-results" id="bizResults"><div class="hint">Enter a business field and city to start.</div></div>
+<div class="ey">PUBLIC DISCOVERY SOURCES</div>
+<p class="business-note">CareerPilot creates targeted searches. Open a source, review the real result, and save the business or person you want to contact.</p>
+<div class="business-results" id="bizResults"><div class="hint">Enter a business field and city to create targeted searches.</div></div>
 </div>
 </div>
+
 <div>
 <div class="card pad">
-<div class="ey">SAVED BUSINESS LEADS</div>
-<div class="row" style="margin-top:9px"><input id="bizLeadName" placeholder="Business / person name" style="margin:0"><input id="bizLeadCity" placeholder="City" style="margin:0"></div>
-<div class="row" style="margin-top:8px"><input id="bizLeadField" placeholder="Business field" style="margin:0"><input id="bizLeadWebsite" placeholder="Website (optional)" style="margin:0"></div>
-<div class="row" style="margin-top:8px"><input id="bizLeadLinkedIn" placeholder="LinkedIn URL (optional)" style="margin:0"><input id="bizLeadPerson" placeholder="Contact person (optional)" style="margin:0"></div>
-<button class="pri" id="bizSaveLead" style="margin-top:8px">Save Business Lead</button>
+<div class="ey">SAVE A BUSINESS LEAD</div>
+<div class="row" style="margin-top:9px">
+<input id="bizLeadName" placeholder="Business or person name" style="margin:0">
+<input id="bizLeadPerson" placeholder="Contact person (optional)" style="margin:0">
+</div>
+<div class="row" style="margin-top:8px">
+<input id="bizLeadCity" placeholder="City" style="margin:0">
+<input id="bizLeadField" placeholder="Business field" style="margin:0">
+</div>
+<div class="row" style="margin-top:8px">
+<input id="bizLeadWebsite" placeholder="Website URL (optional)" style="margin:0">
+<input id="bizLeadLinkedIn" placeholder="LinkedIn URL (optional)" style="margin:0">
+</div>
+<div class="row" style="margin-top:8px">
+<select id="bizLeadStatus" style="margin:0">
+<option value="new">New lead</option><option value="contacted">Contacted</option><option value="replied">Replied</option><option value="follow_up">Follow-up</option><option value="closed">Closed</option>
+</select>
+<input id="bizLeadNotes" placeholder="Notes (optional)" style="margin:0">
+</div>
+<button class="pri" id="bizSaveLead" style="margin-top:8px">Save Lead</button>
 <div id="bizLeadList" class="business-leads"></div>
 </div>
+
 <div class="card pad">
-<div class="ey">AI CONVERSATION</div>
-<p class="business-note">Select a saved lead, then generate a professional first-contact message based on your existing CV information. Review before sending.</p>
+<div class="ey">AI OUTREACH</div>
+<p class="business-note">Select a saved lead. CareerPilot uses your existing CV information plus the lead details to prepare a concise first-contact message. Review it before sending.</p>
 <div id="bizSelectedLead" class="hint" style="margin-top:8px">No lead selected.</div>
-<textarea id="bizConversation" class="business-draft" placeholder="Your AI outreach draft will appear here."></textarea>
+<textarea id="bizConversation" class="business-draft" placeholder="Your outreach message will appear here."></textarea>
 <div class="business-actions"><button class="pri" id="bizGenerateMsg">Generate Conversation</button><button id="bizCopyMsg">Copy Message</button></div>
 <div id="bizAiStatus" class="hint" style="margin-top:8px"></div>
 </div>
 </div>
 </div>
-<div class="card pad" style="margin-top:12px"><div class="ey">HOW THIS WORKS</div><p class="business-note" style="margin-top:7px">CareerPilot does not scrape or automate LinkedIn. It gives you public discovery links, lets you save a lead, and prepares a personalized conversation for you to review and send yourself.</p></div>`;
+
+<div class="card pad" style="margin-top:12px">
+<div class="ey">SAFE WORKFLOW</div>
+<p class="business-note" style="margin-top:7px">Search → verify the public business/person → save the lead → generate a tailored message → review → send yourself. LinkedIn profiles and contact details are not copied automatically into CareerPilot.</p>
+</div>;
 function jobEsc(v){return escHtml(String(v||''))}
 document.body.insertAdjacentHTML('beforeend','<div class="job-detail-backdrop" id="jobDetailModal" aria-hidden="true"><div class="job-detail-modal" id="jobDetailContent"></div></div>');
 function jobTypeLabel(v){return String(v||'').replace(/_/g,' ').replace(/\\b\\w/g,m=>m.toUpperCase())}
@@ -969,49 +1003,73 @@ function findJobByKey(key){
 function renderJobCardsIfPresent(){Q('[data-job-card]').forEach(card=>{const key=card.getAttribute('data-job-card'),j=findJobByKey(key);if(j){const b=card.querySelector('[data-job-save]');if(b)b.textContent=isJobSaved(j)?'✓ Saved':'☆ Save'}})}
 
 // ---------- Business Network ----------
-const BIZ_KEY='careerpilot_business_leads_2026';
+const BIZ_KEY='careerpilot_business_leads_2026_v2';
 function loadBusinessLeads(){try{const x=JSON.parse(localStorage.getItem(BIZ_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return[]}}
-function saveBusinessLeads(v){localStorage.setItem(BIZ_KEY,JSON.stringify(v.slice(0,100)))}
+function saveBusinessLeads(v){try{localStorage.setItem(BIZ_KEY,JSON.stringify(v.slice(0,100)))}catch{}}
 function bizEsc(v){return escHtml(String(v||''))}
-function bizQuery(){const f=($('bizField')?.value||'').trim(),c=($('bizCity')?.value||'').trim(),co=($('bizCountry')?.value||'').trim();return [f,c,co].filter(Boolean).join(' ')}
-function bizLinks(field,city,country){
+function bizText(id){return ($ (id)?.value||'').trim()}
+function bizQuery(){return [bizText('bizField'),bizText('bizCity'),bizText('bizCountry')].filter(Boolean).join(' ')}
+function bizSearchUrl(q){return 'https://www.google.com/search?q='+encodeURIComponent(q)}
+function bizMapsUrl(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)}
+function bizTargetTerms(v){if(v==='founder')return 'founder OR owner OR CEO OR cofounder';if(v==='marketing')return 'marketing manager OR head of marketing OR sales manager';if(v==='hr')return 'HR manager OR recruiter OR talent acquisition';return 'founder OR owner OR CEO OR director OR marketing manager'}
+function bizLinks(field,city,country,target){
  const q=[field,city,country].filter(Boolean).join(' ');
- const people='site:linkedin.com/in '+field+' '+city+' founder OR owner OR CEO OR director';
- const companies='site:linkedin.com/company '+field+' '+city;
- const maps='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);
- const web='https://www.google.com/search?q='+encodeURIComponent(q+' businesses '+city);
- const peopleWeb='https://www.google.com/search?q='+encodeURIComponent(people);
- const companyWeb='https://www.google.com/search?q='+encodeURIComponent(companies);
- const fb='https://www.google.com/search?q='+encodeURIComponent('site:facebook.com '+q+' business');
- return {maps,web,peopleWeb,companyWeb,fb}
+ const terms=bizTargetTerms(target);
+ return {
+  maps:bizMapsUrl(q),
+  web:bizSearchUrl(q+' businesses companies'),
+  linkedinCompanies:bizSearchUrl('site:linkedin.com/company '+q),
+  linkedinPeople:bizSearchUrl('site:linkedin.com/in '+field+' '+city+' '+terms),
+  facebook:bizSearchUrl('site:facebook.com '+q+' business'),
+  instagram:bizSearchUrl('site:instagram.com '+q+' business'),
+  websites:bizSearchUrl(q+' official website')
+ };
+}
+function bizSearchCard(title,desc,url,button){
+ return '<div class="business-card"><h3>'+bizEsc(title)+'</h3><div class="hint">'+bizEsc(desc)+'</div><div class="business-actions"><a href="'+bizEsc(url)+'" target="_blank" rel="noopener noreferrer"><button class="pri">'+bizEsc(button||'Open Search ↗')+'</button></a></div></div>';
 }
 function renderBusinessDiscovery(){
- const box=$('bizResults'); if(!box)return;
- const field=($('bizField')?.value||'').trim(),city=($('bizCity')?.value||'').trim(),country=($('bizCountry')?.value||'').trim();
- if(!field&&!city){box.innerHTML='<div class="hint">Enter a business field and city to start.</div>';return}
- const links=bizLinks(field||'business',city||'local',country);
- const label=(field||'Business')+' · '+(city||'Any city')+(country?' · '+country:'');
- box.innerHTML='<div class="business-card"><h3>'+bizEsc(label)+'</h3><div class="hint">Choose a discovery source:</div><div class="business-actions"><a href="'+bizEsc(links.maps)+'" target="_blank" rel="noopener noreferrer"><button>Google Maps</button></a><a href="'+bizEsc(links.web)+'" target="_blank" rel="noopener noreferrer"><button>Web Businesses</button></a><a href="'+bizEsc(links.companyWeb)+'" target="_blank" rel="noopener noreferrer"><button>LinkedIn Companies</button></a><a href="'+bizEsc(links.peopleWeb)+'" target="_blank" rel="noopener noreferrer"><button>LinkedIn People</button></a><a href="'+bizEsc(links.fb)+'" target="_blank" rel="noopener noreferrer"><button>Facebook Search</button></a></div><p class="business-note" style="margin-top:10px">After finding a company/person, copy the public name or URL into Saved Business Leads. LinkedIn is opened through search and is not copied into CareerPilot automatically.</p></div>';
+ const box=$('bizResults');if(!box)return;
+ const field=bizText('bizField'),city=bizText('bizCity'),country=bizText('bizCountry'),target=$('bizTarget')?.value||'any';
+ if(!field&&!city){box.innerHTML='<div class="hint">Enter a business field and city to create targeted searches.</div>';return}
+ const links=bizLinks(field||'business',city||'local',country,target);
+ const place=[city,country].filter(Boolean).join(', ')||'selected location';
+ box.innerHTML=[
+  bizSearchCard('Businesses on Google Maps','Real local business listings in '+place+'. Useful for finding stores, agencies, offices and service businesses.',links.maps,'Open Maps'),
+  bizSearchCard('Business websites','Search public company and business websites for the selected field and city.',links.web,'Search Businesses'),
+  bizSearchCard('LinkedIn Companies','Find public company pages related to this business field and location.',links.linkedinCompanies,'Find Companies'),
+  bizSearchCard('LinkedIn People','Find public professional profiles using the selected decision-maker type.',links.linkedinPeople,'Find People'),
+  bizSearchCard('Facebook Business Pages','Discover public Facebook business pages and local companies.',links.facebook,'Search Facebook'),
+  bizSearchCard('Instagram Business Profiles','Discover public Instagram business profiles for the selected market.',links.instagram,'Search Instagram'),
+  bizSearchCard('Official Websites','Find official websites before saving a lead, so you can verify the business details.',links.websites,'Find Websites')
+ ].join('');
 }
 function renderBusinessLeads(){
- const box=$('bizLeadList'); if(!box)return;
+ const box=$('bizLeadList');if(!box)return;
  const leads=loadBusinessLeads();
- box.innerHTML=leads.length?leads.map(l=>'<div class="business-card"><h3>'+bizEsc(l.name)+'</h3><div class="hint">'+bizEsc(l.person||'')+(l.person?' · ':'')+bizEsc(l.field||'Business')+' · '+bizEsc(l.city||'')+'</div>'+(l.website?'<div class="business-actions"><a href="'+bizEsc(l.website)+'" target="_blank" rel="noopener noreferrer"><button>Website</button></a></div>':'')+(l.linkedin?'<div class="business-note" style="margin-top:7px">LinkedIn URL saved</div>':'')+'<div class="business-actions"><button data-biz-select="'+bizEsc(l.id)+'" class="pri">Conversation</button><button data-biz-delete="'+bizEsc(l.id)+'">Delete</button></div></div>').join(''):'<div class="hint">No saved business leads yet.</div>';
+ box.innerHTML=leads.length?leads.map(l=>{
+  const statusLabel=({new:'New',contacted:'Contacted',replied:'Replied',follow_up:'Follow-up',closed:'Closed'})[l.status]||'New';
+  return '<div class="business-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><h3>'+bizEsc(l.name)+'</h3><div class="hint">'+bizEsc(l.person||'')+(l.person?' · ':'')+bizEsc(l.field||'Business')+(l.city?' · '+bizEsc(l.city):'')+'</div></div><span class="job-detail-chip">'+bizEsc(statusLabel)+'</span></div>'+(l.notes?'<div class="business-note" style="margin-top:7px">'+bizEsc(l.notes)+'</div>':'')+'<div class="business-actions">'+(l.website?'<a href="'+bizEsc(l.website)+'" target="_blank" rel="noopener noreferrer"><button>Website ↗</button></a>':'')+(l.linkedin?'<a href="'+bizEsc(l.linkedin)+'" target="_blank" rel="noopener noreferrer"><button>LinkedIn ↗</button></a>':'')+'<button data-biz-select="'+bizEsc(l.id)+'" class="pri">Conversation</button><button data-biz-delete="'+bizEsc(l.id)+'">Delete</button></div></div>'
+ }).join(''):'<div class="hint">No saved business leads yet.</div>';
 }
 function selectedBusinessLead(){const id=window.__careerPilotBizSelected||'';return loadBusinessLeads().find(x=>x.id===id)||null}
 function businessCvContext(){return typeof letterContext==='function'?letterContext():(S?.d?JSON.stringify(S.d):'')}
-function selectBusinessLead(id){window.__careerPilotBizSelected=String(id||'');const l=selectedBusinessLead();const s=$('bizSelectedLead');if(s)s.textContent=l?('Selected: '+(l.person||l.name)+' · '+(l.field||'Business')+' · '+(l.city||'')):'No lead selected.';if(l&&$('bizConversation')&&l.draft)$('bizConversation').value=l.draft}
-$('bizSearchBtn').onclick=()=>{renderBusinessDiscovery();const s=$('bizStatus');if(s)s.textContent='Discovery searches ready. Open a source and save the businesses/people you want to contact.'};
+function selectBusinessLead(id){window.__careerPilotBizSelected=String(id||'');const l=selectedBusinessLead();const s=$('bizSelectedLead');if(s)s.textContent=l?('Selected: '+(l.person||l.name)+' · '+(l.field||'Business')+(l.city?' · '+l.city:'')):'No lead selected.';if(l&&$('bizConversation'))$('bizConversation').value=l.draft||''}
+$('bizSearchBtn').onclick=()=>{renderBusinessDiscovery();const s=$('bizStatus');if(s)s.textContent='Targeted public searches are ready. Verify the real business/person before saving a lead.'};
 $('v-business').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='bizField'||e.target.id==='bizCity'||e.target.id==='bizCountry'))renderBusinessDiscovery()});
 $('bizSaveLead').onclick=()=>{
- const name=($('bizLeadName')?.value||'').trim(),city=($('bizLeadCity')?.value||'').trim(),field=($('bizLeadField')?.value||'').trim(),website=($('bizLeadWebsite')?.value||'').trim(),linkedin=($('bizLeadLinkedIn')?.value||'').trim(),person=($('bizLeadPerson')?.value||'').trim();
+ const name=bizText('bizLeadName'),person=bizText('bizLeadPerson'),city=bizText('bizLeadCity'),field=bizText('bizLeadField'),website=bizText('bizLeadWebsite'),linkedin=bizText('bizLeadLinkedIn'),status=$('bizLeadStatus')?.value||'new',notes=bizText('bizLeadNotes');
  if(!name){toast('Add a business or person name first');return}
- const leads=loadBusinessLeads();const lead={id:'biz-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),name,city,field,website,linkedin,person,draft:''};leads.unshift(lead);saveBusinessLeads(leads);['bizLeadName','bizLeadCity','bizLeadField','bizLeadWebsite','bizLeadLinkedIn','bizLeadPerson'].forEach(id=>{if($(id))$(id).value=''});selectBusinessLead(lead.id);renderBusinessLeads();toast('✓ Business lead saved')
+ const leads=loadBusinessLeads(),lead={id:'biz-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),name,person,city,field,website,linkedin,status,notes,draft:'',createdAt:Date.now()};
+ leads.unshift(lead);saveBusinessLeads(leads);
+ ['bizLeadName','bizLeadPerson','bizLeadCity','bizLeadField','bizLeadWebsite','bizLeadLinkedIn','bizLeadNotes'].forEach(id=>{if($(id))$(id).value=''});
+ if($('bizLeadStatus'))$('bizLeadStatus').value='new';
+ selectBusinessLead(lead.id);renderBusinessLeads();toast('✓ Business lead saved');
 };
 $('v-business').addEventListener('click',e=>{
  const s=e.target.closest('[data-biz-select]'),d=e.target.closest('[data-biz-delete]');
  if(s){selectBusinessLead(s.dataset.bizSelect);return}
- if(d){const leads=loadBusinessLeads().filter(x=>x.id!==d.dataset.bizDelete);saveBusinessLeads(leads);if(window.__careerPilotBizSelected===d.dataset.bizDelete)window.__careerPilotBizSelected='';renderBusinessLeads();selectBusinessLead('')}
+ if(d){const id=d.dataset.bizDelete;saveBusinessLeads(loadBusinessLeads().filter(x=>x.id!==id));if(window.__careerPilotBizSelected===id)window.__careerPilotBizSelected='';renderBusinessLeads();selectBusinessLead('');return}
 });
 $('bizGenerateMsg').onclick=async()=>{
  const l=selectedBusinessLead();if(!l){$('bizAiStatus').textContent='Select a saved business lead first.';return}
@@ -1021,7 +1079,7 @@ $('bizGenerateMsg').onclick=async()=>{
   const res=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json',authorization:'Bearer '+(session?.access_token||'')},body:JSON.stringify({task:'outreach',input:(l.name+' '+l.person+' '+l.field+' '+l.city+' '+(l.website||'')),businessName:l.name,personName:l.person,businessField:l.field,city:l.city,website:l.website,linkedin:l.linkedin,cvContext:businessCvContext().slice(0,12000)})});
   const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'AI service is not configured yet.');
   $('bizConversation').value=data.text||'';$('bizAiStatus').textContent='Generated securely on the server.';
-  const leads=loadBusinessLeads();const x=leads.find(a=>a.id===l.id);if(x){x.draft=data.text||'';saveBusinessLeads(leads)}
+  const leads=loadBusinessLeads(),x=leads.find(a=>a.id===l.id);if(x){x.draft=data.text||'';saveBusinessLeads(leads)}
  }catch(e){$('bizAiStatus').textContent=e.message||'AI generation failed.'}finally{b.disabled=false}
 };
 $('bizCopyMsg').onclick=()=>copyToolText('bizConversation',$('bizCopyMsg'));
