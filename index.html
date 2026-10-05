@@ -1029,21 +1029,53 @@ function bizLinks(field,city,country,target){
 function bizSearchCard(title,desc,url,button){
  return '<div class="business-card"><h3>'+bizEsc(title)+'</h3><div class="hint">'+bizEsc(desc)+'</div><div class="business-actions"><a href="'+bizEsc(url)+'" target="_blank" rel="noopener noreferrer"><button class="pri">'+bizEsc(button||'Open Search ↗')+'</button></a></div></div>';
 }
-function renderBusinessDiscovery(){
+function bizProfileUrl(name,city,field,target){
+ const terms=bizTargetTerms(target);
+ return bizSearchUrl('site:linkedin.com/in "'+name+'" '+city+' '+field+' '+terms);
+}
+function renderBusinessResults(rows){
  const box=$('bizResults');if(!box)return;
+ if(!rows.length){box.innerHTML='<div class="hint">No live businesses found for this search. Try a broader field or city.</div>';return}
+ box.innerHTML='<div class="business-note" style="margin-bottom:3px">LIVE RESULTS · Google Places</div>'+
+ rows.map((r,idx)=>{
+   const maps=bizMapsUrl([r.name,r.address].filter(Boolean).join(', '));
+   const li=bizProfileUrl(r.name,r.city||bizText('bizCity'),r.field||bizText('bizField'),$('bizTarget')?.value||'any');
+   return '<div class="business-card">'+
+     '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><h3>'+bizEsc(r.name)+'</h3><div class="hint">'+bizEsc(r.category||'Business')+(r.address?' · '+bizEsc(r.address):'')+'</div></div><span class="job-detail-chip">LIVE</span></div>'+
+     (safeExternalUrl(r.website)?'<div class="business-note" style="margin-top:8px">Official website available</div>':'<div class="business-note" style="margin-top:8px">No website listed</div>')+
+     '<div class="business-actions">'+
+     '<button data-biz-use="'+idx+'" class="pri">Use Lead</button>'+
+     (safeExternalUrl(r.website)?'<a href="'+bizEsc(safeExternalUrl(r.website))+'" target="_blank" rel="noopener noreferrer"><button>Website ↗</button></a>':'')+
+     '<a href="'+bizEsc(li)+'" target="_blank" rel="noopener noreferrer"><button>LinkedIn People ↗</button></a>'+
+     '<a href="'+bizEsc(maps)+'" target="_blank" rel="noopener noreferrer"><button>Google Maps ↗</button></a>'+
+     '</div></div>'
+ }).join('')+
+ '<div class="business-note" style="margin-top:10px">Google Maps data · Results are live for this search and are not stored automatically.</div>';
+ window.__careerPilotBusinessResults=rows;
+}
+async function searchBusinessNetwork(){
  const field=bizText('bizField'),city=bizText('bizCity'),country=bizText('bizCountry'),target=$('bizTarget')?.value||'any';
- if(!field&&!city){box.innerHTML='<div class="hint">Enter a business field and city to create targeted searches.</div>';return}
- const links=bizLinks(field||'business',city||'local',country,target);
- const place=[city,country].filter(Boolean).join(', ')||'selected location';
- box.innerHTML=[
-  bizSearchCard('Businesses on Google Maps','Real local business listings in '+place+'. Useful for finding stores, agencies, offices and service businesses.',links.maps,'Open Maps'),
-  bizSearchCard('Business websites','Search public company and business websites for the selected field and city.',links.web,'Search Businesses'),
-  bizSearchCard('LinkedIn Companies','Find public company pages related to this business field and location.',links.linkedinCompanies,'Find Companies'),
-  bizSearchCard('LinkedIn People','Find public professional profiles using the selected decision-maker type.',links.linkedinPeople,'Find People'),
-  bizSearchCard('Facebook Business Pages','Discover public Facebook business pages and local companies.',links.facebook,'Search Facebook'),
-  bizSearchCard('Instagram Business Profiles','Discover public Instagram business profiles for the selected market.',links.instagram,'Search Instagram'),
-  bizSearchCard('Official Websites','Find official websites before saving a lead, so you can verify the business details.',links.websites,'Find Websites')
- ].join('');
+ const box=$('bizResults'),status=$('bizStatus'),btn=$('bizSearchBtn');
+ if(!field||!city){if(status)status.textContent='Enter both a business field and city.';return}
+ if(box)box.innerHTML='<div class="hint">Searching live businesses…</div>';
+ if(status)status.textContent='Searching live business listings…';
+ if(btn)btn.disabled=true;
+ try{
+   const q=new URLSearchParams({field,city,country,target});
+   const res=await fetch('/api/businesses?'+q.toString(),{headers:{accept:'application/json'}});
+   const data=await res.json().catch(()=>({}));
+   if(data.configured===false){
+     if(box)box.innerHTML='<div class="business-card"><h3>Live Business Search is ready</h3><div class="hint">The search interface is connected, but the Google Places provider still needs its secure Cloudflare API key.</div><div class="business-note" style="margin-top:8px">No key is exposed in the browser. This keeps the provider credential server-side.</div></div>';
+     if(status)status.textContent='Provider setup required before live business cards can load.';
+     return;
+   }
+   if(!res.ok)throw new Error(data.error||'Business search failed.');
+   renderBusinessResults(Array.isArray(data.businesses)?data.businesses:[]);
+   if(status)status.textContent=(data.businesses?.length||0)+' live business results found.';
+ }catch(e){
+   if(box)box.innerHTML='<div class="hint">Live business search is temporarily unavailable. Try again.</div>';
+   if(status)status.textContent=e.message||'Business search failed.';
+ }finally{if(btn)btn.disabled=false}
 }
 function renderBusinessLeads(){
  const box=$('bizLeadList');if(!box)return;
@@ -1056,8 +1088,15 @@ function renderBusinessLeads(){
 function selectedBusinessLead(){const id=window.__careerPilotBizSelected||'';return loadBusinessLeads().find(x=>x.id===id)||null}
 function businessCvContext(){return typeof letterContext==='function'?letterContext():(S?.d?JSON.stringify(S.d):'')}
 function selectBusinessLead(id){window.__careerPilotBizSelected=String(id||'');const l=selectedBusinessLead();const s=$('bizSelectedLead');if(s)s.textContent=l?('Selected: '+(l.person||l.name)+' · '+(l.field||'Business')+(l.city?' · '+l.city:'')):'No lead selected.';if(l&&$('bizConversation'))$('bizConversation').value=l.draft||''}
-$('bizSearchBtn').onclick=()=>{renderBusinessDiscovery();const s=$('bizStatus');if(s)s.textContent='Targeted public searches are ready. Verify the real business/person before saving a lead.'};
-$('v-business').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='bizField'||e.target.id==='bizCity'||e.target.id==='bizCountry'))renderBusinessDiscovery()});
+$('bizSearchBtn').onclick=searchBusinessNetwork;
+$('v-business').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='bizField'||e.target.id==='bizCity'||e.target.id==='bizCountry'))searchBusinessNetwork()});
+$('v-business').addEventListener('click',e=>{
+ const u=e.target.closest('[data-biz-use]');
+ if(u){const r=window.__careerPilotBusinessResults?.[Number(u.dataset.bizUse)];if(!r)return;$('bizLeadName').value=r.name||'';$('bizLeadCity').value=r.city||bizText('bizCity');$('bizLeadField').value=r.field||bizText('bizField');$('bizLeadWebsite').value=r.website||'';$('bizLeadLinkedIn').value=bizProfileUrl(r.name,r.city||bizText('bizCity'),r.field||bizText('bizField'),$('bizTarget')?.value||'any');document.getElementById('bizLeadName')?.scrollIntoView({behavior:'smooth',block:'center'});if($('bizStatus'))$('bizStatus').textContent='Lead details loaded into the Save Lead form. Review them before saving.';return}
+ const s=e.target.closest('[data-biz-select]'),d=e.target.closest('[data-biz-delete]');
+ if(s){selectBusinessLead(s.dataset.bizSelect);return}
+ if(d){const id=d.dataset.bizDelete;saveBusinessLeads(loadBusinessLeads().filter(x=>x.id!==id));if(window.__careerPilotBizSelected===id)window.__careerPilotBizSelected='';renderBusinessLeads();selectBusinessLead('');return}
+});
 $('bizSaveLead').onclick=()=>{
  const name=bizText('bizLeadName'),person=bizText('bizLeadPerson'),city=bizText('bizLeadCity'),field=bizText('bizLeadField'),website=safeExternalUrl(bizText('bizLeadWebsite')),linkedin=safeExternalUrl(bizText('bizLeadLinkedIn')),status=$('bizLeadStatus')?.value||'new',notes=bizText('bizLeadNotes');
  if(!name){toast('Add a business or person name first');return}
@@ -1067,11 +1106,7 @@ $('bizSaveLead').onclick=()=>{
  if($('bizLeadStatus'))$('bizLeadStatus').value='new';
  selectBusinessLead(lead.id);renderBusinessLeads();toast('✓ Business lead saved');
 };
-$('v-business').addEventListener('click',e=>{
- const s=e.target.closest('[data-biz-select]'),d=e.target.closest('[data-biz-delete]');
- if(s){selectBusinessLead(s.dataset.bizSelect);return}
- if(d){const id=d.dataset.bizDelete;saveBusinessLeads(loadBusinessLeads().filter(x=>x.id!==id));if(window.__careerPilotBizSelected===id)window.__careerPilotBizSelected='';renderBusinessLeads();selectBusinessLead('');return}
-});
+
 $('bizGenerateMsg').onclick=async()=>{
  const l=selectedBusinessLead();if(!l){$('bizAiStatus').textContent='Select a saved business lead first.';return}
  const b=$('bizGenerateMsg');b.disabled=true;$('bizAiStatus').textContent='Generating…';
@@ -1084,7 +1119,7 @@ $('bizGenerateMsg').onclick=async()=>{
  }catch(e){$('bizAiStatus').textContent=e.message||'AI generation failed.'}finally{b.disabled=false}
 };
 $('bizCopyMsg').onclick=()=>copyToolText('bizConversation',$('bizCopyMsg'));
-renderBusinessDiscovery();renderBusinessLeads();
+renderBusinessLeads();
 $('jobSearchBtn').onclick=loadLiveJobs;
 $('v-jobs').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='jobQ'||e.target.id==='jobLoc'))loadLiveJobs()});
 $('v-jobs').addEventListener('click',e=>{
