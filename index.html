@@ -348,7 +348,7 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
 <div class="shell">
   <nav class="side glass" id="nav" aria-label="Main"></nav>
   <section class="editor" id="ed">
-    <div class="view on" id="v-home"></div><div class="view" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div><div class="view" id="v-business"></div><div class="view" id="v-cvs"></div><div class="view" id="v-writer"></div><div class="view" id="v-letter"></div><div class="view" id="v-interview"></div><div class="view" id="v-tracker"></div>
+    <div class="view on" id="v-home"></div><div class="view" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div><div class="view" id="v-jobs"></div><div class="view" id="v-business"></div><div class="view" id="v-cvs"></div><div class="view" id="v-match"></div><div class="view" id="v-writer"></div><div class="view" id="v-letter"></div><div class="view" id="v-interview"></div><div class="view" id="v-tracker"></div>
   </section>
   <main class="canvas">
     <div class="ctb glass"><button type="button" class="mo" data-v="cv">Edit</button><button type="button" id="zm" aria-label="Zoom out">−</button><span id="zv">100%</span><button type="button" id="zp" aria-label="Zoom in">+</button><button type="button" id="zf">Fit</button><button type="button" class="mo" data-v="design">Design</button><button type="button" class="mo" id="bX2">Export</button></div>
@@ -457,13 +457,13 @@ $('bU').onclick=()=>{if(hi>0){hi--;restore()}};$('bR').onclick=()=>{if(hi<H.leng
 })();
 
 /* ---------- shell: nav + views ---------- */
-const NAV=[['home','⌂','Dashboard'],['cv','✎','CV Builder'],['cvs','▤','My CVs'],['design','▦','Templates'],['business','◉','Business Network'],['writer','✦','AI Writing Helper'],['letter','✉','Cover Letter'],['interview','☏','Interview Prep'],['profile','⚙','Settings']];
+const NAV=[['home','⌂','Dashboard'],['cv','✎','CV Builder'],['cvs','▤','My CVs'],['design','▦','Templates'],['jobs','🌐','Live Jobs'],['business','◉','Business Network'],['match','◎','Job Match'],['writer','✦','AI Writing Helper'],['letter','✉','Cover Letter'],['interview','☏','Interview Prep'],['profile','⚙','Settings']];
 $('nav').innerHTML=NAV.map(([v,i,l])=>`<button class="nb" ${v?`data-v="${v}"`:'data-soon="1"'}><i>${i}</i><span>${l}</span>${v?'':'<em>COMING SOON</em>'}</button>`).join('')+'<div class="usr"><div><b data-n></b><small>Free Plan</small></div><button data-soon="1" class="pri">Upgrade</button></div>';
 $('mnav').innerHTML=`<button data-v="cv"><i>✎</i><small>Edit</small></button><button data-action="preview"><i>◉</i><small>Preview</small></button><button data-v="design" data-design="1"><i>◈</i><small>Design</small></button><button data-v="templates" data-templates="1"><i>▦</i><small>Templates</small></button><button data-action="export"><i>⇩</i><small>Export</small></button><button data-action="mobile-more"><i>☰</i><small>More</small></button>`;
-document.body.insertAdjacentHTML('beforeend',`<div class="mobile-more-backdrop" id="mobileMore" aria-hidden="true"><div class="mobile-more-sheet" role="dialog" aria-label="CareerPilot tools"><button class="mobile-more-close" data-action="mobile-more-close" aria-label="Close">×</button><div class="ey">CAREERPILOT TOOLS</div><h3>Career tools</h3><div class="mobile-more-grid"><button data-v="business"><b>◉</b><span>Business Network</span></button><button data-v="writer"><b>✦</b><span>AI Writing</span></button><button data-v="letter"><b>✉</b><span>Cover Letter</span></button><button data-v="interview"><b>☏</b><span>Interview Prep</span></button><button data-v="tracker"><b>✓</b><span>Application Tracker</span></button><button data-v="cvs"><b>▤</b><span>My CVs</span></button><button data-v="profile"><b>⚙</b><span>Settings</span></button></div></div></div>`);
+document.body.insertAdjacentHTML('beforeend',`<div class="mobile-more-backdrop" id="mobileMore" aria-hidden="true"><div class="mobile-more-sheet" role="dialog" aria-label="CareerPilot tools"><button class="mobile-more-close" data-action="mobile-more-close" aria-label="Close">×</button><div class="ey">CAREERPILOT TOOLS</div><h3>Career tools</h3><div class="mobile-more-grid"><button data-v="jobs"><b>🌐</b><span>Live Jobs</span></button><button data-v="business"><b>◉</b><span>Business Network</span></button><button data-v="match"><b>◎</b><span>Job Match</span></button><button data-v="writer"><b>✦</b><span>AI Writing</span></button><button data-v="letter"><b>✉</b><span>Cover Letter</span></button><button data-v="interview"><b>☏</b><span>Interview Prep</span></button><button data-v="tracker"><b>✓</b><span>Application Tracker</span></button><button data-v="cvs"><b>▤</b><span>My CVs</span></button><button data-v="profile"><b>⚙</b><span>Settings</span></button></div></div></div>`);
 function go(v,opts={}){const from=document.body.dataset.v||'home';document.body.dataset.v=v;document.body.classList.remove('prev');Q('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));if(v==='design'){const tab=opts.designTab===0?'templates':'design';Q('#nav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));Q('#mnav button').forEach(b=>b.classList.remove('on'));const activeMobile=tab==='templates'?Q('#mnav [data-templates="1"]')[0]:Q('#mnav [data-design="1"]')[0];if(activeMobile)activeMobile.classList.add('on');if(opts.designTab!==undefined){const tabs=Q('#v-design [data-dt]');const panels=Q('#v-design .dp');tabs.forEach((b,i)=>b.classList.toggle('on',i===opts.designTab));panels.forEach((p,i)=>p.classList.toggle('on',i===opts.designTab))}$('v-design').dataset.mobileMode=tab}else{Q('#nav [data-v],#mnav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('v-design').removeAttribute('data-mobile-mode')}if(!opts.skipHistory&&from!==v){history.pushState({v},'',location.pathname+'#'+encodeURIComponent(v))}requestAnimationFrame(fit)}
 function prev(on,opts={}){const was=document.body.classList.contains('prev');document.body.classList.toggle('prev',on);if(!opts.skipHistory&&was!==on){history.pushState({v:document.body.dataset.v,prev:on},'',location.pathname+'#'+encodeURIComponent(document.body.dataset.v)+(on?'?preview=1':''))}requestAnimationFrame(fit)}
-function restoreRoute(){const raw=location.hash.replace(/^#/,'');const v=decodeURIComponent(raw.split('?')[0]||'home');const removed=new Set(['jobs','match']);const valid=removed.has(v)?'home':(document.getElementById('v-'+v)?v:'home');const isPrev=new URLSearchParams(location.hash.split('?')[1]||'').get('preview')==='1';go(valid,{skipHistory:true});if(isPrev)prev(true,{skipHistory:true})}
+function restoreRoute(){const raw=location.hash.replace(/^#/,'');const v=decodeURIComponent(raw.split('?')[0]||'home');const valid=document.getElementById('v-'+v)?v:'home';const isPrev=new URLSearchParams(location.hash.split('?')[1]||'').get('preview')==='1';go(valid,{skipHistory:true});if(isPrev)prev(true,{skipHistory:true})}
 window.addEventListener('popstate',restoreRoute);
 window.addEventListener('hashchange',()=>restoreRoute());
 document.addEventListener('click',e=>{const b=e.target.closest('[data-v],[data-soon],[data-action]');if(!b)return;if(b.dataset.soon)toast('Coming soon');else if(b.dataset.action==='preview')prev(true);else if(b.dataset.action==='export')exportPDF();else if(b.dataset.action==='mobile-more'){const m=$('mobileMore');if(m){m.classList.add('on');m.setAttribute('aria-hidden','false')}}else if(b.dataset.action==='mobile-more-close'||(e.target.id==='mobileMore')){const m=$('mobileMore');if(m){m.classList.remove('on');m.setAttribute('aria-hidden','true')}}else if(b.dataset.v==='templates'&&b.dataset.templates){$('mobileMore')?.classList.remove('on');Q('#mnav [data-v="design"],#mnav [data-v="templates"]').forEach(x=>x.classList.remove('on'));b.classList.add('on');go('design',{designTab:0})}else if(b.dataset.v==='design'&&b.dataset.design){$('mobileMore')?.classList.remove('on');Q('#mnav [data-v="design"],#mnav [data-v="templates"]').forEach(x=>x.classList.remove('on'));b.classList.add('on');go('design',{designTab:1})}else if(b.dataset.v){$('mobileMore')?.classList.remove('on');go(b.dataset.v)}});
@@ -567,6 +567,7 @@ $('v-home').innerHTML=`
 <button class="quick" data-v="cv"><span class="qi">✎</span><span><b>Create / Edit CV</b><small>Build an ATS-friendly CV</small></span></button>
 <button class="quick" data-v="cvs"><span class="qi">▤</span><span><b>My CVs</b><small>Manage your CV versions</small></span></button>
 <button class="quick" data-v="design"><span class="qi">▦</span><span><b>CV Templates</b><small>Modern, executive, minimal and creative</small></span></button>
+<button class="quick" data-v="jobs"><span class="qi">🌐</span><span><b>Search Global Jobs</b><small>Find opportunities worldwide</small></span></button>
 </div></div>
 <div class="card pad" style="margin-top:12px"><div class="ey">GLOBAL JOBS</div><h3 style="margin:4px 0 10px">Start your job search</h3><div class="portal-grid">
 <div class="portal"><b>LinkedIn Jobs</b><small>Worldwide professional jobs</small><a href="https://www.linkedin.com/jobs/" target="_blank" rel="noopener noreferrer"><button>Search ↗</button></a></div>
@@ -576,10 +577,12 @@ $('v-home').innerHTML=`
 <div class="portal"><b>Jobs.com.pk</b><small>Pakistan opportunities</small><a href="https://www.jobs.com.pk/" target="_blank" rel="noopener noreferrer"><button>Search ↗</button></a></div>
 </div></div>
 <div class="card pad" style="margin-top:12px"><div class="ey">CAREER TOOLS</div><h3 style="margin:4px 0 10px">Career Tools</h3><div class="quick-grid">
+<button class="quick" data-v="match"><span class="qi">◎</span><span><b>AI Job Match</b><small>Match CV with job descriptions</small></span></button>
 <button class="quick" data-v="letter"><span class="qi">✉</span><span><b>Cover Letter</b><small>Create targeted applications</small></span></button>
 <button class="quick" data-v="interview"><span class="qi">☏</span><span><b>Interview Coach</b><small>Practice interviews</small></span></button>
 <button class="quick" data-v="tracker"><span class="qi">✓</span><span><b>Application Tracker</b><small>Track your job applications</small></span></button>
 </div></div>`
+$('v-match').innerHTML=`<div class="card ai-panel"><div class="ey">JOB MATCH + ATS</div><h2>Match your CV to a real job</h2><p class="hint">Paste the job description to compare your current CV with the role. CareerPilot gives a transparent 0–100 match estimate, keyword gaps, section checks, and practical next steps — all locally in your browser.</p><div class="ai-grid"><label>Target job title <input id="matchRole" placeholder="Graphic Designer"></label><label>Company <input id="matchCompany" placeholder="Company name (optional)"></label></div><label style="display:block;margin-top:10px">Job description<textarea id="jobDesc" rows="9" aria-label="Job description" placeholder="Paste the complete job description here..."></textarea></label><div class="ai-actions" style="margin-top:10px"><button class="pri" id="runMatch">Analyze Job Match</button><button id="clearMatch">Clear</button></div><div id="matchResult" style="margin-top:14px"></div></div>`;
 $('v-writer').innerHTML=`<div class="card ai-panel">
 <div class="ey">AI WRITING HELPER</div><h2>Write better CV content</h2>
 <p class="hint">Improve a CV bullet, create a professional summary, or tailor CV content to a job description. Requests go through the secure server endpoint; no AI key is exposed in the browser.</p>
@@ -635,6 +638,65 @@ $('makeLetter').onclick=async()=>{
 $('clearLetter').onclick=()=>{$('letterRole').value='';$('letterCompany').value='';$('letterDesc').value='';$('letterOut').value='';$('letterStatus').textContent=''};
 $('copyLetter').onclick=()=>copyToolText('letterOut',$('copyLetter'));
 $('printLetter').onclick=printCoverLetter;
+$('runMatch').onclick=()=>{
+ const jd=$('jobDesc').value.trim(), role=$('matchRole').value.trim(), company=$('matchCompany').value.trim();
+ if(!jd){$('matchResult').innerHTML='<div class="card ai-panel"><p class="hint">Paste a job description first.</p></div>';return}
+ const d=S.d;
+ const cv=[d.name,d.title,d.email,d.phone,d.location,d.link,d.summary,...(d.skills||[]),...(d.languages||[]),...(d.projects||[]),...(d.certs||[]),...(d.achievements||[]),...(d.exp||[]).flatMap(x=>[x.position,x.company,x.start,x.end,x.location,x.description]),...(d.edu||[]).flatMap(x=>[x.degree,x.institute,x.year,x.location])].join(' ');
+ const normText=s=>String(s||'').toLowerCase().replace(/[–—]/g,'-').replace(/[^a-z0-9+#.\s-]/g,' ').replace(/\s+/g,' ').trim();
+ const cvText=normText(cv),jdText=normText(jd);
+ const stop=new Set(['the','and','for','with','from','that','this','your','you','are','our','job','work','will','have','has','not','can','all','their','they','who','into','about','using','role','team','company','years','year','what','how','but','these','those','them','then','than','also','more','most','must','able','looking','join','including','required','requirements','responsibilities','skills','experience','position','candidate','please','within','across','based','would','should','may','need','per','via','etc','such','well','good','strong','knowledge','ability','plus','hamen','hume','humen','humain','chahiye','chaiye','hai','hain','ke','ki','ka','ko','se','mein','main','me','par','ek','aik','ap','aap','ham','hum','kr','kar','k','liya','liye','wala','wali','wale','bhi','jo','jese','jaisa','jaisi','ye','yeh','woh','wo']);
+ const raw=jdText.split(/\s+/).filter(Boolean);
+ const tokens=[...new Set(raw.filter(x=>x.length>=3&&!stop.has(x)&&!/^\d+$/.test(x)))];
+ const phrases=[];
+ for(let n=3;n>=2;n--){for(let i=0;i<=raw.length-n;i++){const p=raw.slice(i,i+n);if(p.every(x=>x.length>=2&&!stop.has(x))&&p.some(x=>!stop.has(x))){const s=p.join(' ');if(!phrases.includes(s)&&s.length>=7)phrases.push(s)}}}
+ const phraseKeys=phrases.filter(p=>cvText.includes(p));
+ const freq={};tokens.forEach(x=>freq[x]=(freq[x]||0)+1);
+ const keys=Object.keys(freq).sort((a,b)=>freq[b]-freq[a]);
+ const hits=keys.filter(x=>cvText.includes(x));
+ const missing=keys.filter(x=>!hits.includes(x));
+ const phraseWeight=phraseKeys.length?Math.min(35,Math.round(phraseKeys.length/Math.max(Math.min(phrases.length,20),1)*35)):0;
+ const tokenWeight=keys.length?Math.round(hits.length/keys.length*15):0;
+ const keywordScore=Math.min(50,phraseWeight+tokenWeight);
+ const matchedSignals=[...phraseKeys,...hits.filter(x=>x.length>=4&&!phraseKeys.some(p=>p.split(' ').includes(x)))];
+ const sections=[
+  ['Contact details',!!(d.email&&d.phone&&d.location)],
+  ['Professional summary',String(d.summary||'').trim().length>=80],
+  ['Skills',Array.isArray(d.skills)&&d.skills.length>=5],
+  ['Experience',Array.isArray(d.exp)&&d.exp.length>0],
+  ['Education',Array.isArray(d.edu)&&d.edu.length>0],
+  ['Achievements / projects',((d.achievements||[]).length+(d.projects||[]).length)>0]
+ ];
+ const sectionScore=Math.round(sections.filter(x=>x[1]).length/sections.length*20);
+ const contactScore=(d.email&&d.phone)?10:(d.email||d.phone)?5:0;
+ const cvWordCount=toolWords(cvText).length;
+ const lengthScore=cvWordCount>=180&&cvWordCount<=1100?10:cvWordCount>=100&&cvWordCount<=1400?6:3;
+ const quantified=/(\b\d+(?:[.,]\d+)?%?\b|\$\s?\d|\b(?:increased|grew|reduced|saved|generated|managed|led|delivered)\b)/i.test(cv);
+ const evidenceScore=quantified?10:5;
+ const roleWords=toolWords(role).filter(x=>!stop.has(x));
+ const roleMatch=roleWords.length?Math.round(roleWords.filter(x=>cvText.includes(x)).length/roleWords.length*100):null;
+ const responsibilityCoverage=phrases.length?Math.round(phraseKeys.length/Math.max(Math.min(phrases.length,20),1)*100):0;
+ const matchScore=Math.min(100,Math.round((keywordScore/50)*55+(responsibilityCoverage/100)*25+(roleMatch===null?50:roleMatch)*.2));
+ const score=Math.min(100,keywordScore+sectionScore+contactScore+lengthScore+evidenceScore);
+ const fixes=[];
+ if(!d.email||!d.phone)fixes.push('Complete your contact details (email and phone).');
+ if(String(d.summary||'').trim().length<80)fixes.push('Expand the professional summary to roughly 2–4 concise lines.');
+ if((d.skills||[]).length<5)fixes.push('Add at least 5 relevant skills you genuinely have.');
+ if(!(d.exp||[]).length)fixes.push('Add relevant work experience or clearly labeled practical projects.');
+ if(!quantified)fixes.push('Add measurable evidence where truthful: %, revenue, time saved, volume, or other concrete results.');
+ if(cvWordCount<180)fixes.push('Your CV appears very short; add relevant achievements, projects, experience, or certifications.');
+ if(cvWordCount>1400)fixes.push('Your CV appears long; remove repeated or low-value content.');
+ missing.slice(0,6).forEach(x=>{if(x.length>3)fixes.push('If you genuinely have “'+x+'”, add it naturally to the relevant CV section.')});
+ if(!fixes.length)fixes.push('No major rule-based issues found. Review each matched requirement and keep only claims you can support.');
+ const badge=score>=80?'Strong ATS readiness':score>=60?'Good starting point':'Needs improvement';
+ const matchBadge=matchScore>=80?'High alignment':matchScore>=60?'Moderate alignment':'More tailoring recommended';
+ const matchedPhraseList=phraseKeys.slice(0,10).map(escHtml).map(x=>'<li>'+x+'</li>').join('');
+ const cleanMissing=missing.filter(x=>x.length>=4&&!/^(team|company|platforms?|materials?|stores?|requirements?|responsibilities?)$/.test(x)).slice(0,10);
+ $('matchResult').innerHTML='<div class="card ai-panel ats-result"><div class="ats-top"><div><div class="ey">JOB MATCH + ATS</div><div class="ai-score">'+matchScore+'<small>/100</small></div><b>'+matchBadge+'</b></div><div class="ats-meta"><span>ATS readiness <b>'+score+'/100</b></span><span>Phrase match <b>'+responsibilityCoverage+'%</b></span><span>Role match <b>'+(roleMatch===null?'—':roleMatch+'%')+'</b></span></div></div><div class="ats-breakdown" style="margin-bottom:12px"><span>ATS Keywords '+keywordScore+'/50</span><span>Sections '+sectionScore+'/20</span><span>Contact '+contactScore+'/10</span><span>Length '+lengthScore+'/10</span><span>Evidence '+evidenceScore+'/10</span></div><div class="ai-grid"><div><b>Matched job phrases</b><ul class="ai-list">'+(matchedPhraseList||'<li>No clear phrase matches yet.</li>')+'</ul></div><div><b>Potential keyword gaps</b><ul class="ai-list">'+(cleanMissing.length?cleanMissing.map(escHtml).map(x=>'<li>'+x+'</li>').join(''):'<li>No major keyword gaps detected.</li>')+'</ul></div></div><div class="ats-fixes"><b>Recommended fixes</b><ol class="ai-list">'+fixes.slice(0,8).map(escHtml).map(x=>'<li>'+x+'</li>').join('')+'</ol></div><p class="hint">Job Match combines phrase, keyword and role signals. ATS Readiness measures CV structure and machine-readable content. Both are transparent rule-based estimates—not hiring predictions.</p><div class="ai-actions" style="margin-top:10px"><button id="copyMatch">Copy Analysis</button><button id="useMatchWriter">Tailor CV with AI</button><button id="useMatchLetter">Create Cover Letter</button></div></div>';
+ $('copyMatch').onclick=()=>copyToolText('matchResult',$('copyMatch'));
+ $('useMatchWriter').onclick=()=>{go('writer');$('aiTask').value='tailor';updateAIWriterForm();$('aiInput').value=aiWriterContext();$('aiJob').value=jd;toast('Job details moved to AI Writer')};
+ $('useMatchLetter').onclick=()=>{go('letter');$('letterRole').value=role;$('letterCompany').value=company;$('letterDesc').value=jd;toast('Job details moved to Cover Letter')};
+};$('clearMatch').onclick=()=>{$('jobDesc').value='';$('matchRole').value='';$('matchCompany').value='';$('matchResult').innerHTML=''}
 $('makeInterview').onclick=()=>{
  const role=$('intRole').value.trim()||'this role',type=$('intType').value,jd=$('intDesc').value;
  const focus=toolWords(jd).filter(x=>!['the','and','for','with','from','that','this','your','you','are','our','job','work','will','have','has','not','can','into','about','using'].includes(x)).slice(0,8);
@@ -685,10 +747,19 @@ const JOBS=[
  ['ILO Jobs','International Labour Organization career opportunities.','https://jobs.ilo.org/','Worldwide / International Organizations']
 ];
 
-$('v-jobs').innerHTML=`<div class="jobs-quick-nav"><button class="on" data-jobs-tab="saved">☆ Saved Jobs</button><button data-jobs-tab="alerts">🔔 Job Alerts</button><button data-jobs-tab="tracker">✓ Application Tracker</button></div>
+$('v-jobs').innerHTML=`<div class="jobs-quick-nav"><button class="on" data-jobs-tab="live">🌐 Live Jobs</button><button data-jobs-tab="saved">☆ Saved Jobs</button><button data-jobs-tab="alerts">🔔 Job Alerts</button><button data-jobs-tab="tracker">✓ Application Tracker</button></div><div class="card pad">
+<div class="ey" style="margin-bottom:5px">LIVE GLOBAL JOB SEARCH</div>
+<h2 style="margin:0 0 6px">Find real jobs from multiple sources</h2>
+<p class="hint">Search live jobs from multiple sources. Job details and applications stay with the original job provider.</p>
+<div class="row"><input id="jobQ" placeholder="Job title, skill or keyword" style="margin:0"><input id="jobLoc" placeholder="Country, region or Remote" style="margin:0"></div>
+<div class="row" style="margin-top:8px"><select id="jobType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><select id="jobExp" style="margin:0"><option value="">All experience levels</option><option value="entry">Entry / Junior</option><option value="mid">Mid-level</option><option value="senior">Senior / Lead</option></select></div>
+<div class="row" style="margin-top:8px"><select id="jobSalary" style="margin:0"><option value="0">Any salary</option><option value="30000">$30k+ / year</option><option value="50000">$50k+ / year</option><option value="75000">$75k+ / year</option><option value="100000">$100k+ / year</option><option value="150000">$150k+ / year</option></select><select id="jobSort" style="margin:0"><option value="recent">Newest first</option><option value="salary">Highest salary</option><option value="match">Best CV match</option></select><button class="pri" id="jobSearchBtn">Search Live Jobs</button></div>
+<div id="jobStatus" class="hint" style="margin-top:9px">Enter a keyword and search. Remote jobs are supplied by Remotive.</div>
+</div>
+<div id="jobCards"></div>
 <div class="card pad" id="savedJobsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">SAVED JOBS</div><p class="hint" style="margin:4px 0 0">Keep interesting jobs here before you apply.</p></div><b id="savedJobCount">0</b></div><div id="savedJobCards" style="margin-top:12px"></div></div>
-<div class="card pad" id="jobAlertsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">JOB ALERTS</div><p class="hint" style="margin:4px 0 0">Save your preferred jobs and detect new matching listings.</p></div><b id="jobAlertNewCount">0</b></div><div class="row" style="margin-top:10px"><input id="alertQ" placeholder="Job title or skill" style="margin:0"><input id="alertLoc" placeholder="Country, region or Remote" style="margin:0"></div><div class="row" style="margin-top:8px"><select id="alertType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><select id="alertExp" style="margin:0"><option value="">All experience levels</option><option value="entry">Entry / Junior</option><option value="mid">Mid-level</option><option value="senior">Senior / Lead</option></select></div><div class="row" style="margin-top:8px"><select id="alertSalary" style="margin:0"><option value="0">Any salary</option><option value="30000">$30k+ / year</option><option value="50000">$50k+ / year</option><option value="75000">$75k+ / year</option><option value="100000">$100k+ / year</option><option value="150000">$150k+ / year</select><select id="alertFreq" style="margin:0"><option value="daily">Check daily</option><option value="weekly">Check weekly</option></select><button class="pri" id="createJobAlert">Create Job Alert</button></div><div id="jobAlertStatus" class="hint" style="margin-top:9px">Alerts are saved on this device.</div><div id="jobAlertList" style="margin-top:12px"></div><div id="jobAlertMatches" style="margin-top:12px"></div><div style="margin-top:10px"><button id="checkJobAlerts">Check New Jobs</button></div></div>
-<div class="card pad"><div class="ey">OTHER JOB PLATFORMS</div><p class="hint" style="margin:4px 0 10px">You can also open established job portals directly.</p><div id="jobPortals"></div></div>`;$('v-business').innerHTML=`<div class="card pad">
+<div class="card pad" id="jobAlertsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">JOB ALERTS</div><p class="hint" style="margin:4px 0 0">Save your preferred jobs and detect new matching listings.</p></div><b id="jobAlertNewCount">0</b></div><div class="row" style="margin-top:10px"><input id="alertQ" placeholder="Job title or skill" style="margin:0"><input id="alertLoc" placeholder="Country, region or Remote" style="margin:0"></div><div class="row" style="margin-top:8px"><select id="alertType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><select id="alertExp" style="margin:0"><option value="">All experience levels</option><option value="entry">Entry / Junior</option><option value="mid">Mid-level</option><option value="senior">Senior / Lead</option></select></div><div class="row" style="margin-top:8px"><select id="alertSalary" style="margin:0"><option value="0">Any salary</option><option value="30000">$30k+ / year</option><option value="50000">$50k+ / year</option><option value="75000">$75k+ / year</option><option value="100000">$100k+ / year</option><option value="150000">$150k+ / year</select><select id="alertFreq" style="margin:0"><option value="daily">Check daily</option><option value="weekly">Check weekly</option></select><button class="pri" id="createJobAlert">Create Job Alert</button></div><div id="jobAlertStatus" class="hint" style="margin-top:9px">Alerts are saved on this device.</div><div id="jobAlertList" style="margin-top:12px"></div><div id="jobAlertMatches" style="margin-top:12px"></div><div style="margin-top:10px"><button id="checkJobAlerts">Check New Jobs</button></div></div><div class="card pad"><div class="ey">OTHER JOB PLATFORMS</div><p class="hint" style="margin:4px 0 10px">You can also open established job portals directly.</p><div id="jobPortals"></div></div>`;
+$('v-business').innerHTML=`<div class="card pad">
 <div class="ey">BUSINESS NETWORK · CLIENT DISCOVERY</div>
 <h2 style="margin:0 0 6px">Find businesses, decision-makers and potential clients</h2>
 <p class="hint">Search a business field and city, discover public business pages or professional profiles, save the prospects you care about, then prepare a personalized message.</p>
@@ -1057,6 +1128,8 @@ $('bizGenerateMsg').onclick=async()=>{
 };
 $('bizCopyMsg').onclick=()=>copyToolText('bizConversation',$('bizCopyMsg'));
 renderBusinessLeads();
+$('jobSearchBtn').onclick=loadLiveJobs;
+$('v-jobs').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='jobQ'||e.target.id==='jobLoc'))loadLiveJobs()});
 $('v-jobs').addEventListener('click',e=>{
   const jt=e.target.closest('[data-jobs-tab]');
   if(jt){Q('[data-jobs-tab]').forEach(b=>b.classList.toggle('on',b===jt));const tab=jt.dataset.jobsTab;if(tab==='saved')$('savedJobsPanel')?.scrollIntoView({behavior:'smooth',block:'start'});else if(tab==='alerts')$('jobAlertsPanel')?.scrollIntoView({behavior:'smooth',block:'start'});else if(tab==='tracker'){go('tracker');return}else $('jobQ')?.focus();return}
@@ -1109,7 +1182,7 @@ async function createJobAlert(){const a={id:secureId('alert'),q:($('alertQ')?.va
 let jobAlertAutoBusy=false;
 async function maybeAutoCheckJobAlerts(){if(jobAlertAutoBusy||!navigator.onLine)return;if(currentUser){jobAlertAutoBusy=true;try{await syncServerJobAlerts()}finally{jobAlertAutoBusy=false};return}const alerts=loadJobAlerts();if(!alerts.length)return;const now=Date.now();const due=alerts.filter(a=>{const gap=a.freq==='weekly'?7*86400000:86400000;return !a.lastChecked||now-Number(a.lastChecked)>=gap});if(!due.length)return;jobAlertAutoBusy=true;try{await checkJobAlerts(due.map(a=>a.id))}finally{jobAlertAutoBusy=false}}
 $('createJobAlert').onclick=createJobAlert;$('checkJobAlerts').onclick=()=>checkJobAlerts();$('jobAlertsPanel').addEventListener('click',async e=>{const x=e.target.closest('[data-alert-check]'),d=e.target.closest('[data-alert-delete]'),s=e.target.closest('[data-alert-save]');if(x){checkJobAlerts([x.dataset.alertCheck]);return}if(d){const id=d.dataset.alertDelete;try{if(currentUser)await serverAlertRequest('DELETE',null,id)}catch(e){}saveJobAlerts(loadJobAlerts().filter(a=>a.id!==id));renderJobAlerts();toast('Job Alert deleted');return}if(s){const j=findJobByKey(s.dataset.alertSave);if(j&&!isJobSaved(j))saveJob(j);renderJobAlerts()}});renderJobAlerts();
-setTimeout(maybeAutoCheckJobAlerts,1800);setInterval(maybeAutoCheckJobAlerts,15*60*1000);window.addEventListener('online',()=>setTimeout(maybeAutoCheckJobAlerts,1200));renderJobPortals();renderSavedJobs();
+setTimeout(maybeAutoCheckJobAlerts,1800);setInterval(maybeAutoCheckJobAlerts,15*60*1000);window.addEventListener('online',()=>setTimeout(maybeAutoCheckJobAlerts,1200));renderJobPortals();renderSavedJobs();loadLiveJobs();
 const CVLIB_KEY='careerpilot_cv_library_2026',CVACTIVE_KEY='careerpilot_active_cv_2026';
 let cvLibrary=[],activeCvId=null;
 function cloneCV(x){return JSON.parse(JSON.stringify(x))}
