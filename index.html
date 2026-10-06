@@ -554,7 +554,7 @@ function escHtml(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'
 /* Career tool handlers are bound after their view markup is created. */
 
 $('v-home').innerHTML=`
-<div class="dash-head"><div><div class="ey">CAREERPILOT · AI CAREER SUITE</div><h2 style="margin:3px 0">Your career workflow, from CV to interview.</h2><p>Build your CV, discover real jobs, match opportunities, write applications and prepare for interviews — in one workspace.</p></div><button class="pri" data-v="cv">✎ Build / Edit CV</button></div>
+<div class="dash-head"><div><div class="ey">CAREERPILOT DASHBOARD</div><h2 style="margin:3px 0">Build your career in one place.</h2><p>CVs, professional templates, global jobs and career tools.</p></div><button class="pri" data-v="cv">✎ Build / Edit CV</button></div>
 <div class="dashboard-grid">
 <div class="card dstat"><span>📄</span><b data-cv-count>1</b><small>CVs created</small></div>
 <div class="card dstat"><span>🎨</span><b>30</b><small>Professional CV templates</small></div>
@@ -576,14 +576,13 @@ $('v-home').innerHTML=`
 <div class="portal"><b>Glassdoor</b><small>Jobs and company information</small><a href="https://www.glassdoor.com/Job/" target="_blank" rel="noopener noreferrer"><button>Search ↗</button></a></div>
 <div class="portal"><b>Jobs.com.pk</b><small>Pakistan opportunities</small><a href="https://www.jobs.com.pk/" target="_blank" rel="noopener noreferrer"><button>Search ↗</button></a></div>
 </div></div>
-<div class="card pad" style="margin-top:12px"><div class="ey">AI CAREER SUITE</div><h3 style="margin:4px 0 10px">One workflow from opportunity to application</h3><div class="quick-grid">
-<button class="quick" data-v="match"><span class="qi">◎</span><span><b>Job Match + ATS</b><small>Compare your CV with a real job and find gaps</small></span></button>
-<button class="quick" data-v="writer"><span class="qi">✦</span><span><b>AI Writing Helper</b><small>Improve bullets, summaries and job-tailored CV content</small></span></button>
-<button class="quick" data-v="letter"><span class="qi">✉</span><span><b>AI Cover Letter</b><small>Create a targeted application from your CV</small></span></button>
-<button class="quick" data-v="interview"><span class="qi">☏</span><span><b>AI Interview Coach</b><small>Generate role-specific practice questions and answer guidance</small></span></button>
-<button class="quick" data-v="jobs"><span class="qi">🌐</span><span><b>Live Jobs</b><small>Discover real opportunities from multiple sources</small></span></button>
-<button class="quick" data-v="tracker"><span class="qi">✓</span><span><b>Application Tracker</b><small>Keep your applications organized</small></span></button>
-</div></div>;
+<div class="card pad" style="margin-top:12px"><div class="ey">CAREER TOOLS</div><h3 style="margin:4px 0 10px">Career Tools</h3><div class="quick-grid">
+<button class="quick" data-v="match"><span class="qi">◎</span><span><b>AI Job Match</b><small>Match CV with job descriptions</small></span></button>
+<button class="quick" data-v="letter"><span class="qi">✉</span><span><b>Cover Letter</b><small>Create targeted applications</small></span></button>
+<button class="quick" data-v="interview"><span class="qi">☏</span><span><b>Interview Coach</b><small>Practice interviews</small></span></button>
+<button class="quick" data-v="tracker"><span class="qi">✓</span><span><b>Application Tracker</b><small>Track your job applications</small></span></button>
+</div></div>`
+$('v-match').innerHTML=`<div class="card ai-panel"><div class="ey">JOB MATCH + ATS</div><h2>Match your CV to a real job</h2><p class="hint">Paste the job description to compare your current CV with the role. CareerPilot gives a transparent 0–100 match estimate, keyword gaps, section checks, and practical next steps — all locally in your browser.</p><div class="ai-grid"><label>Target job title <input id="matchRole" placeholder="Graphic Designer"></label><label>Company <input id="matchCompany" placeholder="Company name (optional)"></label></div><label style="display:block;margin-top:10px">Job description<textarea id="jobDesc" rows="9" aria-label="Job description" placeholder="Paste the complete job description here..."></textarea></label><div class="ai-actions" style="margin-top:10px"><button class="pri" id="runMatch">Analyze Job Match</button><button id="clearMatch">Clear</button></div><div id="matchResult" style="margin-top:14px"></div></div>`;
 $('v-writer').innerHTML=`<div class="card ai-panel">
 <div class="ey">AI WRITING HELPER</div><h2>Write better CV content</h2>
 <p class="hint">Improve a CV bullet, create a professional summary, or tailor CV content to a job description. Requests go through the secure server endpoint; no AI key is exposed in the browser.</p>
@@ -698,22 +697,12 @@ $('runMatch').onclick=()=>{
  $('useMatchWriter').onclick=()=>{go('writer');$('aiTask').value='tailor';updateAIWriterForm();$('aiInput').value=aiWriterContext();$('aiJob').value=jd;toast('Job details moved to AI Writer')};
  $('useMatchLetter').onclick=()=>{go('letter');$('letterRole').value=role;$('letterCompany').value=company;$('letterDesc').value=jd;toast('Job details moved to Cover Letter')};
 };$('clearMatch').onclick=()=>{$('jobDesc').value='';$('matchRole').value='';$('matchCompany').value='';$('matchResult').innerHTML=''}
-$('makeInterview').onclick=async()=>{
- const role=$('intRole').value.trim(),type=$('intType').value,jd=$('intDesc').value.trim();
- if(!role){$('intOut').innerHTML='<div class="card ai-panel"><p class="hint">Enter the target role first.</p></div>';return}
- const b=$('makeInterview');b.disabled=true;$('intOut').innerHTML='<div class="card pad"><div class="hint">AI coach is preparing your interview set…</div></div>';
- try{
-  const session=(await sb.auth.getSession()).data.session;
-  if(!session?.access_token)throw new Error('Please sign in to use AI Interview Coach.');
-  const res=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json',authorization:'Bearer '+session.access_token},body:JSON.stringify({task:'interview',role,interviewType:type,jobDescription:jd,cvContext:letterContext().slice(0,12000),input:role})});
-  const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'AI interview service is unavailable.');
-  const out=String(data.text||'').trim();
-  if(!out)throw new Error('AI returned an empty interview set.');
-  $('intOut').innerHTML='<div class="card ai-panel"><div class="ey">AI '+escHtml(type)+' INTERVIEW COACH</div><div class="job-detail-body" style="margin-top:10px;white-space:pre-wrap">'+escHtml(out)+'</div><div class="ai-actions" style="margin-top:12px"><button id="copyInterview">Copy Practice Set</button></div><p class="hint" style="margin-top:10px">Use only truthful examples from your real experience. AI guidance is a practice aid, not a hiring prediction.</p></div>';
-  $('copyInterview').onclick=()=>copyToolText('intOut',$('copyInterview'));
- }catch(e){
-  $('intOut').innerHTML='<div class="card ai-panel"><p class="hint">'+escHtml(e.message||'Interview generation failed.')+'</p></div>';
- }finally{b.disabled=false}
+$('makeInterview').onclick=()=>{
+ const role=$('intRole').value.trim()||'this role',type=$('intType').value,jd=$('intDesc').value;
+ const focus=toolWords(jd).filter(x=>!['the','and','for','with','from','that','this','your','you','are','our','job','work','will','have','has','not','can','into','about','using'].includes(x)).slice(0,8);
+ const qs=['Tell me about yourself and the experience most relevant to '+role+'.','Why are you interested in this position?','Which achievement best demonstrates your ability to succeed in this role?','Describe a challenging situation and how you handled it.','Which of your skills would you use most in this role?','How do you prioritize competing deadlines?','What would you focus on during your first 30 days?','What questions would you ask the interviewer?'];
+ if(focus.length) qs.splice(4,0,'How would you apply your experience with '+focus.slice(0,3).join(', ')+' to this role?');
+ $('intOut').innerHTML='<div class="card ai-panel"><div class="ey">'+escHtml(type)+' INTERVIEW SET</div><ol class="ai-list">'+qs.map(escHtml).map(x=>'<li>'+x+'</li>').join('')+'</ol><p class="hint">Practice answers from your real CV experience. These questions are generated locally; connect an AI provider later for deeper personalized coaching.</p></div>';
 };
 $('v-profile').innerHTML=`<div class="card pad"><div class="ey">ACCOUNT & PLAN</div><div class="plan-bar"><div><b id="planName">Free Plan</b><div class="usage-line" id="planUsage">3 AI actions / month included</div></div><span class="plan-pill" id="planPill">FREE</span></div><div class="premium-grid"><div class="premium-card"><span class="premium-tag">FREE</span><h3>CareerPilot Free</h3><ul><li>5 professional CV templates</li><li>Basic PDF export</li><li>3 AI actions per month</li><li>Global job search</li></ul></div><div class="premium-card"><span class="premium-tag">PREMIUM</span><h3>CareerPilot Premium</h3><ul><li>All 30 professional CV templates</li><li>Up to 100 AI actions / month</li><li>Advanced career tools</li><li>Ad-free workspace</li><li>Priority cloud features</li></ul><button class="pri" id="upgradePlan" style="margin-top:8px">Upgrade to Premium</button></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button id="loadSaved">Load saved CV</button><button class="pri" id="saveCV2">Save CV</button><button id="exportCV2">Export PDF</button></div><div class="ad-slot" data-ad-slot style="margin-top:14px">ADVERTISEMENT</div></div>`;
 $('loadSaved').onclick=()=>{const x=activeCV();if(!x){toast('No saved CV found');return}openCV(x.id)};
