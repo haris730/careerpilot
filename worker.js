@@ -177,11 +177,6 @@ function buildPrompt(body) {
     const website = String(body.website || '').slice(0, 500);
     return rules.join('\\n') + '\\nTask: Write a short, professional first-contact outreach message for a business or business decision-maker. Personalize only from supplied facts. Do not claim prior contact, clients, results, or services that are not supported by the CV context. Avoid spammy language. Keep it suitable for LinkedIn, email, or a professional DM. End with a simple invitation to discuss how the user can help.\\nBusiness name:\\n' + businessName + '\\nContact person:\\n' + personName + '\\nBusiness field:\\n' + field + '\\nCity:\\n' + city + '\\nWebsite:\\n' + website + '\\nCV context:\\n' + cv + '\\nInput:\\n' + input;
   }
-  if (task === 'interview') {
-    const role = String(body.role || '').slice(0, 300);
-    const interviewType = String(body.interviewType || 'General').slice(0, 60);
-    return rules.join('\\n') + '\\nTask: Act as a professional interview coach. Create a focused practice set for the target role using only the supplied CV context and job description. Return 8 realistic interview questions. For each question, add a short line called "What they want to hear" describing the evidence the candidate should give, without inventing facts. Include 3 concise answer tips at the end. Do not write fictional candidate answers.\\nTarget role:\\n' + role + '\\nInterview type:\\n' + interviewType + '\\nCV context:\\n' + cv + '\\nJob description:\\n' + job;
-  }
   if (task === 'letter') {
     const role = String(body.role || '').slice(0, 300);
     const company = String(body.company || '').slice(0, 300);
@@ -315,9 +310,8 @@ export default {
       if (!user?.id) return json({ error: 'Sign in required for AI tools.' }, 401);
       let body;
       try { const raw=await readBodyLimited(request,128*1024); body=JSON.parse(raw); } catch(e) { return json({ error: e.message==='PAYLOAD_TOO_LARGE'?'Request payload too large.':'Invalid JSON request.' }, e.message==='PAYLOAD_TOO_LARGE'?413:400); }
-      if (!['bullet','summary','tailor','letter','outreach','interview'].includes(body.task)) return json({ error: 'Invalid AI task.' }, 400);
+      if (!['bullet','summary','tailor','letter','outreach'].includes(body.task)) return json({ error: 'Invalid AI task.' }, 400);
       if (body.task !== 'letter' && !String(body.input || '').trim()) return json({ error: 'Input is required.' }, 400);
-      if (body.task === 'interview' && !String(body.role || '').trim()) return json({ error: 'Target role is required.' }, 400);
       if (body.task === 'tailor' && !String(body.jobDescription || '').trim()) return json({ error: 'Job description is required for tailoring.' }, 400);
       if (body.task === 'letter' && (!String(body.role || '').trim() || !String(body.jobDescription || '').trim())) return json({ error: 'Job title and job description are required.' }, 400);
       const quota = await supabaseRpc(request,'consume_ai_credit',{p_kind:String(body.task||'ai'),p_free_limit:FREE_AI_LIMIT,p_premium_limit:PREMIUM_AI_LIMIT});
