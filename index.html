@@ -956,14 +956,26 @@ async function loadLiveJobs(){
       }catch(_e){}
     }
 
-    const words=q.toLowerCase().split(/\s+/).filter(Boolean);
-    if(words.length)rows=rows.filter(j=>{
-      const text=[j.title,j.company_name,j.category,j.description,...(Array.isArray(j.tags)?j.tags:[]),jobLocationText(j)].join(' ').toLowerCase();
-      return words.every(w=>text.includes(w));
-    });
+    const normalizeSearchWord=w=>String(w||'').toLowerCase().replace(/\bgrapic\b/g,'graphic').replace(/\bdesginer\b/g,'designer');
+    const words=q.split(/\s+/).map(normalizeSearchWord).filter(Boolean);
+    let queryMode='exact';
+    if(words.length){
+      const exactRows=rows.filter(j=>{
+        const text=[j.title,j.company_name,j.category,j.description,...(Array.isArray(j.tags)?j.tags:[]),jobLocationText(j)].join(' ').toLowerCase();
+        return words.every(w=>text.includes(w));
+      });
+      if(exactRows.length)rows=exactRows;
+      else{
+        const relatedRows=rows.filter(j=>{
+          const text=[j.title,j.company_name,j.category,j.description,...(Array.isArray(j.tags)?j.tags:[]),jobLocationText(j)].join(' ').toLowerCase();
+          return words.some(w=>text.includes(w));
+        });
+        rows=relatedRows;queryMode='related';
+      }
+    }
     if(type&&type!=='all')rows=rows.filter(j=>String(j.job_type||'')===type);
-    window.__careerPilotLiveJobs=rows;
-    const needle=loc.toLowerCase();
+    window.__careerPilotLiveJobs=rows.slice();
+    const needle=loc.toLowerCase().trim();
     if(needle)rows=rows.filter(j=>needle==='remote'||jobLocationText(j).toLowerCase().includes(needle)||String(j.title||'').toLowerCase().includes(needle)||String(j.company_name||'').toLowerCase().includes(needle));
     if(exp)rows=rows.filter(j=>(j.job_experience||jobExperience(j))===exp);
     if(salary)rows=rows.filter(j=>jobSalaryMax(j)>=salary);
@@ -974,17 +986,10 @@ async function loadLiveJobs(){
     if(rows.length){
       cards.innerHTML=rows.map(jobCard).join('');
       const sourceLabel=(data.source&&rows.some(j=>j.source===data.source))?data.source:'Multiple live sources';
-      status.textContent=rows.length+' live job'+(rows.length===1?'':'s')+' found · '+sourceLabel;
+      status.textContent=(queryMode==='related'?'No exact match — showing ':'')+rows.length+' related live job'+(rows.length===1?'':'s')+' · '+sourceLabel;
     }else{
-      /* Do not erase the last visible jobs while a search has no match. */
-      const previous=Array.isArray(window.__careerPilotLastLiveRows)?window.__careerPilotLastLiveRows:[];
-      if(previous.length){
-        cards.innerHTML=previous.map(jobCard).join('');
-        status.textContent='0 matching jobs found · showing the previous live jobs. Try a broader search.';
-      }else{
-        cards.innerHTML='<div class="card pad"><div class="hint">No live jobs matched these filters. Try a broader search or remove the salary/experience requirement.</div></div>';
-        status.textContent='0 live jobs found';
-      }
+      cards.innerHTML='<div class="card pad"><div class="hint">No live jobs matched these filters. Try a broader keyword or remove the salary/experience requirement.</div></div>';
+      status.textContent='0 matching jobs found · no previous results shown';
     }
     if(rows.length)window.__careerPilotLastLiveRows=rows.slice();
   }catch(e){
