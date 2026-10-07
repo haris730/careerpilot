@@ -755,9 +755,10 @@ $('v-jobs').innerHTML=`<div class="jobs-quick-nav"><button class="on" data-jobs-
 <div class="row"><input id="jobQ" placeholder="Job title, skill or keyword" style="margin:0"><input id="jobLoc" placeholder="Country, region or Remote" style="margin:0"></div>
 <div class="row" style="margin-top:8px"><select id="jobType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><select id="jobExp" style="margin:0"><option value="">All experience levels</option><option value="entry">Entry / Junior</option><option value="mid">Mid-level</option><option value="senior">Senior / Lead</option></select></div>
 <div class="row" style="margin-top:8px"><select id="jobSalary" style="margin:0"><option value="0">Any salary</option><option value="30000">$30k+ / year</option><option value="50000">$50k+ / year</option><option value="75000">$75k+ / year</option><option value="100000">$100k+ / year</option><option value="150000">$150k+ / year</option></select><select id="jobSort" style="margin:0"><option value="recent">Newest first</option><option value="salary">Highest salary</option><option value="match">Best CV match</option></select><button class="pri" id="jobSearchBtn">Search Live Jobs</button></div>
-<div id="jobStatus" class="hint" style="margin-top:9px">Enter a keyword and search. Remote jobs are supplied by Remotive.</div>
+<div id="jobStatus" class="hint" style="margin-top:9px">Enter a keyword and search. Live jobs are aggregated from Himalayas, Remote OK, Arbeitnow, Jobicy and Remotive.</div>
 </div>
 <div id="jobCards"></div>
+<div class="card pad" style="margin-top:10px"><div class="hint">Jobs aggregated from Himalayas, Remote OK, Arbeitnow, Jobicy and Remotive. Click a job to view it on the original site.</div></div>
 <div class="card pad" id="savedJobsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">SAVED JOBS</div><p class="hint" style="margin:4px 0 0">Keep interesting jobs here before you apply.</p></div><b id="savedJobCount">0</b></div><div id="savedJobCards" style="margin-top:12px"></div></div>
 <div class="card pad" id="jobAlertsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">JOB ALERTS</div><p class="hint" style="margin:4px 0 0">Save your preferred jobs and detect new matching listings.</p></div><b id="jobAlertNewCount">0</b></div><div class="row" style="margin-top:10px"><input id="alertQ" placeholder="Job title or skill" style="margin:0"><input id="alertLoc" placeholder="Country, region or Remote" style="margin:0"></div><div class="row" style="margin-top:8px"><select id="alertType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><select id="alertExp" style="margin:0"><option value="">All experience levels</option><option value="entry">Entry / Junior</option><option value="mid">Mid-level</option><option value="senior">Senior / Lead</option></select></div><div class="row" style="margin-top:8px"><select id="alertSalary" style="margin:0"><option value="0">Any salary</option><option value="30000">$30k+ / year</option><option value="50000">$50k+ / year</option><option value="75000">$75k+ / year</option><option value="100000">$100k+ / year</option><option value="150000">$150k+ / year</select><select id="alertFreq" style="margin:0"><option value="daily">Check daily</option><option value="weekly">Check weekly</option></select><button class="pri" id="createJobAlert">Create Job Alert</button></div><div id="jobAlertStatus" class="hint" style="margin-top:9px">Alerts are saved on this device.</div><div id="jobAlertList" style="margin-top:12px"></div><div id="jobAlertMatches" style="margin-top:12px"></div><div style="margin-top:10px"><button id="checkJobAlerts">Check New Jobs</button></div></div><div class="card pad"><div class="ey">OTHER JOB PLATFORMS</div><p class="hint" style="margin:4px 0 10px">You can also open established job portals directly.</p><div id="jobPortals"></div></div>`;
 $('v-business').innerHTML=`<div class="card pad">
@@ -878,6 +879,24 @@ function jobLocationText(j){
   return Array.isArray(j.candidate_required_location)?j.candidate_required_location.join(', '):(j.candidate_required_location||'Remote');
 }
 function jobDescriptionText(j){return String(j.description||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/\s+/g,' ').trim()}
+function jobSourceName(j){
+  const known=new Set(['Himalayas','Remote OK','Arbeitnow','Jobicy','Remotive']);
+  const direct=String(j?.source||'').trim();
+  if(known.has(direct))return direct;
+  try{
+    const host=new URL(String(j?.url||'')).hostname.toLowerCase().replace(/^www\./,'');
+    if(host==='himalayas.app')return 'Himalayas';
+    if(host==='remoteok.com')return 'Remote OK';
+    if(host==='arbeitnow.com')return 'Arbeitnow';
+    if(host==='jobicy.com')return 'Jobicy';
+    if(host==='remotive.com')return 'Remotive';
+  }catch{}
+  return 'Original job site';
+}
+function jobOriginalUrl(j){
+  const raw=String(j?.url||'').trim();
+  try{const u=new URL(raw);return /^https?:$/.test(u.protocol)?u.href:''}catch{return ''}
+}
 function addJobToTracker(j,status='Saved'){const a=loadTracks(),url=j.url||'';if(a.some(x=>x.link&&url&&x.link===url)){toast('Already in Application Tracker');return false}a.unshift({role:j.title||'Untitled role',company:j.company_name||'',status,link:url,jobKey:jobKey(j),createdAt:Date.now()});saveTracks(a);renderTracks();toast('✓ Added to Application Tracker');return true}
 function openJobDetails(j){
  const modal=$('jobDetailModal');if(!modal)return;
@@ -891,7 +910,8 @@ function jobCard(j){
   const loc=jobLocationText(j);
   const tags=[jobTypeLabel(j.job_type),loc,jobExperience(j)==='entry'?'Entry / Junior':jobExperience(j)==='senior'?'Senior / Lead':'Mid-level'].filter(Boolean).map(jobEsc).join(' · ');
   const saved=isJobSaved(j),m=cvMatch(j);
-  return '<div class="card pad" data-job-card="'+jobEsc(jobKey(j))+'" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0"><div class="ey">'+jobEsc(j.category||'REMOTE JOB')+'</div><h3 style="margin:3px 0 5px">'+jobEsc(j.title)+'</h3><div style="font-weight:600">'+jobEsc(j.company_name||'Company')+'</div><div class="hint" style="margin-top:4px">'+tags+'</div><div class="hint" style="margin-top:4px">💰 '+jobEsc(salary)+' · CV Match '+m.score+'%</div></div><div class="job-card-actions"><button data-job-detail="'+jobEsc(jobKey(j))+'">Details</button><button data-job-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-job-save="'+jobEsc(jobKey(j))+'">'+(saved?'✓ Saved':'☆ Save')+'</button><button data-job-track="'+jobEsc(jobKey(j))+'">+ Tracker</button><a href="'+jobEsc(j.url)+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button class="pri">Apply ↗</button></a></div></div><div class="hint" style="margin-top:10px">Source: '+jobEsc(j.source||'Live Jobs')+' · '+jobEsc(j.publication_date?new Date(j.publication_date).toLocaleDateString():'Recently listed')+'</div><div data-job-match-panel style="display:none"></div></div>'
+  const source=jobSourceName(j),original=jobOriginalUrl(j);
+  return '<div class="card pad" data-job-card="'+jobEsc(jobKey(j))+'" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div style="min-width:0"><div class="ey">'+jobEsc(j.category||'REMOTE JOB')+'</div><h3 style="margin:3px 0 5px">'+jobEsc(j.title)+'</h3><div style="font-weight:600">'+jobEsc(j.company_name||'Company')+'</div><div class="hint" style="margin-top:4px">'+tags+'</div><div class="hint" style="margin-top:4px">💰 '+jobEsc(salary)+' · CV Match '+m.score+'%</div></div><div class="job-card-actions"><button data-job-detail="'+jobEsc(jobKey(j))+'">Details</button><button data-job-match="'+jobEsc(jobKey(j))+'">Match CV</button><button data-job-save="'+jobEsc(jobKey(j))+'">'+(saved?'✓ Saved':'☆ Save')+'</button><button data-job-track="'+jobEsc(jobKey(j))+'">+ Tracker</button><a href="'+jobEsc(original||'#')+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button class="pri">View Original ↗</button></a></div></div><div class="hint" style="margin-top:10px">Source: <b>'+jobEsc(source)+'</b> · '+jobEsc(j.publication_date?new Date(j.publication_date).toLocaleDateString():'Recently listed')+(original?' · <a href="'+jobEsc(original)+'" target="_blank" rel="noopener noreferrer">Original job ↗</a>':'')+'</div><div data-job-match-panel style="display:none"></div></div>'
 }
 function normalizeArbeitnowJob(j){
   const types=Array.isArray(j.job_types)?j.job_types.join(' '):String(j.job_types||'');
@@ -986,8 +1006,8 @@ async function loadLiveJobs(){
 
     if(rows.length){
       cards.innerHTML=rows.map(jobCard).join('');
-      const sourceLabel=(data.source&&rows.some(j=>j.source===data.source))?data.source:'Multiple live sources';
-      status.textContent=(queryMode==='related'?'No exact match — showing ':'')+rows.length+' related live job'+(rows.length===1?'':'s')+' · '+sourceLabel;
+      const sourceCount=new Set(rows.map(jobSourceName)).size;
+      status.textContent=(queryMode==='related'?'No exact match — showing ':'')+rows.length+' live job'+(rows.length===1?'':'s')+' · '+sourceCount+' sources';
     }else{
       cards.innerHTML='<div class="card pad"><div class="hint">No live jobs matched these filters. Try a broader keyword or remove the salary/experience requirement.</div></div>';
       status.textContent='0 matching jobs found · no previous results shown';
@@ -1176,7 +1196,323 @@ function alertKeywordMatchesJob(j,q){const words=String(q||'').toLowerCase().tri
 function alertLocationMatchesJob(j,loc){if(!loc)return true;const jl=jobLocationText(j).toLowerCase(),title=String(j.title||'').toLowerCase(),company=String(j.company_name||'').toLowerCase(),desc=String(j.description||'').toLowerCase();if(jl.includes(loc)||title.includes(loc)||company.includes(loc)||desc.includes(loc))return true;if(loc==='pakistan')return /\\b(worldwide|anywhere|global)\\b/.test(jl);return /\\b(worldwide|anywhere|global)\\b/.test(jl)}
 function alertMatchesJob(j,a){const norm=s=>String(s||'').toLowerCase().replace(/\\bgrapic\\b/g,'graphic'),loc=norm(a.loc);if(!alertKeywordMatchesJob(j,a.q))return false;if(!alertLocationMatchesJob(j,loc))return false;if(a.type&&String(j.job_type||'')!==a.type)return false;if(a.exp){const jt=String(j.title||'').toLowerCase();const known=/senior|sr\\.?|lead|principal|staff|manager|director|head|architect|junior|jr\\.?|entry|intern|trainee|graduate/.test(jt);if(known&&jobExperience(j)!==a.exp)return false}if(a.salary){const sm=jobSalaryMax(j);if(sm&&sm<Number(a.salary))return false}return true}
 
-function renderJobAlerts(){const box=$('jobAlertList'),mb=$('jobAlertMatches'),count=$('jobAlertNewCount');if(!box||!mb||!count)return;const alerts=loadJobAlerts(),matches=loadAlertMatches();count.textContent=matches.filter(x=>x.new).length;box.innerHTML=alerts.length?alerts.map(a=>'<div class="card" style="padding:10px;margin-top:8px"><b>'+jobEsc(a.q||'Any job')+'</b><div class="hint">'+jobEsc(a.loc||'Any location')+' · '+jobEsc(a.exp||'Any experience')+' · '+(a.salary?'$'+Math.round(a.salary/1000)+'k+':'Any salary')+' · '+jobEsc(a.freq==='weekly'?'Weekly':'Daily')+(a.server?' · ☁ Server':'')+'</div><div style="display:flex;gap:7px;margin-top:8px"><button data-alert-check="'+jobEsc(a.id)+'">Check</button><button data-alert-delete="'+jobEsc(a.id)+'">Delete</button><span class="hint">'+(a.newCount||0)+' new</span></div></div>').join(''):'<div class="hint">No alerts yet. Create one above.</div>';mb.innerHTML=matches.length?'<div class="ey">NEW / RECENT MATCHES</div>'+matches.slice(0,10).map(x=>'<div class="card" style="padding:10px;margin-top:8px"><b>'+jobEsc(x.job.title)+'</b><div class="hint">'+jobEsc(x.job.company_name||'Company')+' · '+jobEsc(jobLocationText(x.job))+' · CV Match '+cvMatch(x.job).score+'%'+(x.new?' · NEW':'')+'</div><div style="display:flex;gap:7px;margin-top:8px"><button data-alert-save="'+jobEsc(jobKey(x.job))+'">'+(isJobSaved(x.job)?'✓ Saved':'☆ Save')+'</button><a href="'+jobEsc(x.job.url)+'" target="_blank" rel="noopener noreferrer"><button class="pri">Apply ↗</button></a></div></div>').join(''):''}
+function renderJobAlerts(){const box=$('jobAlertList'),mb=$('jobAlertMatches'),count=$('jobAlertNewCount');if(!box||!mb||!count)return;const alerts=loadJobAlerts(),matches=loadAlertMatches();count.textContent=matches.filter(x=>x.new).length;box.innerHTML=alerts.length?alerts.map(a=>'<div class="card" style="padding:10px;margin-top:8px"><b>'+jobEsc(a.q||'Any job')+'</b><div class="hint">'+jobEsc(a.loc||'Any location')+' · '+jobEsc(a.exp||'Any experience')+' · '+(a.salary?'
+async function checkOneJobAlert(a){const p=new URLSearchParams();p.set('limit','60');if(a.q)p.set('search',a.q);const r=await fetch('https://careerpilot.mohammadhariscom7.workers.dev/api/jobs?'+p.toString(),{headers:{accept:'application/json','cache-control':'no-cache'}});let data={};try{data=await r.json()}catch(e){}if(!r.ok)throw new Error(data.error||'Live job service unavailable');const rows=(Array.isArray(data.jobs)?data.jobs:[]).filter(j=>alertMatchesJob(j,a));const seen=new Set(a.seen||[]),fresh=rows.filter(j=>!seen.has(jobKey(j)));a.seen=[...rows.map(jobKey),...(a.seen||[])].slice(0,120);a.lastChecked=Date.now();a.newCount=fresh.length;return rows.map(j=>({job:j,new:!seen.has(jobKey(j)),createdAt:Date.now(),alertId:a.id}))}
+async function checkJobAlerts(ids){const alerts=loadJobAlerts();if(!alerts.length){toast('Create a Job Alert first');return}const status=$('jobAlertStatus');if(status)status.textContent='Checking live jobs...';let all=[];try{const target=ids?alerts.filter(a=>ids.includes(a.id)):alerts;for(const a of target)all.push(...await checkOneJobAlert(a));saveJobAlerts(alerts);const previous=loadAlertMatches().map(x=>({...x,new:false}));saveAlertMatches([...all,...previous]);if(currentUser){for(const a of target){try{await serverAlertRequest('POST',{id:a.id,keyword:a.q,location:a.loc,job_type:a.type,experience:a.exp,min_salary:a.salary,frequency:a.freq})}catch(e){}}await syncServerJobAlerts()}renderJobAlerts();if(status)status.textContent=all.length?all.length+' matching live jobs found.':'No matching jobs found. Checked just now.';if(all.length)toast('✓ '+all.length+' live job matches found')}catch(e){if(status)status.textContent='Job alert check failed. Please try again.';toast(e.message||'Job alert check failed')}}
+async function createJobAlert(){const a={id:secureId('alert'),q:($('alertQ')?.value||'').trim(),loc:($('alertLoc')?.value||'').trim(),type:$('alertType')?.value||'',exp:$('alertExp')?.value||'',salary:Number($('alertSalary')?.value||0),freq:$('alertFreq')?.value||'daily',seen:[],newCount:0,createdAt:Date.now(),server:false};if(!a.q&&!a.loc){toast('Add a job keyword or location');return}const alerts=loadJobAlerts();alerts.unshift(a);saveJobAlerts(alerts);renderJobAlerts();if(currentUser){try{await serverAlertRequest('POST',{id:a.id,keyword:a.q,location:a.loc,job_type:a.type,experience:a.exp,min_salary:a.salary,frequency:a.freq});a.server=true;saveJobAlerts(alerts);toast('✓ Job Alert created — server automatic checks enabled');await syncServerJobAlerts()}catch(e){toast('Alert saved locally; server sync failed')}}else{toast('✓ Job Alert created');await checkJobAlerts([a.id])}}
+let jobAlertAutoBusy=false;
+async function maybeAutoCheckJobAlerts(){if(jobAlertAutoBusy||!navigator.onLine)return;if(currentUser){jobAlertAutoBusy=true;try{await syncServerJobAlerts()}finally{jobAlertAutoBusy=false};return}const alerts=loadJobAlerts();if(!alerts.length)return;const now=Date.now();const due=alerts.filter(a=>{const gap=a.freq==='weekly'?7*86400000:86400000;return !a.lastChecked||now-Number(a.lastChecked)>=gap});if(!due.length)return;jobAlertAutoBusy=true;try{await checkJobAlerts(due.map(a=>a.id))}finally{jobAlertAutoBusy=false}}
+$('createJobAlert').onclick=createJobAlert;$('checkJobAlerts').onclick=()=>checkJobAlerts();$('jobAlertsPanel').addEventListener('click',async e=>{const x=e.target.closest('[data-alert-check]'),d=e.target.closest('[data-alert-delete]'),s=e.target.closest('[data-alert-save]');if(x){checkJobAlerts([x.dataset.alertCheck]);return}if(d){const id=d.dataset.alertDelete;try{if(currentUser)await serverAlertRequest('DELETE',null,id)}catch(e){}saveJobAlerts(loadJobAlerts().filter(a=>a.id!==id));renderJobAlerts();toast('Job Alert deleted');return}if(s){const j=findJobByKey(s.dataset.alertSave);if(j&&!isJobSaved(j))saveJob(j);renderJobAlerts()}});renderJobAlerts();
+setTimeout(maybeAutoCheckJobAlerts,1800);setInterval(maybeAutoCheckJobAlerts,15*60*1000);window.addEventListener('online',()=>setTimeout(maybeAutoCheckJobAlerts,1200));renderJobPortals();renderSavedJobs();loadLiveJobs();
+const CVLIB_KEY='careerpilot_cv_library_2026',CVACTIVE_KEY='careerpilot_active_cv_2026';
+let cvLibrary=[],activeCvId=null;
+function cloneCV(x){return JSON.parse(JSON.stringify(x))}
+function cvTime(v){return new Date(v||Date.now()).toLocaleString([], {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+function cvAccent(data){return data?.t?.ac||'#2563eb'}
+function cvTitle(data){return data?.d?.title||'Professional CV'}
+function loadCVLibrary(){
+  try{
+    const raw=ls(CVLIB_KEY);
+    if(raw){const a=JSON.parse(raw);if(Array.isArray(a)&&a.length){cvLibrary=a.map(x=>({id:String(x.id),name:x.name||'My CV',data:norm(x.data||dflt()),updatedAt:x.updatedAt||Date.now(),cloudId:x.cloudId||null}));}}
+  }catch(e){}
+  if(!cvLibrary.length){
+    const legacy=cloneCV(S);
+    cvLibrary=[{id:'cv-'+Date.now(),name:legacy.d.name||'My CV',data:legacy,updatedAt:Date.now(),cloudId:null}];
+  }
+  try{activeCvId=ls(CVACTIVE_KEY)||cvLibrary[0].id}catch(e){activeCvId=cvLibrary[0].id}
+  if(!cvLibrary.some(x=>x.id===activeCvId))activeCvId=cvLibrary[0].id;
+  saveCVLibrary();
+}
+function saveCVLibrary(){try{localStorage.setItem(CVLIB_KEY,JSON.stringify(cvLibrary));localStorage.setItem(CVACTIVE_KEY,activeCvId||'')}catch(e){}}
+function activeCV(){return cvLibrary.find(x=>x.id===activeCvId)||cvLibrary[0]}
+function syncActiveLibrary(){
+  const x=activeCV();if(!x)return;
+  x.data=cloneCV(S);x.name=S.d.name||x.name||'My CV';x.updatedAt=Date.now();saveCVLibrary();renderCVLibrary();
+}
+function openCV(id){
+  const x=cvLibrary.find(v=>v.id===id);if(!x)return;
+  activeCvId=x.id;S=norm(cloneCV(x.data));sel=null;saveCVLibrary();persist();refresh();renderCVLibrary();toast('CV opened');
+}
+function createCV(){
+  const d=cloneCV(dflt());d.d.name='Untitled CV';d.d.title='Professional Title';
+  const x={id:secureId('cv'),name:'Untitled CV',data:d,updatedAt:Date.now(),cloudId:null};
+  cvLibrary.unshift(x);activeCvId=x.id;S=norm(cloneCV(d));sel=null;saveCVLibrary();persist();refresh();renderCVLibrary();toast('New CV created');
+}
+function duplicateCV(id){
+  const src=cvLibrary.find(v=>v.id===id)||activeCV();if(!src)return;
+  const d=cloneCV(src.data),base=src.name||d.d.name||'My CV';d.d.name=base+' Copy';
+  const x={id:secureId('cv'),name:d.d.name,data:d,updatedAt:Date.now(),cloudId:null};
+  cvLibrary.unshift(x);activeCvId=x.id;S=norm(cloneCV(d));sel=null;saveCVLibrary();persist();refresh();renderCVLibrary();toast('CV duplicated');
+}
+function renameCV(id){
+  const x=cvLibrary.find(v=>v.id===id);if(!x)return;
+  const n=prompt('CV name',x.name||x.data?.d?.name||'My CV');if(n===null)return;
+  const name=n.trim();if(!name){toast('Enter a CV name');return}
+  x.name=name;x.data.d.name=name;x.updatedAt=Date.now();
+  if(x.id===activeCvId){S.d.name=name;persist()}
+  saveCVLibrary();renderCVLibrary();scheduleCloudSave();toast('CV renamed');
+}
+function deleteCV(id){
+  if(cvLibrary.length<=1){toast('Keep at least one CV');return}
+  const x=cvLibrary.find(v=>v.id===id);if(!x)return;
+  if(!confirm('Delete "'+(x.name||'My CV')+'"? This cannot be undone.'))return;
+  cvLibrary=cvLibrary.filter(v=>v.id!==id);
+  if(x.cloudId&&currentUser)deleteCloudCV(x.cloudId);
+  if(activeCvId===id){activeCvId=cvLibrary[0].id;S=norm(cloneCV(cvLibrary[0].data));sel=null;persist();refresh()}
+  saveCVLibrary();renderCVLibrary();toast('CV deleted');
+}
+function renderCVLibrary(){
+  const root=$('v-cvs');if(!root)return;
+  const q=($('cvSearch')?.value||'').toLowerCase();
+  const rows=cvLibrary.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.data?.d?.title||'').toLowerCase().includes(q));
+  root.querySelector('[data-count]').textContent=cvLibrary.length+' CV'+(cvLibrary.length===1?'':'s');const stat=$('[data-cv-count]');if(stat)stat.textContent=cvLibrary.length;
+  root.querySelector('[data-cloud]').textContent=currentUser?'☁ Cloud sync on':'Local device';
+  root.querySelector('[data-grid]').innerHTML=rows.map(x=>{
+    const active=x.id===activeCvId,accent=cvAccent(x.data);
+    return '<div class="card cv-card '+(active?'active':'')+'"><div class="cv-card-top"><div><div class="ey">'+(active?'ACTIVE CV':'SAVED CV')+'</div><h3 style="margin:3px 0 0">'+escHtml(x.name||'My CV')+'</h3></div>'+(active?'<span class="cv-badge">Current</span>':'')+'</div><div class="cv-thumb" style="--tc:'+accent+'"><b>'+escHtml(x.data?.d?.name||'Your Name')+'</b><div style="color:#6b7280;font-size:11px;margin-top:3px">'+escHtml(cvTitle(x.data))+'</div></div><div class="cv-meta"><small>Updated '+cvTime(x.updatedAt)+'</small><small>'+escHtml(x.data?.t?.tpl||'template')+'</small></div><div class="cv-card-actions"><button class="pri" data-open-cv="'+escHtml(x.id)+'">Open</button><button data-dup-cv="'+escHtml(x.id)+'">Duplicate</button><button data-rename-cv="'+escHtml(x.id)+'">Rename</button><button class="dg" data-del-cv="'+escHtml(x.id)+'">Delete</button></div></div>'
+  }).join('')||'<div class="card cv-empty"><div style="font-size:28px">📄</div><h3>No CVs found</h3><p class="hint">Create a new CV or change your search.</p></div>';
+}
+$('v-cvs').innerHTML='<div class="card pad"><div class="cv-manager-head"><div><div class="ey">MY CVs</div><h2 style="margin:4px 0">Your CV library</h2><p class="hint">Create separate CVs for different jobs, countries and career paths.</p></div><div class="cv-manager-actions"><button class="pri" id="newCV">+ New CV</button><button id="cvsImportCurrent">Save Current as CV</button></div></div><div class="cv-manager-tools"><input id="cvSearch" placeholder="Search CVs by name or role"><span class="st"><i></i><em data-cloud>Local device</em></span><span class="cv-badge" data-count>0 CVs</span></div></div><div class="cv-grid" data-grid></div>';
+loadCVLibrary();renderCVLibrary();
+$('cvSearch').addEventListener('input',renderCVLibrary);
+$('newCV').onclick=createCV;
+$('cvsImportCurrent').onclick=()=>{syncActiveLibrary();toast('Current CV saved to library')};
+$('v-cvs').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.openCv)openCV(b.dataset.openCv);
+  else if(b.dataset.dupCv)duplicateCV(b.dataset.dupCv);
+  else if(b.dataset.renameCv)renameCV(b.dataset.renameCv);
+  else if(b.dataset.delCv)deleteCV(b.dataset.delCv);
+});
+
+/* ---------- editor cards ---------- */
+const card=(t,b,o)=>`<details class="card"${o?' open':''}><summary>${t}</summary><div class="cb">${b}</div></details>`;
+$('v-cv').innerHTML=card('Personal information',F.map(([p,l,ic])=>`<label>${l}<div class="fw"><i>${ic}</i><input data-p="${p}"${p==='email'?' type="email" aria-invalid="false"':''}></div></label>`).join(''),1)+
+card('Contact & Photo',`<div class="icon-row"><label>Email icon<select id="iconEmail"><option value="">None</option><option value="✉">✉</option><option value="@">@</option><option value="📧">📧</option></select></label><label>Phone icon<select id="iconPhone"><option value="">None</option><option value="☎">☎</option><option value="📞">📞</option><option value="▯">▯</option></select></label><label>Address icon<select id="iconLocation"><option value="">None</option><option value="⌂">⌂</option><option value="⌖">⌖</option><option value="📍">📍</option></select></label><label>Link icon<select id="iconLink"><option value="">None</option><option value="🔗">🔗</option><option value="↗">↗</option><option value="●">●</option></select></label></div><label style="margin-top:12px">Profile photo<div class="photo-controls"><input id="photoInput" type="file" accept="image/*"><img id="photoPreview" class="photo-preview" alt="Profile photo preview" hidden><button id="photoRemove" type="button">Remove</button></div></label><p class="hint">Photo is optional. A resized copy is used to keep the CV lightweight.</p>`,1)+
+card('Summary','<label>Professional summary<textarea rows="5" data-p="summary"></textarea></label>')+
+card('Skills','<div class="chips" id="chips"></div><div class="row"><input id="skIn" placeholder="New skill" aria-label="New skill" style="margin:0"><button id="skAdd" style="flex:0 0 auto">+ Add Skill</button></div><label>Languages (one per line)<textarea rows="3" data-p="languages"></textarea></label>')+
+card('Experience','<div id="expL"></div><button data-add="exp" style="width:100%">+ Add Experience</button>')+
+card('Education','<div id="eduL"></div><button data-add="edu" style="width:100%">+ Add Education</button>')+
+card('Achievements','<label>One per line<textarea rows="3" data-p="achievements"></textarea></label>')+
+card('Certifications','<label>One per line<textarea rows="3" data-p="certs"></textarea></label>')+
+card('Projects','<label>One per line<textarea rows="3" data-p="projects"></textarea></label>');
+syncCvExtras();
+function txt(){Q('#ed [data-t]').forEach(e=>e.textContent=get(e.dataset.t)||'—');Q('[data-n]').forEach(e=>e.textContent=S.d.name);Q('[data-t="title"]').forEach(e=>e.textContent=S.d.title||'—')}
+function chips(){$('chips').innerHTML=S.d.skills.map((s,i)=>`<span class="chip" draggable="true" data-i="${i}"><b aria-hidden="true">⋮⋮</b>${esc(s)}<button data-sk="${i}" aria-label="Remove ${esc(s)}">×</button></span>`).join('')}
+function syncCvExtras(){const icons=S.d.icons||{};const map={iconEmail:'email',iconPhone:'phone',iconLocation:'location',iconLink:'link'};Object.keys(map).forEach(id=>{const el=$(id);if(el)el.value=icons[map[id]]||''});const img=$('photoPreview');if(img){img.hidden=!S.d.photo;if(S.d.photo)img.src=S.d.photo}}
+function fillSide(){Q('#ed [data-p]').forEach(i=>{if(i===document.activeElement)return;const v=get(i.dataset.p);i.value=Array.isArray(v)?v.join('\n'):v==null?'':v});txt();chips();syncCvExtras()}
+function dyn(open){
+  const bt='<span class="bt"><button data-a="ed">Edit</button><button data-a="dup">Duplicate</button><button data-a="del" class="dg">Delete</button></span>';
+  const fl=(k,i,fs)=>fs.map(([f,l])=>`<label>${l}<input data-p="${k}.${i}.${f}"></label>`).join('');
+  const head=(k,i,n)=>`<div class="ch"><span class="ey">${n} ${String(i+1).padStart(2,'0')}</span>${bt}</div>`;
+  $('expL').innerHTML=S.d.exp.map((x,i)=>`<div class="tl" data-k="exp.${i}">${head('exp',i,'EXPERIENCE')}<b data-t="exp.${i}.position"></b><div data-t="exp.${i}.company"></div><small><span data-t="exp.${i}.start"></span> — <span data-t="exp.${i}.end"></span> · <span data-t="exp.${i}.location"></span></small><div class="fs">${fl('exp',i,XF)}<label>Description<textarea rows="4" data-p="exp.${i}.description"></textarea></label></div></div>`).join('');
+  $('eduL').innerHTML=S.d.edu.map((x,i)=>`<div class="tl" data-k="edu.${i}">${head('edu',i,'EDUCATION')}<b data-t="edu.${i}.degree"></b><div data-t="edu.${i}.institute"></div><small><span data-t="edu.${i}.year"></span> · <span data-t="edu.${i}.location"></span></small><div class="fs">${fl('edu',i,DF)}</div></div>`).join('');
+  if(open){const t=document.querySelector(`.tl[data-k="${open}"]`);if(t)t.classList.add('open')}
+  fillSide();
+}
+function remap(k,f){const n={},re=new RegExp('^cv-'+k+'-(\\d+)-(.*)$');for(const x in S.st){const m=x.match(re);if(!m){n[x]=S.st[x];continue}const i=f(+m[1]);if(i>=0)n[`cv-${k}-${i}-${m[2]}`]=S.st[x]}S.st=n}
+const BLANK={exp:()=>({position:'New Position',company:'Company',start:'2024',end:'Present',location:'Location',description:'Describe your responsibilities and achievements.'}),edu:()=>({degree:'Degree / Qualification',institute:'Institute',year:'Year',location:'Location'})};
+['iconEmail','iconPhone','iconLocation','iconLink'].forEach((id)=>$(id)?.addEventListener('change',()=>{const map={iconEmail:'email',iconPhone:'phone',iconLocation:'location',iconLink:'link'};S.d.icons=S.d.icons||{};S.d.icons[map[id]]=$(id).value;render();sync()}));
+$('photoInput')?.addEventListener('change',e=>{const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('image/')){toast('Please select an image file');return}const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{const max=480,scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));const w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));const can=document.createElement('canvas');can.width=w;can.height=h;const ctx=can.getContext('2d');if(!ctx){URL.revokeObjectURL(url);toast('Photo could not be processed');return}ctx.drawImage(img,0,0,w,h);S.d.photo=can.toDataURL('image/jpeg',.84);URL.revokeObjectURL(url);syncCvExtras();render();sync();toast('✓ Profile photo added')};img.onerror=()=>{URL.revokeObjectURL(url);toast('Photo could not be read')};img.src=url});
+$('photoRemove')?.addEventListener('click',()=>{S.d.photo='';if($('photoInput'))$('photoInput').value='';syncCvExtras();render();sync();toast('Photo removed')});
+$('ed').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const tl=b.closest('.tl'),a=b.dataset.a;
+  if(tl&&a){const[k,i]=tl.dataset.k.split('.'),n=+i,arr=S.d[k];
+    if(a==='ed')tl.classList.toggle('open');
+    if(a==='dup'){arr.splice(n+1,0,Object.assign({},arr[n]));remap(k,j=>j>n?j+1:j);dyn(`${k}.${n+1}`);render();sync()}
+    if(a==='del'){arr.splice(n,1);remap(k,j=>j===n?-1:j>n?j-1:j);dyn();render();sync()}}
+  if(b.dataset.add){const k=b.dataset.add;S.d[k].push(BLANK[k]());dyn(k+'.'+(S.d[k].length-1));render();sync()}
+  if(b.dataset.sk!=null){S.d.skills.splice(+b.dataset.sk,1);chips();render();sync()}
+  if(b.id==='skAdd')addSkill();
+});
+function addSkill(){const i=$('skIn'),v=i.value.trim();if(!v)return;S.d.skills.push(v);i.value='';chips();render();sync()}
+$('skIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addSkill()}});
+let dg=null;const ch=$('chips');
+ch.addEventListener('dragstart',e=>{const c=e.target.closest('.chip');if(c){dg=+c.dataset.i;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(dg))}});
+ch.addEventListener('dragover',e=>e.preventDefault());
+ch.addEventListener('drop',e=>{e.preventDefault();const c=e.target.closest('.chip');if(!c||dg==null)return;const a=S.d.skills,m=a.splice(dg,1)[0];a.splice(+c.dataset.i,0,m);dg=null;chips();render();sync()});
+$('ed').addEventListener('input',e=>{
+  const t=e.target,p=t.dataset&&t.dataset.p;if(!p)return;let v=t.value;
+  if(LISTS.includes(p))v=v.split('\n').filter(s=>s.trim());
+  set(p,v);
+  if(p==='email'){const ok=/^\S+@\S+\.\S+$/.test(v);t.classList.toggle('ok',ok&&!!v);t.classList.toggle('bad',!ok&&!!v);t.setAttribute('aria-invalid',String(!ok&&!!v))}
+  txt();render();sync();
+});
+
+/* ---------- design panel ---------- */
+const LAY=[['1','One Column'],['2','Two Column'],['s','Sidebar'],['3','Reverse'],['4','Editorial'],['5','Compact']],RG=[['mg','Margins',20,60],['sp','Section spacing',8,36],['cw','Column width',180,320],['gp','Column gap',0,40]];
+$('v-design').innerHTML=`<div class="tabs" role="tablist">${['Templates','Colors','Typography','Layout'].map((t,i)=>`<button role="tab" data-dt="${i}" class="${i?'':'on'}">${t}</button>`).join('')}</div>
+<div class="dp on card pad"><div class="ey" style="margin-bottom:8px">30-PRESET PROFESSIONAL CV LIBRARY</div><p class="hint" style="margin:0 0 10px">Switch templates without losing content. Every template uses live HTML text for selectable, A4-ready PDF output.</p><div class="tpl-filters" role="tablist" aria-label="Template categories"><button class="on" data-tfilter="All">All <b>30</b></button><button data-tfilter="ATS-friendly">ATS-friendly <b>10</b></button><button data-tfilter="Creative">Creative <b>6</b></button><button data-tfilter="Executive">Executive <b>6</b></button><button data-tfilter="Professional">Professional <b>8</b></button></div><div class="car" id="templateGallery">${TPL.map(([n,p],i)=>`<button class="tc tpl-card" data-tp="${i}" data-cat="${p.cat}" title="${n} CV template"><div class="th th-${p.lay} th-${p.tpl}" style="--c:${p.ac}"><i></i><s></s><s></s></div><b style="display:block;font-size:12px">${n}</b><small class="hint">${p.cat}${i<5?' · FREE':' · PREMIUM'}</small></button>`).join('')}</div></div>
+<div class="dp card pad"><div class="sw">${COL.map(([n,c])=>`<button class="sc" data-col="${c}"><i style="background:${c}"></i>${n}</button>`).join('')}</div><label>Custom accent color<input type="color" id="tAc"></label><label>CV background<select id="tBg"></select></label></div>
+<div class="dp card pad"><label>Template font<select id="tFf"></select></label><p class="hint">Select any text in the CV to change its font, size, weight, letter spacing and line height. Only that element changes.</p></div>
+<div class="dp card pad"><div class="row">${LAY.map(([v,l])=>`<button class="lb" data-lay="${v}">${l}</button>`).join('')}</div>${RG.map(([k,l,a,b])=>`<label>${l}<input type="range" data-l="${k}" min="${a}" max="${b}"></label>`).join('')}</div>`;
+FONTS.forEach(([v,l])=>{$('sFont').add(new Option(l,v));if(v)$('tFf').add(new Option(l,v))});
+BGS.forEach(([v,l])=>$('tBg').add(new Option(l,v)));
+
+/* ---------- mobile design sheet ---------- */
+const templateFilter=$('v-design').querySelector('.tpl-filters');if(templateFilter){templateFilter.addEventListener('click',e=>{const b=e.target.closest('[data-tfilter]');if(!b)return;Q('[data-tfilter]',templateFilter).forEach(x=>x.classList.toggle('on',x===b));const cat=b.dataset.tfilter;Q('#templateGallery .tpl-card').forEach(x=>x.style.display=cat==='All'||x.dataset.cat===cat?'':'none')})};const designView=$('v-design');
+if(designView){
+ const grip=document.createElement('div');grip.className='cp-sheet-handle';grip.setAttribute('aria-label','Drag design panel');
+ const close=document.createElement('button');close.className='mobile-sheet-close';close.textContent='×';close.setAttribute('aria-label','Close design panel');close.onclick=()=>go('cv');
+ designView.prepend(close);designView.prepend(grip);
+ let sy=0,dy=0,drag=false;
+ grip.addEventListener('pointerdown',e=>{drag=true;sy=e.clientY;grip.setPointerCapture?.(e.pointerId);designView.style.transition='none'});
+ grip.addEventListener('pointermove',e=>{if(!drag)return;dy=Math.max(0,e.clientY-sy);designView.style.transform='translateY('+dy+'px)'});
+ grip.addEventListener('pointerup',()=>{if(!drag)return;drag=false;designView.style.transition='';if(dy>100){designView.style.transform='';go('cv')}else designView.style.transform='';dy=0});
+}
+
+$('v-design').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.dt!=null){Q('[data-dt]').forEach(x=>x.classList.toggle('on',x===b));Q('#v-design .dp').forEach((x,i)=>x.classList.toggle('on',i===+b.dataset.dt))}
+  if(b.dataset.tp!=null){const ti=+b.dataset.tp;if(ti>=5&&careerPilotPlan!=='premium'){const box=document.createElement('div');box.className='card upgrade-modal';box.innerHTML='<div class="ey">PREMIUM TEMPLATE</div><h2>Unlock the full CV library</h2><p class="hint">Templates 1–5 are available in Free. Premium unlocks templates 6–30 and future premium career features.</p><div class="price-card"><b>CareerPilot Premium</b><ul><li>All 30 professional CV templates</li><li>Unlimited CV versions</li><li>AI Job Match, Cover Letter & Interview Coach</li><li>Priority cloud features</li></ul><button class="pri" id="upgradeNow">Continue to Premium</button> <button id="closeUpgrade">Not now</button></div>';$('v-design').prepend(box);$('closeUpgrade').onclick=()=>box.remove();$('upgradeNow').onclick=()=>{box.remove();go('profile');setTimeout(()=>$('upgradePlan')?.click(),50)};return}Object.assign(S.t,TPL[ti][1]);applyT();sync()}
+  if(b.dataset.col){S.t.ac=b.dataset.col;applyT();sync()}
+  if(b.dataset.lay){S.t.lay=b.dataset.lay;applyT();sync()}
+});
+$('v-design').addEventListener('input',e=>{const t=e.target;if(t.id==='tAc')S.t.ac=t.value;else if(t.dataset.l)S.t[t.dataset.l]=+t.value;else return;applyT();sync()});
+$('v-design').addEventListener('change',e=>{const t=e.target;if(t.id==='tBg')S.t.bg=t.value;else if(t.id==='tFf')S.t.ff=t.value;else return;applyT();sync()});
+function applyT(){
+  const t=S.t,s=paper.style;paper.className='L'+t.lay+' T-'+t.tpl;
+  s.setProperty('--ac',t.ac);s.setProperty('--mg',t.mg+'px');s.setProperty('--sp',t.sp+'px');s.setProperty('--cw',t.cw+'px');s.setProperty('--gp',t.gp+'px');s.background=t.bg;s.fontFamily=t.ff;
+  $('tAc').value=t.ac;$('tBg').value=t.bg;$('tFf').value=t.ff;Q('[data-l]').forEach(r=>r.value=t[r.dataset.l]);
+  Q('[data-tp]').forEach((b,i)=>b.classList.toggle('on',TPL[i][1].tpl===t.tpl));Q('[data-lay]').forEach(b=>b.classList.toggle('on',b.dataset.lay===t.lay));Q('[data-col]').forEach(b=>b.classList.toggle('on',b.dataset.col===t.ac));fit();
+}
+
+/* ---------- CV canvas ---------- */
+const E=(id,p,t,c,ph,m)=>`<div id="${id}" class="el ${c}" data-p="${p}" data-ph="${ph}"${m?' data-m="1"':''} contenteditable="true" spellcheck="false">${esc(t)}</div>`;
+const Hd=(k,t)=>`<h3><span id="cv-${k}-heading" class="el">${t}</span></h3>`;
+function render(){
+  const d=S.d;
+  const list=(k,h,key,c)=>d[k].length?`<section>${Hd(key,h)}${d[k].map((x,i)=>E(`cv-${key}-${i}`,`${k}.${i}`,x,c,'Item')).join('')}</section>`:'';
+  const C=(key,id,p,t)=>{const icons=d.icons||{};const ic=icons[key]||'';return `<span class="cti"><span class="cii" aria-hidden="true">${esc(ic)}</span>${E(id,p,t,'','Contact')}</span>`};
+  const photo=d.photo?`<img class="cv-photo" src="${esc(d.photo)}" alt="Profile photo">`:'';
+  const exp=d.exp.length?`<section>${Hd('experience','Experience')}${d.exp.map((x,i)=>{const q=f=>`exp.${i}.${f}`,id=f=>`cv-exp-${i}-${f}`;
+    return `<div class="it"><div class="row">${E(id('position'),q('position'),x.position,'pos','Job title')}<div class="dt">${E(id('start'),q('start'),x.start,'','Start')}<span>–</span>${E(id('end'),q('end'),x.end,'','End')}</div></div><div class="row">${E(id('company'),q('company'),x.company,'co','Company')}${E(id('location'),q('location'),x.location,'mt','Location')}</div>${E(id('description'),q('description'),x.description,'','Description',1)}</div>`}).join('')}</section>`:'';
+  const edu=d.edu.length?`<section>${Hd('education','Education')}${d.edu.map((x,i)=>{const q=f=>`edu.${i}.${f}`,id=f=>`cv-edu-${i}-${f}`;
+    return `<div class="it">${E(id('degree'),q('degree'),x.degree,'pos','Degree')}${E(id('school'),q('institute'),x.institute,'co','Institute')}<div class="row mt">${E(id('year'),q('year'),x.year,'','Year')}${E(id('location'),q('location'),x.location,'','Location')}</div></div>`}).join('')}</section>`:'';
+  paper.innerHTML=`<div class="hd${d.photo?' has-photo':''}">${photo}${E('cv-name','name',d.name,'nm','Full name')}${E('cv-title','title',d.title,'tt','Professional title')}<div class="ct">${C('email','cv-email','email',d.email)}${C('phone','cv-phone','phone',d.phone)}${C('location','cv-location','location',d.location)}${C('link','cv-portfolio','link',d.link)}</div></div>
+<div class="bd"><div class="lc">${list('skills','Skills','skills','li').replace(/cv-skills-(\d)/g,'cv-skill-$1')}${list('languages','Languages','languages','li')}${edu}${list('certs','Certifications','certs','li')}</div>
+<div class="rc"><section>${Hd('summary','Professional Summary')}${E('cv-summary','summary',d.summary,'','Write a short summary',1)}</section>${exp}${list('achievements','Achievements','achievements','bl')}${list('projects','Projects','projects','bl')}</div></div>`;
+  Q('.el',paper).forEach(applyStyle);
+  const e=sel&&$(sel);if(e)e.classList.add('sel');else if(sel){sel=null;loadPanel()}
+  fit();
+}
+function applyStyle(el){
+  const s=S.st[el.id];el.style.cssText='';if(!s)return;
+  if(s.c)el.style.color=s.c;if(s.z)el.style.fontSize=s.z+'px';if(s.f)el.style.fontFamily=s.f;if(s.w)el.style.fontWeight=s.w;if(s.a)el.style.textAlign=s.a;
+  if(s.ls)el.style.letterSpacing=s.ls+'px';if(s.lh)el.style.lineHeight=s.lh;
+  if(s.x||s.y){el.style.position='relative';el.style.left=(s.x||0)+'px';el.style.top=(s.y||0)+'px'}
+}
+function fit(){const w=$('stage').clientWidth-32;if(w<=0)return;cz=Z||Math.min(1,w/794);paper.style.transform=`scale(${cz})`;$('fit').style.width=794*cz+'px';$('fit').style.height=paper.offsetHeight*cz+'px';$('zv').textContent=Math.round(cz*100)+'%'}
+$('zm').onclick=()=>{Z=Math.max(.3,+(cz-.1).toFixed(2));fit()};$('zp').onclick=()=>{Z=Math.min(2,+(cz+.1).toFixed(2));fit()};$('zf').onclick=()=>{Z=null;fit()};
+/* Mobile CV preview toolbar: keep actions inside the preview and prevent the
+   global navigation click handler from hijacking toolbar taps. */
+Q('.ctb button').forEach(b=>b.addEventListener('click',e=>e.stopPropagation()));
+
+window.addEventListener('resize',fit);if(window.ResizeObserver)new ResizeObserver(fit).observe(paper);
+
+/* ---------- selected element (styles keyed by unique element id) ---------- */
+const NM={'cv-name':'Full Name','cv-title':'Professional Title','cv-email':'Email','cv-phone':'Phone','cv-location':'Location','cv-portfolio':'Portfolio / LinkedIn','cv-summary':'Summary'};
+const label=id=>NM[id]||id.replace('cv-','').replace(/-/g,' ').replace(/^./,c=>c.toUpperCase());
+const sColor=$('sColor'),sSize=$('sSize'),sFont=$('sFont'),sBold=$('sBold'),sX=$('sX'),sY=$('sY'),sLs=$('sLs'),sLh=$('sLh');
+function loadPanel(){
+  const el=sel&&$(sel);$('esel').classList.toggle('on',!!el);
+  if(!el){sel=null;return}
+  const cs=getComputedStyle(el),s=S.st[sel]||{};
+  $('sn').textContent=label(sel);sColor.value=hex(cs.color);sSize.value=Math.round(parseFloat(cs.fontSize));sFont.value=s.f||'';
+  const b=+cs.fontWeight>=600;sBold.setAttribute('aria-pressed',b);sBold.classList.toggle('pri',b);
+  sX.value=s.x||0;sY.value=s.y||0;sLs.value=s.ls||0;sLh.value=s.lh||Math.round(parseFloat(cs.lineHeight)/parseFloat(cs.fontSize)*10)/10||1.4;
+  const a=cs.textAlign==='center'||cs.textAlign==='right'?cs.textAlign:'left';Q('#sAlign button').forEach(x=>x.classList.toggle('on',x.dataset.a===a));
+}
+function select(id){Q('.el.sel').forEach(x=>x.classList.remove('sel'));sel=id;$(id).classList.add('sel');loadPanel()}
+function setSt(k,v){if(!sel)return;(S.st[sel]=S.st[sel]||{})[k]=v;applyStyle($(sel));sync()}
+paper.addEventListener('click',e=>{const el=e.target.closest('.el');if(el&&el.id&&el.id!==sel)select(el.id)});
+paper.addEventListener('input',e=>{const el=e.target.closest('.el');if(!el||!el.dataset.p)return;set(el.dataset.p,el.innerText.replace(/\n$/,''));fillSide();fit();sync()});
+paper.addEventListener('keydown',e=>{const el=e.target.closest('.el');if(el&&e.key==='Enter'&&!el.dataset.m){e.preventDefault();el.blur()}});
+paper.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,(e.clipboardData||window.clipboardData).getData('text/plain'))});
+sColor.oninput=()=>setSt('c',sColor.value);sSize.oninput=()=>setSt('z',+sSize.value||0);sFont.onchange=()=>setSt('f',sFont.value);
+sBold.onclick=()=>{const b=sBold.getAttribute('aria-pressed')!=='true';sBold.setAttribute('aria-pressed',b);sBold.classList.toggle('pri',b);setSt('w',b?'700':'400')};
+sX.oninput=()=>setSt('x',+sX.value||0);sY.oninput=()=>setSt('y',+sY.value||0);sLs.oninput=()=>setSt('ls',+sLs.value||0);sLh.oninput=()=>setSt('lh',+sLh.value||0);
+$('sAlign').onclick=e=>{const b=e.target.closest('button');if(b){setSt('a',b.dataset.a);loadPanel()}};
+$('sReset').onclick=()=>{if(!sel)return;delete S.st[sel];applyStyle($(sel));loadPanel();sync()};
+$('sx').onclick=()=>{Q('.el.sel').forEach(x=>x.classList.remove('sel'));sel=null;loadPanel()};
+
+const SUPABASE_URL='https://gxixgacuryslyoawhrej.supabase.co';
+const SUPABASE_KEY='sb_publishable_cjEbbJ_VUoT_vKMOR-vBmA_It8gXYQd';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let authMode='login', cloudTimer=null, careerPilotPlan='free';
+async function loadPlanStatus(){
+  if(!currentUser)return;
+  try{
+    const {data:ent}=await sb.rpc('ensure_my_entitlement');
+    const plan=ent?.plan==='premium'&&(!ent?.premium_until||new Date(ent.premium_until)>new Date())?'premium':'free';
+    careerPilotPlan=plan; window.careerPilotPremium=plan==='premium';
+    const now=new Date();const periodStart=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),1));
+    const {data:usage}=await sb.from('ai_usage').select('ai_count').eq('user_id',currentUser.id).eq('period_start',periodStart.toISOString().slice(0,10)).maybeSingle();
+    const count=Number(usage?.ai_count||0),remaining=Math.max(0,3-count);
+    const name=$('planName'),pill=$('planPill'),line=$('planUsage');
+    if(name)name.textContent=plan==='premium'?'Premium Plan':'Free Plan';
+    if(pill){pill.textContent=plan==='premium'?'PREMIUM':'FREE';pill.classList.toggle('premium',plan==='premium')}
+    if(line)line.textContent=plan==='premium'?'AI actions: up to 100 / month':'AI actions: '+remaining+' of 3 remaining this month';
+    Q('[data-n]').forEach(x=>x.closest('.usr')?.querySelector('small')&&(x.closest('.usr').querySelector('small').textContent=plan==='premium'?'Premium Plan':'Free Plan'));
+    Q('[data-ad-slot]').forEach(x=>x.style.display=plan==='premium'?'none':'flex');
+  }catch(e){console.warn('Plan status unavailable',e)}
+}
+
+const authModal=$('authModal'),authMsg=$('authMsg');
+function authMessage(m){authMsg.textContent=m||''}
+function openAuth(mode='login'){authMode=mode;$('authTitle').textContent=mode==='login'?'Welcome back':'Create your account';$('authSubmit').textContent=mode==='login'?'Login':'Create account';$('authNameWrap').style.display=mode==='login'?'none':'block';$('tabLogin').classList.toggle('on',mode==='login');$('tabSignup').classList.toggle('on',mode!=='login');$('authLogout').style.display=currentUser?'block':'none';authMessage('');authModal.classList.add('on')}
+$('authOpen').onclick=()=>openAuth(currentUser?'login':'login');$('authClose').onclick=()=>authModal.classList.remove('on');$('tabLogin').onclick=()=>openAuth('login');$('tabSignup').onclick=()=>openAuth('signup');
+$('authSubmit').onclick=async()=>{authMessage('Please wait…');const email=$('authEmail').value.trim(),password=$('authPassword').value,name=$('authName').value.trim();if(!email||password.length<6){authMessage('Enter a valid email and password (6+ characters).');return}try{if(authMode==='signup'){const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name}}});if(error)throw error;authMessage(data.session?'Account created.':'Account created. Check your email to confirm, then login.')}else{const {error}=await sb.auth.signInWithPassword({email,password});if(error){const msg=String(error.message||'');if(/invalid login credentials/i.test(msg))authMessage('Email ya password ghalat hai. Agar account nahi bana to Sign up karein.');else if(/email not confirmed/i.test(msg))authMessage('Pehle apni email confirm karein, phir login karein.');else authMessage(msg||'Login failed.');return}authModal.classList.remove('on')}}catch(e){authMessage(e.message||'Authentication failed.')}};
+$('googleAuth').onclick=async()=>{authMessage('Opening Google Sign-in…');try{const {error}=await sb.auth.signInWithOAuth({provider:'google'});if(error){const msg=String(error.message||'');if(/not enabled|unsupported provider|provider is not enabled/i.test(msg)){authMessage('Google Sign-in Supabase mein enabled nahi hai. Supabase → Authentication → Sign In / Providers → Google ko enable karein.')}else authMessage(msg||'Google Sign-in failed.')}}catch(e){authMessage(e.message||'Google Sign-in failed.')}};
+$('authLogout').onclick=async()=>{await sb.auth.signOut();authModal.classList.remove('on')};
+function updateAccountUI(){const b=$('authOpen');b.textContent=currentUser?'Account':'Sign in';Q('[data-n]').forEach(x=>x.textContent=currentUser?.user_metadata?.full_name||currentUser?.email?.split('@')[0]||'Guest')}
+async function loadCloud(){
+  if(!currentUser)return;
+  const {data,error}=await sb.from('cvs').select('id,name,cv_data,template,updated_at').order('updated_at',{ascending:false});
+  if(error){toast('Cloud CV load failed');return}
+  if(data?.length){
+    cvLibrary=data.map(row=>({id:'cloud-'+row.id,cloudId:row.id,name:row.name||row.cv_data?.d?.name||'My CV',data:norm(row.cv_data),updatedAt:row.updated_at||Date.now()}));
+    activeCvId=cvLibrary[0].id;S=norm(cloneCV(cvLibrary[0].data));sel=null;saveCVLibrary();localStorage.setItem(KEY,JSON.stringify(S));refresh();renderCVLibrary();toast(data.length+' CV'+(data.length===1?'':'s')+' loaded from cloud');
+  }else{
+    syncActiveLibrary();await saveCloud();
+  }
+}
+function scheduleCloudSave(){clearTimeout(cloudTimer);if(currentUser)cloudTimer=setTimeout(()=>saveCloud(),900)}
+async function saveCloud(){
+  if(!currentUser)return;
+  const x=activeCV();if(!x)return;
+  x.data=cloneCV(S);x.name=S.d.name||x.name||'My CV';x.updatedAt=Date.now();saveCVLibrary();
+  const payload={user_id:currentUser.id,name:x.name,cv_data:x.data,template:x.data.t?.tpl||null,updated_at:new Date().toISOString()};
+  let result;
+  if(x.cloudId){
+    result=await sb.from('cvs').update(payload).eq('id',x.cloudId).eq('user_id',currentUser.id);
+  }else{
+    result=await sb.from('cvs').insert(payload).select('id').maybeSingle();
+    if(result.data?.id){x.cloudId=result.data.id;saveCVLibrary()}
+  }
+  if(result.error)toast('Cloud save failed');else{renderCVLibrary();toast('✓ Saved to cloud')}
+}
+async function deleteCloudCV(id){
+  if(!currentUser||!id)return;
+  const {error}=await sb.from('cvs').delete().eq('id',id).eq('user_id',currentUser.id);
+  if(error)toast('Cloud delete failed');
+}
+async function hydrateAuth(){const {data}=await sb.auth.getSession();currentUser=data.session?.user||null;updateAccountUI();renderCVLibrary();if(currentUser){await loadCloud();await loadPlanStatus()}}
+sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||null;updateAccountUI();renderCVLibrary();if(currentUser){authModal.classList.remove('on');await loadCloud();await loadPlanStatus();await syncServerJobAlerts();toast('Signed in')}});
+const oldSync=sync;sync=function(){oldSync();syncActiveLibrary();scheduleCloudSave()};
+hydrateAuth();
+setTimeout(()=>{if(currentUser)syncServerJobAlerts()},1200);
+function refresh(){dyn();applyT();render();loadPanel();renderCVLibrary();go(document.body.dataset.v)}
+const initialRoute=(()=>{const raw=location.hash.replace(/^#/,'');return decodeURIComponent(raw.split('?')[0]||'home')})();
+refresh();
+restoreRoute();
+let cpInstallPrompt=null;const cpInstallBtn=$("installApp"),cpOnline=$("cpOnline");function cpStandalone(){return window.matchMedia?.("(display-mode: standalone)").matches||window.navigator.standalone===true}function cpUpdateInstallUI(){if(cpInstallBtn)cpInstallBtn.classList.toggle("show",!!cpInstallPrompt&&!cpStandalone())}window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();cpInstallPrompt=e;cpUpdateInstallUI()});window.addEventListener("appinstalled",()=>{cpInstallPrompt=null;cpUpdateInstallUI();toast("✓ CareerPilot installed")});if(cpInstallBtn)cpInstallBtn.onclick=async()=>{if(!cpInstallPrompt){toast(cpStandalone()?"CareerPilot is already installed":"Use your browser menu to install CareerPilot");return}const p=cpInstallPrompt;cpInstallPrompt=null;cpUpdateInstallUI();try{await p.prompt();await p.userChoice}catch(e){}};function cpNetwork(){if(cpOnline){cpOnline.textContent=navigator.onLine?"✓ Back online":"⚠ You are offline — saved drafts remain available";cpOnline.classList.toggle("off",!navigator.onLine);cpOnline.classList.add("on");clearTimeout(window.__cpNetTimer);window.__cpNetTimer=setTimeout(()=>cpOnline.classList.remove("on"),2200)}}window.addEventListener("online",cpNetwork);window.addEventListener("offline",cpNetwork);cpUpdateInstallUI();if(!navigator.onLine)cpNetwork();if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('api/sw.js?v=21',{scope:'/',updateViaCache:'none'}).catch(()=>{}));}
+})();
+</script>
+</body>
+</html>
++Math.round(a.salary/1000)+'k+':'Any salary')+' · '+jobEsc(a.freq==='weekly'?'Weekly':'Daily')+(a.server?' · ☁ Server':'')+'</div><div style="display:flex;gap:7px;margin-top:8px"><button data-alert-check="'+jobEsc(a.id)+'">Check</button><button data-alert-delete="'+jobEsc(a.id)+'">Delete</button><span class="hint">'+(a.newCount||0)+' new</span></div></div>').join(''):'<div class="hint">No alerts yet. Create one above.</div>';mb.innerHTML=matches.length?'<div class="ey">NEW / RECENT MATCHES</div>'+matches.slice(0,10).map(x=>{const source=jobSourceName(x.job),original=jobOriginalUrl(x.job);return '<div class="card" style="padding:10px;margin-top:8px"><b>'+jobEsc(x.job.title)+'</b><div class="hint">'+jobEsc(x.job.company_name||'Company')+' · '+jobEsc(jobLocationText(x.job))+' · Source: <b>'+jobEsc(source)+'</b> · CV Match '+cvMatch(x.job).score+'%'+(x.new?' · NEW':'')+'</div><div style="display:flex;gap:7px;margin-top:8px"><button data-alert-save="'+jobEsc(jobKey(x.job))+'">'+(isJobSaved(x.job)?'✓ Saved':'☆ Save')+'</button>'+(original?'<a href="'+jobEsc(original)+'" target="_blank" rel="noopener noreferrer"><button class="pri">View Original ↗</button></a>':'')+'</div></div>'}).join(''):''}
 async function checkOneJobAlert(a){const p=new URLSearchParams();p.set('limit','60');if(a.q)p.set('search',a.q);const r=await fetch('https://careerpilot.mohammadhariscom7.workers.dev/api/jobs?'+p.toString(),{headers:{accept:'application/json','cache-control':'no-cache'}});let data={};try{data=await r.json()}catch(e){}if(!r.ok)throw new Error(data.error||'Live job service unavailable');const rows=(Array.isArray(data.jobs)?data.jobs:[]).filter(j=>alertMatchesJob(j,a));const seen=new Set(a.seen||[]),fresh=rows.filter(j=>!seen.has(jobKey(j)));a.seen=[...rows.map(jobKey),...(a.seen||[])].slice(0,120);a.lastChecked=Date.now();a.newCount=fresh.length;return rows.map(j=>({job:j,new:!seen.has(jobKey(j)),createdAt:Date.now(),alertId:a.id}))}
 async function checkJobAlerts(ids){const alerts=loadJobAlerts();if(!alerts.length){toast('Create a Job Alert first');return}const status=$('jobAlertStatus');if(status)status.textContent='Checking live jobs...';let all=[];try{const target=ids?alerts.filter(a=>ids.includes(a.id)):alerts;for(const a of target)all.push(...await checkOneJobAlert(a));saveJobAlerts(alerts);const previous=loadAlertMatches().map(x=>({...x,new:false}));saveAlertMatches([...all,...previous]);if(currentUser){for(const a of target){try{await serverAlertRequest('POST',{id:a.id,keyword:a.q,location:a.loc,job_type:a.type,experience:a.exp,min_salary:a.salary,frequency:a.freq})}catch(e){}}await syncServerJobAlerts()}renderJobAlerts();if(status)status.textContent=all.length?all.length+' matching live jobs found.':'No matching jobs found. Checked just now.';if(all.length)toast('✓ '+all.length+' live job matches found')}catch(e){if(status)status.textContent='Job alert check failed. Please try again.';toast(e.message||'Job alert check failed')}}
 async function createJobAlert(){const a={id:secureId('alert'),q:($('alertQ')?.value||'').trim(),loc:($('alertLoc')?.value||'').trim(),type:$('alertType')?.value||'',exp:$('alertExp')?.value||'',salary:Number($('alertSalary')?.value||0),freq:$('alertFreq')?.value||'daily',seen:[],newCount:0,createdAt:Date.now(),server:false};if(!a.q&&!a.loc){toast('Add a job keyword or location');return}const alerts=loadJobAlerts();alerts.unshift(a);saveJobAlerts(alerts);renderJobAlerts();if(currentUser){try{await serverAlertRequest('POST',{id:a.id,keyword:a.q,location:a.loc,job_type:a.type,experience:a.exp,min_salary:a.salary,frequency:a.freq});a.server=true;saveJobAlerts(alerts);toast('✓ Job Alert created — server automatic checks enabled');await syncServerJobAlerts()}catch(e){toast('Alert saved locally; server sync failed')}}else{toast('✓ Job Alert created');await checkJobAlerts([a.id])}}
