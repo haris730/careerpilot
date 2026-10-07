@@ -17,3 +17,11 @@ database_id = "f7f2766d-86b1-4e03-9119-44eae243ab38"
 
 [triggers]
 crons = ["0 * * * *"]
+
+[previews.ai]
+binding = "AI"
+
+[[previews.d1_databases]]
+binding = "ALERTS_DB"
+database_name = "careerpilot-alerts-preview-sidebar-fix"
+database_id = "8e88f60a-4acc-446b-b512-d804f59a0d81"
