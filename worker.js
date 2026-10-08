@@ -295,8 +295,8 @@ export default {
         }
         if(type&&type!=='all')jobs=jobs.filter(j=>String(j.job_type||'')===type);
         jobs.sort((a,b)=>new Date(b.publication_date||0)-new Date(a.publication_date||0));
-        jobs=jobs.slice(0,limit).map(j=>({...j,source:'Multiple live sources'}));
-        return new Response(JSON.stringify({jobs,source:'Multiple live sources',fetched_at:new Date().toISOString()}),{status:200,headers:cors});
+        jobs=jobs.slice(0,limit);
+        return new Response(JSON.stringify({jobs,sources:[...new Set(jobs.map(j=>j.source).filter(Boolean))],fetched_at:new Date().toISOString()}),{status:200,headers:cors});
       }catch{
         return new Response(JSON.stringify({error:'Job search failed. Please try again.'}),{status:502,headers:cors});
       }
