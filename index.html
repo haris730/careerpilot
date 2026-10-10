@@ -1519,8 +1519,8 @@ async function loadPlanStatus(){
   }catch(e){console.warn('Plan status unavailable',e)}
 }
 
-const legalAuthLinks=document.createElement('p');legalAuthLinks.style.cssText='margin:14px 0 0;text-align:center;font-size:12px;color:#9a9aae';legalAuthLinks.innerHTML='<a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a>';authModal.querySelector('.auth-box').append(legalAuthLinks);
 const authModal=$('authModal'),authMsg=$('authMsg');
+const legalAuthLinks=document.createElement('p');legalAuthLinks.style.cssText='margin:14px 0 0;text-align:center;font-size:12px;color:#9a9aae';legalAuthLinks.innerHTML='<a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a>';authModal.querySelector('.auth-box').append(legalAuthLinks);
 function authMessage(m){authMsg.textContent=m||''}
 function openAuth(mode='login'){authMode=mode;$('authTitle').textContent=mode==='login'?'Welcome back':'Create your account';$('authSubmit').textContent=mode==='login'?'Login':'Create account';$('authNameWrap').style.display=mode==='login'?'none':'block';$('tabLogin').classList.toggle('on',mode==='login');$('tabSignup').classList.toggle('on',mode!=='login');$('authLogout').style.display=currentUser?'block':'none';authMessage('');authModal.classList.add('on')}
 $('authOpen').onclick=()=>openAuth(currentUser?'login':'login');$('authClose').onclick=()=>authModal.classList.remove('on');$('tabLogin').onclick=()=>openAuth('login');$('tabSignup').onclick=()=>openAuth('signup');
