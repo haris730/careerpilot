@@ -37,7 +37,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .side button.nb span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
 .side button.on{background:var(--g);border-color:transparent}
 .side em{margin-left:auto;font-style:normal;font-size:8px;letter-spacing:.06em;color:var(--mu);border:1px solid var(--gb);border-radius:6px;padding:2px 5px;white-space:nowrap}
-.usr{margin-top:auto;display:flex;align-items:center;gap:8px;justify-content:space-between;padding:10px;border-radius:12px;background:rgba(0,0,0,.25)}.usr small{display:block;color:var(--mu)}
+.usr{margin-top:auto;display:flex;align-items:center;gap:8px;justify-content:space-between;padding:10px;border-radius:12px;background:rgba(0,0,0,.25)}.usr small{display:block;color:var(--mu)}.usr [data-soon][hidden],[data-monetization-card] [hidden],#upgradePlan[hidden],#premiumSettingsMessage[hidden]{display:none!important}
 .editor{grid-column:2;overflow:auto;padding-right:2px}
 .view{display:none}.view.on{display:block;animation:fi .2s}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}}
@@ -521,7 +521,7 @@ const sideIcon=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
 const NAV=[['home','Dashboard'],['cv','CV Builder'],['design','Templates'],['jobs','Live Jobs'],['business','Business Network'],['match','Job Match'],['writer','AI Writing'],['letter','Cover Letter'],['interview','Interview Prep'],['tracker','Application Tracker'],['cvs','My CVs'],['profile','Settings']];
 const PREMIUM_LAUNCHED=false;
 $('nav').innerHTML='<button type="button" class="side-collapse" id="sideCollapse" aria-label="Collapse sidebar" title="Collapse sidebar">'+sideIcon('<path d="M19 12H5M12 5l-7 7 7 7"/>')+'<span>Collapse</span></button>'+NAV.map(([v,l])=>`<button class="nb" data-v="${v}"><i aria-hidden="true">${sideIcon(NAV_ICONS[v])}</i><span>${l}</span></button>`).join('')+'<div class="usr"><div><b data-n></b><small>Free Plan</small></div><button data-soon="1" class="pri" title="Upgrade">Upgrade</button></div>';
-function applyPremiumLaunchState(){const upgrade=$('nav')?.querySelector('[data-soon]');if(upgrade)upgrade.hidden=!PREMIUM_LAUNCHED;const card=document.querySelector('[data-monetization-card]');if(card){const title=card.querySelector('h3'),description=card.querySelector('p'),details=card.querySelector('[data-premium-details]');if(title)title.textContent=PREMIUM_LAUNCHED?'Unlock the full career toolkit':'Premium plans are coming soon.';if(description)description.hidden=!PREMIUM_LAUNCHED;if(details)details.hidden=!PREMIUM_LAUNCHED}}
+function applyPremiumLaunchState(){const upgrade=$('nav')?.querySelector('[data-soon]');if(upgrade)upgrade.hidden=!PREMIUM_LAUNCHED;const card=document.querySelector('[data-monetization-card]');if(card){const title=card.querySelector('h3'),description=card.querySelector('p'),details=card.querySelector('[data-premium-details]');if(title)title.textContent=PREMIUM_LAUNCHED?'Unlock the full career toolkit':'Premium plans are coming soon.';if(description)description.hidden=!PREMIUM_LAUNCHED;if(details)details.hidden=!PREMIUM_LAUNCHED}const settingsButton=$('upgradePlan'),settingsMessage=$('premiumSettingsMessage');if(settingsButton)settingsButton.hidden=!PREMIUM_LAUNCHED;if(settingsMessage)settingsMessage.hidden=PREMIUM_LAUNCHED}
 const SIDE_KEY='careerpilot_sidebar_collapsed_2026';
 const applySidebarState=collapsed=>{document.body.classList.toggle('sidebar-collapsed',collapsed);try{localStorage.setItem(SIDE_KEY,collapsed?'1':'0')}catch(e){}const b=$('sideCollapse');if(b){b.setAttribute('aria-label',collapsed?'Expand sidebar':'Collapse sidebar');b.title=collapsed?'Expand sidebar':'Collapse sidebar'}Q('#nav .nb').forEach(x=>{x.title=x.querySelector('span')?.textContent||''});requestAnimationFrame(fit)};
 applySidebarState(ls(SIDE_KEY)==='1');
@@ -772,11 +772,12 @@ $('makeInterview').onclick=()=>{
  if(focus.length) qs.splice(4,0,'How would you apply your experience with '+focus.slice(0,3).join(', ')+' to this role?');
  $('intOut').innerHTML='<div class="card ai-panel"><div class="ey">'+escHtml(type)+' INTERVIEW SET</div><ol class="ai-list">'+qs.map(escHtml).map(x=>'<li>'+x+'</li>').join('')+'</ol><p class="hint">Practice answers from your real CV experience. These questions are generated locally; connect an AI provider later for deeper personalized coaching.</p></div>';
 };
-$('v-profile').innerHTML=`<div class="card pad"><div class="ey">ACCOUNT & PLAN</div><div class="plan-bar"><div><b id="planName">Free Plan</b><div class="usage-line" id="planUsage">3 AI actions / month included</div></div><span class="plan-pill" id="planPill">FREE</span></div><div class="premium-grid"><div class="premium-card"><span class="premium-tag">FREE</span><h3>CareerPilot Free</h3><ul><li>5 professional CV templates</li><li>Basic PDF export</li><li>3 AI actions per month</li><li>Global job search</li></ul></div><div class="premium-card"><span class="premium-tag">PREMIUM</span><h3>CareerPilot Premium</h3><ul><li>All 30 professional CV templates</li><li>Up to 100 AI actions / month</li><li>Advanced career tools</li><li>Ad-free workspace</li><li>Priority cloud features</li></ul><button class="pri" id="upgradePlan" style="margin-top:8px">Upgrade to Premium</button></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button id="loadSaved">Load saved CV</button><button class="pri" id="saveCV2">Save CV</button><button id="exportCV2">Export PDF</button></div><div class="ad-slot" data-ad-slot style="margin-top:14px">ADVERTISEMENT</div></div>`;
+$('v-profile').innerHTML=`<div class="card pad"><div class="ey">ACCOUNT & PLAN</div><div class="plan-bar"><div><b id="planName">Free Plan</b><div class="usage-line" id="planUsage">3 AI actions / month included</div></div><span class="plan-pill" id="planPill">FREE</span></div><div class="premium-grid"><div class="premium-card"><span class="premium-tag">FREE</span><h3>CareerPilot Free</h3><ul><li>5 professional CV templates</li><li>Basic PDF export</li><li>3 AI actions per month</li><li>Global job search</li></ul></div><div class="premium-card"><span class="premium-tag">PREMIUM</span><h3>CareerPilot Premium</h3><ul><li>All 30 professional CV templates</li><li>Up to 100 AI actions / month</li><li>Advanced career tools</li><li>Ad-free workspace</li><li>Priority cloud features</li></ul><button class="pri" id="upgradePlan" style="margin-top:8px">Upgrade to Premium</button><p id="premiumSettingsMessage" class="hint" hidden>Premium plans are coming soon.</p></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button id="loadSaved">Load saved CV</button><button class="pri" id="saveCV2">Save CV</button><button id="exportCV2">Export PDF</button></div><div class="ad-slot" data-ad-slot style="margin-top:14px">ADVERTISEMENT</div></div>`;
+applyPremiumLaunchState();
 $('loadSaved').onclick=()=>{const x=activeCV();if(!x){toast('No saved CV found');return}openCV(x.id)};
 $('saveCV2').onclick=()=>$('bS').click();$('exportCV2').onclick=exportPDF;
-async function startCheckout(plan){if(!currentUser){openAuth('login');toast('Please sign in first');return}try{const {data}=await sb.auth.getSession(),token=data.session?.access_token;if(!token)throw new Error('Please sign in again.');toast('Opening secure checkout…');const res=await fetch('/api/checkout',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},body:JSON.stringify({plan})});const out=await res.json().catch(()=>({}));if(!res.ok||!out.url)throw new Error(out.error||'Checkout is not configured yet.');window.open(out.url,'_blank','noopener,noreferrer')}catch(e){toast(e.message||'Checkout failed')}}
-function openUpgrade(){const box=document.createElement('div');box.className='card upgrade-modal';box.innerHTML='<div class="ey">CAREERPILOT PREMIUM</div><h2>Premium career toolkit</h2><p class="hint">Unlock higher AI limits and an ad-free workspace.</p><div class="price-card"><h3>Choose your plan</h3><ul><li>Up to 100 AI actions / month</li><li>All 30 professional CV templates</li><li>Ad-free workspace</li><li>Advanced career tools</li></ul><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="buyMonthly" class="pri">$2.99 / month</button><button id="buyYearly">$19.99 / year</button><button id="premiumClose">Close</button></div></div>';$('v-profile').prepend(box);$('premiumClose').onclick=()=>box.remove();$('buyMonthly').onclick=()=>startCheckout('monthly');$('buyYearly').onclick=()=>startCheckout('yearly')}
+async function startCheckout(plan){if(!PREMIUM_LAUNCHED){toast('Premium plans are coming soon.');return}if(!currentUser){openAuth('login');toast('Please sign in first');return}try{const {data}=await sb.auth.getSession(),token=data.session?.access_token;if(!token)throw new Error('Please sign in again.');toast('Opening secure checkout…');const res=await fetch('/api/checkout',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},body:JSON.stringify({plan})});const out=await res.json().catch(()=>({}));if(!res.ok||!out.url)throw new Error(out.error||'Checkout is not configured yet.');window.open(out.url,'_blank','noopener,noreferrer')}catch(e){toast(e.message||'Checkout failed')}}
+function openUpgrade(){if(!PREMIUM_LAUNCHED){toast('Premium plans are coming soon.');return}const box=document.createElement('div');box.className='card upgrade-modal';box.innerHTML='<div class="ey">CAREERPILOT PREMIUM</div><h2>Premium career toolkit</h2><p class="hint">Unlock higher AI limits and an ad-free workspace.</p><div class="price-card"><h3>Choose your plan</h3><ul><li>Up to 100 AI actions / month</li><li>All 30 professional CV templates</li><li>Ad-free workspace</li><li>Advanced career tools</li></ul><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="buyMonthly" class="pri">$2.99 / month</button><button id="buyYearly">$19.99 / year</button><button id="premiumClose">Close</button></div></div>';$('v-profile').prepend(box);$('premiumClose').onclick=()=>box.remove();$('buyMonthly').onclick=()=>startCheckout('monthly');$('buyYearly').onclick=()=>startCheckout('yearly')}
 $('upgradePlan').onclick=openUpgrade;Q('[data-upgrade]').forEach(b=>b.onclick=openUpgrade);
 $('upgradePlan').onclick=openUpgrade;Q('[data-upgrade]').forEach(b=>b.onclick=openUpgrade);
 
@@ -1015,30 +1016,6 @@ async function loadLiveJobs(){
     const r=await fetch('https://careerpilot.mohammadhariscom7.workers.dev/api/jobs?'+p.toString(),{headers:{accept:'application/json'}});
     const data=await r.json();if(!r.ok)throw new Error(data.error||'Job service unavailable');
     let rows=Array.isArray(data.jobs)?data.jobs:[];
-
-    /* Keep the existing direct fallbacks, but only use them when the Worker
-       returns no jobs at all. */
-    if(!rows.length){
-      try{
-        const direct=new URL('https://remotive.com/api/remote-jobs');
-        direct.searchParams.set('limit','100');
-        const dr=await fetch(direct.toString(),{headers:{accept:'application/json'},mode:'cors'});
-        if(dr.ok){
-          const dd=await dr.json();
-          rows=Array.isArray(dd.jobs)?dd.jobs.map(j=>({...j,source:'Remotive'})):[];
-        }
-      }catch(_e){}
-    }
-    if(!rows.length){
-      try{
-        const eu=new URL('https://www.arbeitnow.com/api/job-board-api');
-        const er=await fetch(eu.toString(),{headers:{accept:'application/json'},mode:'cors'});
-        if(er.ok){
-          const ed=await er.json();
-          rows=Array.isArray(ed.data)?ed.data.map(normalizeArbeitnowJob):[];
-        }
-      }catch(_e){}
-    }
 
     const normalizeSearchWord=w=>String(w||'').toLowerCase().replace(/\bgrapic\b/g,'graphic').replace(/\bdesginer\b/g,'designer');
     const words=q.split(/\s+/).map(normalizeSearchWord).filter(Boolean);
@@ -1429,7 +1406,7 @@ if(designView){
 $('v-design').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.dt!=null){Q('[data-dt]').forEach(x=>x.classList.toggle('on',x===b));Q('#v-design .dp').forEach((x,i)=>x.classList.toggle('on',i===+b.dataset.dt))}
-  if(b.dataset.tp!=null){const ti=+b.dataset.tp;if(ti>=5&&careerPilotPlan!=='premium'){const box=document.createElement('div');box.className='card upgrade-modal';box.innerHTML='<div class="ey">PREMIUM TEMPLATE</div><h2>Unlock the full CV library</h2><p class="hint">Templates 1–5 are available in Free. Premium unlocks templates 6–30 and future premium career features.</p><div class="price-card"><b>CareerPilot Premium</b><ul><li>All 30 professional CV templates</li><li>Unlimited CV versions</li><li>AI Job Match, Cover Letter & Interview Coach</li><li>Priority cloud features</li></ul><button class="pri" id="upgradeNow">Continue to Premium</button> <button id="closeUpgrade">Not now</button></div>';$('v-design').prepend(box);$('closeUpgrade').onclick=()=>box.remove();$('upgradeNow').onclick=()=>{box.remove();go('profile');setTimeout(()=>$('upgradePlan')?.click(),50)};return}Object.assign(S.t,TPL[ti][1]);applyT();sync()}
+  if(b.dataset.tp!=null){const ti=+b.dataset.tp;if(ti>=5&&careerPilotPlan!=='premium'){if(!PREMIUM_LAUNCHED){toast('Premium plans are coming soon.');return}const box=document.createElement('div');box.className='card upgrade-modal';box.innerHTML='<div class="ey">PREMIUM TEMPLATE</div><h2>Unlock the full CV library</h2><p class="hint">Templates 1–5 are available in Free. Premium unlocks templates 6–30 and future premium career features.</p><div class="price-card"><b>CareerPilot Premium</b><ul><li>All 30 professional CV templates</li><li>Unlimited CV versions</li><li>AI Job Match, Cover Letter & Interview Coach</li><li>Priority cloud features</li></ul><button class="pri" id="upgradeNow">Continue to Premium</button> <button id="closeUpgrade">Not now</button></div>';$('v-design').prepend(box);$('closeUpgrade').onclick=()=>box.remove();$('upgradeNow').onclick=()=>{if(!PREMIUM_LAUNCHED){box.remove();toast('Premium plans are coming soon.');return}box.remove();go('profile');setTimeout(()=>$('upgradePlan')?.click(),50)};return}Object.assign(S.t,TPL[ti][1]);applyT();sync()}
   if(b.dataset.col){S.t.ac=b.dataset.col;applyT();sync()}
   if(b.dataset.lay){S.t.lay=b.dataset.lay;applyT();sync()}
 });
