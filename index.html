@@ -477,7 +477,7 @@ const mk=k=>k.replace('cv-link','cv-portfolio').replace(/^cv-h-(\w+)$/,'cv-$1-he
 function norm(o){const b=dflt(),st={};for(const k in (o.st||{}))st[mk(k)]=o.st[k];const d=Object.assign(b.d,o.d);d.icons=Object.assign(b.d.icons,o.d?.icons||{});return{d,st,t:Object.assign(b.t,o.t)}}
 const ls=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 let S=dflt(),sel=null,Z=null,cz=1,H,hi=0,tm, currentUser=null;
-try{const r=ls(KEY)||ls(OLD);if(r)S=norm(JSON.parse(r))}catch(e){}
+try{const r=ls(cvStorageKey(KEY))||ls(cvStorageKey(OLD));if(r)S=norm(JSON.parse(r))}catch(e){}
 H=[JSON.stringify(S)];
 const paper=$('paper');
 const eselPanel=$('esel');const editorPanelHost=$('ed');if(eselPanel&&editorPanelHost)editorPanelHost.prepend(eselPanel);
@@ -1248,6 +1248,7 @@ setTimeout(maybeAutoCheckJobAlerts,1800);setInterval(maybeAutoCheckJobAlerts,15*
 const CVLIB_KEY='careerpilot_cv_library_2026',CVACTIVE_KEY='careerpilot_active_cv_2026';
 let cvLibrary=[],activeCvId=null;
 const declinedCVCloudImports=new Set();
+let lastSignedInUserId=null;
 function cvStorageKey(key,user=currentUser){return key+'__'+(user?.id?'user_'+encodeURIComponent(user.id):'anonymous')}
 function migrateLegacyCVStorage(){
   const marker='careerpilot_cv_legacy_migrated_v1';
@@ -1277,7 +1278,7 @@ function importAnonymousCV(){
 function activateCVStorage(user,previousUser=null){
   clearTimeout(tm);clearTimeout(cloudTimer);tm=null;cloudTimer=null;
   currentUser=user||null;cvLibrary=[];activeCvId=null;S=dflt();sel=null;Z=null;H=[JSON.stringify(S)];hi=0;
-  loadCVLibrary();if(user&&!previousUser)importAnonymousCV();H=[JSON.stringify(S)];hi=0;refresh();
+  loadCVLibrary();if(user&&!previousUser&&!lastSignedInUserId)importAnonymousCV();if(user)lastSignedInUserId=user.id;H=[JSON.stringify(S)];hi=0;refresh();
 }
 function cloneCV(x){return JSON.parse(JSON.stringify(x))}
 function cvTime(v){return new Date(v||Date.now()).toLocaleString([], {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
