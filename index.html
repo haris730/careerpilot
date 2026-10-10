@@ -417,7 +417,7 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
   </main>
 </div>
 <nav class="mnav" id="mnav" aria-label="Mobile"></nav>
-<button class="fab" id="fab" aria-label="Preview CV">👁</button><button id="installApp" class="cp-install-pill" type="button" aria-label="Install CareerPilot">Install App</button><div id="cpOnline" class="cp-online" role="status" aria-live="polite">✓ Back online</div><button class="auth-fab" id="authOpen">Sign in</button><div class="auth-modal" id="authModal"><div class="auth-box"><button class="auth-close" id="authClose">✕</button><div class="ey">CAREERPILOT ACCOUNT</div><h2 id="authTitle">Welcome back</h2><p class="hint">Save your CV and career data securely in the cloud.</p><div class="auth-tabs"><button id="tabLogin" class="on">Login</button><button id="tabSignup">Sign up</button></div><label>Email<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></label><label style="display:block;margin-top:10px">Password<input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••"></label><label id="authNameWrap" style="display:none;margin-top:10px">Full name<input id="authName" autocomplete="name" placeholder="Your name"></label><div class="auth-msg" id="authMsg"></div><button class="pri" id="authSubmit" style="width:100%">Login</button><button id="googleAuth" style="width:100%;margin-top:8px">Continue with Google</button><button id="authLogout" style="display:none;width:100%;margin-top:8px">Logout</button></div></div>
+<button class="fab" id="fab" aria-label="Preview CV">👁</button><button id="installApp" class="cp-install-pill" type="button" aria-label="Install CareerPilot">Install App</button><div id="cpOnline" class="cp-online" role="status" aria-live="polite">✓ Back online</div><button class="auth-fab" id="authOpen">Sign in</button><div class="auth-modal" id="authModal"><div class="auth-box"><button class="auth-close" id="authClose">✕</button><div class="ey">CAREERPILOT ACCOUNT</div><h2 id="authTitle">Welcome back</h2><p class="hint">Save your CV and career data securely in the cloud.</p><div class="auth-tabs"><button id="tabLogin" class="on">Login</button><button id="tabSignup">Sign up</button></div><label>Email<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></label><label style="display:block;margin-top:10px">Password<input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••"></label><label id="authNameWrap" style="display:none;margin-top:10px">Full name<input id="authName" autocomplete="name" placeholder="Your name"></label><div class="auth-msg" id="authMsg"></div><button class="pri" id="authSubmit" style="width:100%">Login</button><button id="googleAuth" style="width:100%;margin-top:8px">Continue with Google</button><div id="authLogoutRow" style="display:none;gap:8px;margin-top:8px"><button id="authLogout" style="flex:1;min-width:0;font-size:12px;padding:10px 6px">Sign out</button><button id="authClear" style="flex:1;min-width:0;font-size:12px;padding:10px 6px">Sign out and clear this device</button></div></div></div>
 <footer style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;padding:18px 12px;color:#9a9aae;font-size:13px"><a href="/privacy.html" style="color:inherit">Privacy Policy</a><span aria-hidden="true">·</span><a href="/terms.html" style="color:inherit">Terms of Service</a></footer>
 <div id="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -486,7 +486,7 @@ const set=(p,v)=>{const k=p.split('.'),l=k.pop();k.reduce((o,x)=>o[x],S.d)[l]=v}
 const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),1800)};
 const hex=c=>'#'+(c.match(/\d+/g)||[0,0,0]).slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join('');
-const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){return false}};
+const persist=()=>{try{localStorage.setItem(cvStorageKey(KEY),JSON.stringify(S));return true}catch(e){return false}};
 
 /* ---------- history + autosave ---------- */
 function sync(){$('stt').textContent='Saving…';clearTimeout(tm);tm=setTimeout(()=>{const j=JSON.stringify(S);if(j!==H[hi]){H=H.slice(0,hi+1);H.push(j);hi=H.length-1;if(H.length>60){H.shift();hi--}}persist();$('stt').textContent='✓ Saved just now'},450)}
@@ -1247,24 +1247,54 @@ $('createJobAlert').onclick=createJobAlert;$('checkJobAlerts').onclick=()=>check
 setTimeout(maybeAutoCheckJobAlerts,1800);setInterval(maybeAutoCheckJobAlerts,15*60*1000);window.addEventListener('online',()=>setTimeout(maybeAutoCheckJobAlerts,1200));renderJobPortals();renderSavedJobs();loadLiveJobs();
 const CVLIB_KEY='careerpilot_cv_library_2026',CVACTIVE_KEY='careerpilot_active_cv_2026';
 let cvLibrary=[],activeCvId=null;
+const declinedCVCloudImports=new Set();
+function cvStorageKey(key,user=currentUser){return key+'__'+(user?.id?'user_'+encodeURIComponent(user.id):'anonymous')}
+function migrateLegacyCVStorage(){
+  const marker='careerpilot_cv_legacy_migrated_v1';
+  try{
+    if(localStorage.getItem(marker)==='1')return;
+    const keys=[KEY,OLD,CVLIB_KEY,CVACTIVE_KEY];
+    keys.forEach(k=>{const value=localStorage.getItem(k),target=cvStorageKey(k,null);if(value!==null&&localStorage.getItem(target)===null)localStorage.setItem(target,value)});
+    const builder=localStorage.getItem(cvStorageKey(KEY,null))||localStorage.getItem(cvStorageKey(OLD,null));
+    if(builder){try{S=norm(JSON.parse(builder))}catch(e){}}
+    keys.forEach(k=>localStorage.removeItem(k));
+    localStorage.setItem(marker,'1');
+  }catch(e){}
+}
+function isRealCV(data){try{return JSON.stringify(norm(data))!==JSON.stringify(norm(dflt()))}catch(e){return false}}
+function importAnonymousCV(){
+  let candidate=null;
+  try{
+    const raw=ls(cvStorageKey(CVLIB_KEY,null)),list=raw?JSON.parse(raw):[],active=ls(cvStorageKey(CVACTIVE_KEY,null));
+    if(Array.isArray(list))candidate=list.find(x=>String(x.id)===active&&isRealCV(x.data))||list.find(x=>isRealCV(x.data))||null;
+  }catch(e){}
+  if(!candidate){for(const key of [KEY,OLD]){try{const raw=ls(cvStorageKey(key,null));if(raw){const data=norm(JSON.parse(raw));if(isRealCV(data)){candidate={name:data.d?.name||'My CV',data};break}}}catch(e){}}}
+  if(!candidate||!isRealCV(candidate.data))return;
+  if(!confirm('A CV was found in this browser from a session that was not signed in. Import it into this account? It may belong to someone else. Cancel keeps it separate and does not import it.'))return;
+  const imported={id:secureId('cv'),name:candidate.name||candidate.data.d?.name||'My CV',data:norm(candidate.data),updatedAt:Date.now(),cloudId:null,needsCloudConfirmation:true};
+  cvLibrary.unshift(imported);activeCvId=imported.id;S=norm(cloneCV(imported.data));sel=null;saveCVLibrary();persist();
+}
+function activateCVStorage(user,previousUser=null){
+  clearTimeout(tm);clearTimeout(cloudTimer);tm=null;cloudTimer=null;
+  currentUser=user||null;cvLibrary=[];activeCvId=null;S=dflt();sel=null;Z=null;H=[JSON.stringify(S)];hi=0;
+  loadCVLibrary();if(user&&!previousUser)importAnonymousCV();H=[JSON.stringify(S)];hi=0;refresh();
+}
 function cloneCV(x){return JSON.parse(JSON.stringify(x))}
 function cvTime(v){return new Date(v||Date.now()).toLocaleString([], {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
 function cvAccent(data){return data?.t?.ac||'#2563eb'}
 function cvTitle(data){return data?.d?.title||'Professional CV'}
 function loadCVLibrary(){
+  migrateLegacyCVStorage();
   try{
-    const raw=ls(CVLIB_KEY);
-    if(raw){const a=JSON.parse(raw);if(Array.isArray(a)&&a.length){cvLibrary=a.map(x=>({id:String(x.id),name:x.name||'My CV',data:norm(x.data||dflt()),updatedAt:x.updatedAt||Date.now(),cloudId:x.cloudId||null}));}}
+    const raw=ls(cvStorageKey(CVLIB_KEY));
+    if(raw){const a=JSON.parse(raw);if(Array.isArray(a)&&a.length){cvLibrary=a.map(x=>({id:String(x.id),name:x.name||'My CV',data:norm(x.data||dflt()),updatedAt:x.updatedAt||Date.now(),cloudId:x.cloudId||null,needsCloudConfirmation:!!x.needsCloudConfirmation}));}}
   }catch(e){}
-  if(!cvLibrary.length){
-    const legacy=cloneCV(S);
-    cvLibrary=[{id:'cv-'+Date.now(),name:legacy.d.name||'My CV',data:legacy,updatedAt:Date.now(),cloudId:null}];
-  }
-  try{activeCvId=ls(CVACTIVE_KEY)||cvLibrary[0].id}catch(e){activeCvId=cvLibrary[0].id}
+  if(!cvLibrary.length){const legacy=cloneCV(S);cvLibrary=[{id:'cv-'+Date.now(),name:legacy.d.name||'My CV',data:legacy,updatedAt:Date.now(),cloudId:null,needsCloudConfirmation:false}]}
+  try{activeCvId=ls(cvStorageKey(CVACTIVE_KEY))||cvLibrary[0].id}catch(e){activeCvId=cvLibrary[0].id}
   if(!cvLibrary.some(x=>x.id===activeCvId))activeCvId=cvLibrary[0].id;
-  saveCVLibrary();
+  S=norm(cloneCV((cvLibrary.find(x=>x.id===activeCvId)||cvLibrary[0]).data));saveCVLibrary();
 }
-function saveCVLibrary(){try{localStorage.setItem(CVLIB_KEY,JSON.stringify(cvLibrary));localStorage.setItem(CVACTIVE_KEY,activeCvId||'')}catch(e){}}
+function saveCVLibrary(){try{localStorage.setItem(cvStorageKey(CVLIB_KEY),JSON.stringify(cvLibrary));localStorage.setItem(cvStorageKey(CVACTIVE_KEY),activeCvId||'')}catch(e){}}
 function activeCV(){return cvLibrary.find(x=>x.id===activeCvId)||cvLibrary[0]}
 function syncActiveLibrary(){
   const x=activeCV();if(!x)return;
@@ -1503,45 +1533,39 @@ async function loadPlanStatus(){
 const authModal=$('authModal'),authMsg=$('authMsg');
 const legalAuthLinks=document.createElement('p');legalAuthLinks.style.cssText='margin:14px 0 0;text-align:center;font-size:12px;color:#9a9aae';legalAuthLinks.innerHTML='<a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a>';authModal.querySelector('.auth-box').append(legalAuthLinks);
 function authMessage(m){authMsg.textContent=m||''}
-function openAuth(mode='login'){authMode=mode;$('authTitle').textContent=mode==='login'?'Welcome back':'Create your account';$('authSubmit').textContent=mode==='login'?'Login':'Create account';$('authNameWrap').style.display=mode==='login'?'none':'block';$('tabLogin').classList.toggle('on',mode==='login');$('tabSignup').classList.toggle('on',mode!=='login');$('authLogout').style.display=currentUser?'block':'none';authMessage('');authModal.classList.add('on')}
+function openAuth(mode='login'){authMode=mode;$('authTitle').textContent=mode==='login'?'Welcome back':'Create your account';$('authSubmit').textContent=mode==='login'?'Login':'Create account';$('authNameWrap').style.display=mode==='login'?'none':'block';$('tabLogin').classList.toggle('on',mode==='login');$('tabSignup').classList.toggle('on',mode!=='login');$('authLogoutRow').style.display=currentUser?'flex':'none';authMessage('');authModal.classList.add('on')}
 $('authOpen').onclick=()=>openAuth(currentUser?'login':'login');$('authClose').onclick=()=>authModal.classList.remove('on');$('tabLogin').onclick=()=>openAuth('login');$('tabSignup').onclick=()=>openAuth('signup');
 $('authSubmit').onclick=async()=>{authMessage('Please wait…');const email=$('authEmail').value.trim(),password=$('authPassword').value,name=$('authName').value.trim();if(!email||password.length<6){authMessage('Enter a valid email and password (6+ characters).');return}try{if(authMode==='signup'){const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name}}});if(error)throw error;authMessage(data.session?'Account created.':'Account created. Check your email to confirm, then login.')}else{const {error}=await sb.auth.signInWithPassword({email,password});if(error){const msg=String(error.message||'');if(/invalid login credentials/i.test(msg))authMessage('Email ya password ghalat hai. Agar account nahi bana to Sign up karein.');else if(/email not confirmed/i.test(msg))authMessage('Pehle apni email confirm karein, phir login karein.');else authMessage(msg||'Login failed.');return}authModal.classList.remove('on')}}catch(e){authMessage(e.message||'Authentication failed.')}};
 $('googleAuth').onclick=async()=>{authMessage('Opening Google Sign-in…');try{const {error}=await sb.auth.signInWithOAuth({provider:'google'});if(error){const msg=String(error.message||'');if(/not enabled|unsupported provider|provider is not enabled/i.test(msg)){authMessage('Google Sign-in Supabase mein enabled nahi hai. Supabase → Authentication → Sign In / Providers → Google ko enable karein.')}else authMessage(msg||'Google Sign-in failed.')}}catch(e){authMessage(e.message||'Google Sign-in failed.')}};
-$('authLogout').onclick=async()=>{await sb.auth.signOut();authModal.classList.remove('on')};
+$('authLogout').onclick=async()=>{const {error}=await sb.auth.signOut();if(error){toast('Sign out failed');return}authModal.classList.remove('on')};
+$('authClear').onclick=async()=>{if(!currentUser||!confirm('Sign out and clear this device? Cloud CVs are not deleted. Local copies of this account’s CVs on this device will be deleted.'))return;const user=currentUser;clearTimeout(tm);clearTimeout(cloudTimer);const {error}=await sb.auth.signOut();if(error){toast('Sign out failed');return}[KEY,OLD,CVLIB_KEY,CVACTIVE_KEY].forEach(k=>{try{localStorage.removeItem(cvStorageKey(k,user))}catch(e){}});currentUser=null;activateCVStorage(null,user);updateAccountUI();authModal.classList.remove('on')};
 function updateAccountUI(){const b=$('authOpen');b.textContent=currentUser?'Account':'Sign in';Q('[data-n]').forEach(x=>x.textContent=currentUser?.user_metadata?.full_name||currentUser?.email?.split('@')[0]||'Guest')}
 async function loadCloud(){
-  if(!currentUser)return;
+  if(!currentUser)return;const userId=currentUser.id;
   const {data,error}=await sb.from('cvs').select('id,name,cv_data,template,updated_at').order('updated_at',{ascending:false});
-  if(error){toast('Cloud CV load failed');return}
+  if(currentUser?.id!==userId)return;if(error){toast('Cloud CV load failed');return}
   if(data?.length){
-    cvLibrary=data.map(row=>({id:'cloud-'+row.id,cloudId:row.id,name:row.name||row.cv_data?.d?.name||'My CV',data:norm(row.cv_data),updatedAt:row.updated_at||Date.now()}));
-    activeCvId=cvLibrary[0].id;S=norm(cloneCV(cvLibrary[0].data));sel=null;saveCVLibrary();localStorage.setItem(KEY,JSON.stringify(S));refresh();renderCVLibrary();toast(data.length+' CV'+(data.length===1?'':'s')+' loaded from cloud');
-  }else{
-    syncActiveLibrary();await saveCloud();
-  }
+    const localOnly=cvLibrary.filter(x=>!x.cloudId),cloudCVs=data.map(row=>({id:'cloud-'+row.id,cloudId:row.id,name:row.name||row.cv_data?.d?.name||'My CV',data:norm(row.cv_data),updatedAt:row.updated_at||Date.now()}));
+    cvLibrary=[...cloudCVs,...localOnly];activeCvId=cloudCVs[0].id;S=norm(cloneCV(cvLibrary[0].data));sel=null;saveCVLibrary();localStorage.setItem(cvStorageKey(KEY),JSON.stringify(S));refresh();renderCVLibrary();toast(data.length+' CV'+(data.length===1?'':'s')+' loaded from cloud'+(localOnly.length?'; local CVs kept on this device':''));
+  }else{syncActiveLibrary();await saveCloud()}
 }
 function scheduleCloudSave(){clearTimeout(cloudTimer);if(currentUser)cloudTimer=setTimeout(()=>saveCloud(),900)}
 async function saveCloud(){
-  if(!currentUser)return;
-  const x=activeCV();if(!x)return;
+  if(!currentUser)return;const userId=currentUser.id,x=activeCV();if(!x)return;
+  if(x.needsCloudConfirmation){if(declinedCVCloudImports.has(x.id))return;if(!confirm('This CV is stored locally and may come from an anonymous session or another browser account. Upload it to the currently signed-in account? Choose Cancel to keep it local.')){declinedCVCloudImports.add(x.id);return}x.needsCloudConfirmation=false;saveCVLibrary()}
   x.data=cloneCV(S);x.name=S.d.name||x.name||'My CV';x.updatedAt=Date.now();saveCVLibrary();
-  const payload={user_id:currentUser.id,name:x.name,cv_data:x.data,template:x.data.t?.tpl||null,updated_at:new Date().toISOString()};
-  let result;
-  if(x.cloudId){
-    result=await sb.from('cvs').update(payload).eq('id',x.cloudId).eq('user_id',currentUser.id);
-  }else{
-    result=await sb.from('cvs').insert(payload).select('id').maybeSingle();
-    if(result.data?.id){x.cloudId=result.data.id;saveCVLibrary()}
-  }
-  if(result.error)toast('Cloud save failed');else{renderCVLibrary();toast('✓ Saved to cloud')}
+  const payload={user_id:userId,name:x.name,cv_data:x.data,template:x.data.t?.tpl||null,updated_at:new Date().toISOString()};let result;
+  if(x.cloudId)result=await sb.from('cvs').update(payload).eq('id',x.cloudId).eq('user_id',userId);
+  else{result=await sb.from('cvs').insert(payload).select('id').maybeSingle();if(result.data?.id){x.cloudId=result.data.id;saveCVLibrary()}}
+  if(currentUser?.id!==userId)return;if(result.error)toast('Cloud save failed');else{renderCVLibrary();toast('✓ Saved to cloud')}
 }
 async function deleteCloudCV(id){
   if(!currentUser||!id)return;
   const {error}=await sb.from('cvs').delete().eq('id',id).eq('user_id',currentUser.id);
   if(error)toast('Cloud delete failed');
 }
-async function hydrateAuth(){const {data}=await sb.auth.getSession();currentUser=data.session?.user||null;updateAccountUI();renderCVLibrary();if(currentUser){await loadCloud();await loadPlanStatus()}}
-sb.auth.onAuthStateChange(async(_event,session)=>{currentUser=session?.user||null;updateAccountUI();renderCVLibrary();if(currentUser){authModal.classList.remove('on');await loadCloud();await loadPlanStatus();await syncServerJobAlerts();toast('Signed in')}});
+async function hydrateAuth(){const {data}=await sb.auth.getSession();const next=data.session?.user||null;if((currentUser?.id||null)!==(next?.id||null)){const previous=currentUser;activateCVStorage(next,previous)}else currentUser=next;updateAccountUI();renderCVLibrary();if(currentUser){await loadCloud();await loadPlanStatus()}}
+sb.auth.onAuthStateChange(async(_event,session)=>{const next=session?.user||null;if((currentUser?.id||null)!==(next?.id||null)){const previous=currentUser;activateCVStorage(next,previous)}else currentUser=next;updateAccountUI();renderCVLibrary();if(currentUser){authModal.classList.remove('on');await loadCloud();await loadPlanStatus();await syncServerJobAlerts();toast('Signed in')}});
 const oldSync=sync;sync=function(){oldSync();syncActiveLibrary();scheduleCloudSave()};
 hydrateAuth();
 setTimeout(()=>{if(currentUser)syncServerJobAlerts()},1200);
