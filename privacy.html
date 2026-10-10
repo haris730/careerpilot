@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy | CareerPilot</title>
+<style>
+body{margin:0;background:#0b0b12;color:#f4f4f8;font:16px/1.7 system-ui,sans-serif}
+main{max-width:820px;margin:48px auto;padding:0 22px 48px}
+a{color:#7dd3fc}h1,h2{line-height:1.2}p,li{color:#d1d1df}
+small{color:#a5a5b8}.links{display:flex;gap:18px;flex-wrap:wrap;margin-top:32px}
+</style>
+</head>
+<body><main>
+<p><a href="/">CareerPilot</a></p>
+<h1>Privacy Policy</h1>
+<p><small>Last updated: 9 October 2026</small></p>
+<p><strong>MUHAMMAD HARIS</strong> provides CareerPilot. This page explains, in plain language, how information may be handled when you use the service.</p>
+<h2>Services and information</h2>
+<p>CareerPilot uses Supabase for account sign-in and account data, saved CVs in the <code>cvs</code> table, AI usage counts in <code>ai_usage</code>, plan information in <code>user_entitlements</code>, and billing webhook event records in <code>billing_events</code>. Billing event payloads may include customer details such as an email address. If you enter an email address in your CV, it may also be stored as part of that CV's data. The Application Tracker does not write to Supabase tables named <code>applications</code> or <code>profiles</code>; tracker entries are stored in browser local storage. Google sign-in is offered through Supabase's Google authentication provider.</p>
+<p>CareerPilot is hosted on Cloudflare. Its Cloudflare Worker uses Workers AI to process text submitted to AI features and generate responses. Text you type or submit in an AI feature is processed by the AI model to produce that feature's result.</p>
+<p>Cloud job-alert settings, including your account email, keyword, location, job type, experience level, minimum salary and frequency, are stored in Cloudflare D1. Matching job results are also stored there. The Application Tracker, saved jobs, job-alert settings and matches, business leads, and CV editor/library data can also be stored in your browser's local storage. Your browser may keep a copy of your CV and other data in local storage. Signing out may not remove it from a shared browser, so please use a private window on shared devices.</p>
+<p>Information you enter can include your name, contact details, work history, education, skills, job preferences, application details and other CV or AI-request text.</p>
+<p>Other people using the same browser profile may be able to access locally stored information. Sign out on shared devices and avoid saving sensitive information on a shared browser.</p>
+<h2>Job listings</h2>
+<p>CareerPilot retrieves general job feeds from Himalayas, Remote OK, and Jobicy using fixed feed URLs. Search keywords and employment-type filters, when used, are sent to CareerPilot's <code>/api/jobs</code> endpoint and applied by CareerPilot after it fetches those feeds; the code does not pass those values or your location to these three job providers. Location, experience and salary filters are applied by CareerPilot's browser or alert-matching logic. Server-side alert checks compare saved keyword, location, job type, experience level and minimum salary against fetched job data. The optional Remotive provider is currently disabled, so the code does not send alert keywords to Remotive. When you follow an application link, you go to the original provider or employer website, which has its own privacy practices and terms.</p>
+<p>Business search uses Geoapify, a third-party service. The city and country you enter are sent to Geoapify for geocoding. The business field you enter determines the categories requested from Geoapify and is also used by CareerPilot to rank results; the selected target role is not included in the Geoapify request.</p>
+<p>If checkout is used, CareerPilot sends your account email and display name to a payment provider to create the checkout. The related billing webhook event is stored in Supabase's <code>billing_events</code> table as an event payload, which may include customer details such as email.</p>
+<p>If paid plans are offered, payments will be handled by a payment provider and this policy will be updated.</p>
+<h2>Account and data deletion requests</h2>
+<p>You can email us at <strong>mohammadhariscom7@gmail.com</strong> to request deletion of your account and data. Please describe what you want deleted; we may ask for information to verify your request. A deletion request is not automatic, and this policy does not promise a specific completion timeframe.</p>
+<h2>Contact</h2>
+<p>Questions about this policy can be sent to <strong>mohammadhariscom7@gmail.com</strong>.</p>
+<div class="links"><a href="/terms.html">Terms of Service</a><a href="/">Back to CareerPilot</a></div>
+</main></body></html>
