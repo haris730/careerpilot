@@ -320,7 +320,7 @@ export default {
       if (body.task === 'letter' && (!String(body.role || '').trim() || !String(body.jobDescription || '').trim())) return json({ error: 'Job title and job description are required.' }, 400);
       const quota = await supabaseRpc(request,'consume_ai_credit',{p_kind:String(body.task||'ai'),p_free_limit:FREE_AI_LIMIT,p_premium_limit:PREMIUM_AI_LIMIT});
       if (!quota) return json({ error: 'Usage service unavailable. Please try again.' }, 503);
-      if (!quota.allowed) return json({ error: 'Free AI limit reached for this month. Premium plans are coming soon.' , code:'AI_LIMIT_REACHED', plan:quota.plan, remaining:quota.remaining}, 402);
+      if (!quota.allowed) return json({ error: 'Free AI limit reached for this month. Upgrade to Premium to continue.' , code:'AI_LIMIT_REACHED', plan:quota.plan, remaining:quota.remaining}, 402);
       try {
         const result = await env.AI.run(MODEL, { prompt: buildPrompt(body), max_tokens: 700, temperature: 0.35 });
         const text = typeof result === 'string' ? result : (result?.response || result?.text || result?.output_text || '');
