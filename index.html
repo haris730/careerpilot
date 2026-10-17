@@ -428,7 +428,7 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
 
 
 const $=i=>document.getElementById(i),Q=(s,r)=>Array.from((r||document).querySelectorAll(s)),KEY='careerpilot_cv_builder_2026',OLD='careerpilot_cv_builder_v2';
-const PREMIUM_LAUNCHED=false;
+const PREMIUM_LAUNCHED=true;
 const ADS_ENABLED=false;
 const FONTS=[['','Template default'],['Inter,Segoe UI,Arial,sans-serif','Inter — Modern'],['Source Sans 3,Segoe UI,Arial,sans-serif','Source Sans 3 — Clean'],['IBM Plex Sans,Segoe UI,Arial,sans-serif','IBM Plex Sans — Professional'],['Lato,Segoe UI,Arial,sans-serif','Lato — Humanist'],['Roboto,Arial,sans-serif','Roboto — Universal'],['Open Sans,Arial,sans-serif','Open Sans — Classic'],['Nunito Sans,Arial,sans-serif','Nunito Sans — Friendly'],['Calibri,Arial,sans-serif','Calibri — Business'],['Helvetica,Arial,sans-serif','Helvetica — Corporate'],['Arial,Helvetica,sans-serif','Arial — Safe'],['Georgia,serif','Georgia — Serif'],['Cambria,Georgia,serif','Cambria — Executive'],['Merriweather,Georgia,serif','Merriweather — Editorial'],['Libre Baskerville,Georgia,serif','Libre Baskerville — Traditional'],['EB Garamond,Georgia,serif','EB Garamond — Elegant'],['Times New Roman,serif','Times New Roman'],['Trebuchet MS,sans-serif','Trebuchet MS'],['Courier New,monospace','Courier New — Mono']];
 const BGS=[['#ffffff','White'],['#fffaf0','Warm ivory'],['#f3f4f6','Light gray'],['#f2f7ff','Soft blue']];
@@ -1523,13 +1523,15 @@ async function loadPlanStatus(){
     careerPilotPlan=plan; window.careerPilotPremium=plan==='premium';
     const now=new Date();const periodStart=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),1));
     const {data:usage}=await sb.from('ai_usage').select('ai_count').eq('user_id',currentUser.id).eq('period_start',periodStart.toISOString().slice(0,10)).maybeSingle();
-    const count=Number(usage?.ai_count||0),remaining=Math.max(0,3-count);
+    const count=Number(usage?.ai_count||0),limit=plan==='premium'?100:3,remaining=Math.max(0,limit-count);
     const name=$('planName'),pill=$('planPill'),line=$('planUsage');
     if(name)name.textContent=plan==='premium'?'Premium Plan':'Free Plan';
     if(pill){pill.textContent=plan==='premium'?'PREMIUM':'FREE';pill.classList.toggle('premium',plan==='premium')}
-    if(line)line.textContent=plan==='premium'?'AI actions: up to 100 / month':'AI actions: '+remaining+' of 3 remaining this month';
+    if(line)line.textContent='AI actions: '+remaining+' of '+limit+' remaining this month';
     Q('[data-n]').forEach(x=>x.closest('.usr')?.querySelector('small')&&(x.closest('.usr').querySelector('small').textContent=plan==='premium'?'Premium Plan':'Free Plan'));
     Q('[data-ad-slot]').forEach(x=>x.style.display=!ADS_ENABLED||plan==='premium'?'none':'flex');
+    Q('#nav [data-soon], [data-upgrade], #upgradePlan').forEach(x=>x.style.display=plan==='premium'?'none':'');
+    const monetizationCard=$('[data-monetization-card]');if(monetizationCard)monetizationCard.style.display=plan==='premium'?'none':'';
   }catch(e){console.warn('Plan status unavailable',e)}
 }
 
