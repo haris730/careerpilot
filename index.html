@@ -1454,7 +1454,13 @@ function applyT(){
 
 /* ---------- CV canvas ---------- */
 const E=(id,p,t,c,ph,m)=>`<div id="${id}" class="el ${c}" data-p="${p}" data-ph="${ph}"${m?' data-m="1"':''} contenteditable="true" spellcheck="false">${esc(t)}</div>`;
-const Em=(id,p,t,c,ph,m)=>`<div id="${id}" class="el ${c}" data-p="${p}" data-ph="${ph}"${m?' data-m="1"':''} contenteditable="true" spellcheck="false">${esc(t).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')}</div>`;
+const Em=(id,p,t,c,ph,m)=>{
+  const inline=s=>s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  const rows=esc(t).split(/\r?\n/);let html='',list=false;
+  rows.forEach((row,i)=>{const bullet=row.match(/^\s*[-*]\s+(.+)$/);if(bullet){if(!list){if(html)html+='<br>';html+='<ul>';list=true}html+='<li>'+inline(bullet[1])+'</li>';return}if(list){html+='</ul>';list=false}if(i&&html)html+='<br>';html+=inline(row)});
+  if(list)html+='</ul>';
+  return `<div id="${id}" class="el ${c}" data-p="${p}" data-ph="${ph}"${m?' data-m="1"':''} contenteditable="true" spellcheck="false">${html}</div>`;
+};
 const Hd=(k,t)=>`<h3><span id="cv-${k}-heading" class="el">${t}</span></h3>`;
 function render(){
   const d=S.d;
