@@ -39,7 +39,8 @@ async function handleBillingWebhook(request,env){
   const until=ends||renews||new Date(Date.now()+31*86400000).toISOString();
   const active=activeStatuses.has(status)&&(!ends||new Date(ends)>new Date());
   const plan=active?'premium':'free';
-  await supabaseAdmin(env,'/rest/v1/user_entitlements',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({user_id:userId,plan,premium_until:active?until:null,updated_at:new Date().toISOString()})});
+  const entitlement=await supabaseAdmin(env,'/rest/v1/user_entitlements',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({user_id:userId,plan,premium_until:active?until:null,updated_at:new Date().toISOString()})});
+  if(entitlement===null)return apiJson({error:'Unable to update subscription entitlement.'},500,'*');
   return apiJson({ok:true,plan},200,'*');
 }
 async function createLemonCheckout(request,env,url){
@@ -48,7 +49,8 @@ async function createLemonCheckout(request,env,url){
   const user=await supabaseUser(request);if(!user?.id)return apiJson({error:'Sign in required.'},401,url.origin);
   let body;try{body=await request.json()}catch{return apiJson({error:'Invalid JSON request.'},400,url.origin)}
   const plan=body.plan==='yearly'?'yearly':'monthly';
-  const variant=plan==='yearly'?(env.LEMONSQUEEZY_YEARLY_VARIANT_ID||env.LEMONSQUEEZY_MONTHLY_VARIANT_ID):env.LEMONSQUEEZY_MONTHLY_VARIANT_ID;
+  if(plan==='yearly'&&!env.LEMONSQUEEZY_YEARLY_VARIANT_ID)return apiJson({error:'Yearly checkout is not configured yet.'},503,url.origin);
+  const variant=plan==='yearly'?env.LEMONSQUEEZY_YEARLY_VARIANT_ID:env.LEMONSQUEEZY_MONTHLY_VARIANT_ID;
   const payload={data:{type:'checkouts',attributes:{checkout_options:{embed:true},checkout_data:{email:user.email||'',name:user.user_metadata?.full_name||'',custom:{user_id:user.id,plan}},product_options:{redirect_url:url.origin+'/#profile'}},relationships:{store:{data:{type:'stores',id:String(env.LEMONSQUEEZY_STORE_ID)}},variant:{data:{type:'variants',id:String(variant)}}}}};
   const res=await fetch('https://api.lemonsqueezy.com/v1/checkouts',{method:'POST',headers:{Accept:'application/vnd.api+json','Content-Type':'application/vnd.api+json',Authorization:'Bearer '+env.LEMONSQUEEZY_API_KEY},body:JSON.stringify(payload)});
   if(!res.ok)return apiJson({error:'Unable to create checkout.'},502,url.origin);
