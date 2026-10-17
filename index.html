@@ -95,7 +95,7 @@ input[type=range]{width:100%}
 #paper .it{break-inside:avoid}
 #paper .pos,#paper .co,.nm,.tt{overflow-wrap:anywhere}
 #paper .ct{row-gap:3px}
-.T-ats .hd{padding-bottom:16px}.T-ats .bd{grid-template-columns:1fr}.T-ats .lc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:18px var(--mg);background:#fff;border-bottom:1px solid #e5e7eb}.T-ats .rc{padding:20px var(--mg)}
+.T-ats .hd{padding-bottom:16px}.T-ats .bd{display:grid;grid-template-columns:minmax(0,32%) minmax(0,1fr);gap:0}.T-ats .lc{display:flex;flex-direction:column;gap:18px;padding:18px var(--mg);background:#fff;border-bottom:1px solid #e5e7eb}.T-ats .rc{padding:20px var(--mg)}.T-ats .pos,.T-ats .co,.T-ats .nm,.T-ats .tt,.T-ats .el{overflow-wrap:break-word;word-break:normal;hyphens:none}
 .T-mo .hd{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:end}.T-mo .ct{justify-content:flex-end;text-align:right}
 .T-ex .hd{padding-left:var(--mg);padding-right:var(--mg)}.T-ex .bd{grid-template-columns:32% 68%}.T-ex .lc{border-right:1px solid #e5e7eb}.T-ex .rc{padding-left:24px}
 .T-cr .bd{grid-template-columns:31% 69%}.T-cr .lc{padding-top:28px}.T-cr .rc{padding-top:28px}
@@ -1454,19 +1454,26 @@ function applyT(){
 
 /* ---------- CV canvas ---------- */
 const E=(id,p,t,c,ph,m)=>`<div id="${id}" class="el ${c}" data-p="${p}" data-ph="${ph}"${m?' data-m="1"':''} contenteditable="true" spellcheck="false">${esc(t)}</div>`;
+const Em=(id,p,t,c,ph,m)=>{
+  const inline=s=>s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  const rows=esc(t).split(/\r?\n/);let html='',list=false;
+  rows.forEach((row,i)=>{const bullet=row.match(/^\s*[-*]\s+(.+)$/);if(bullet){if(!list){if(html)html+='<br>';html+='<ul>';list=true}html+='<li>'+inline(bullet[1])+'</li>';return}if(list){html+='</ul>';list=false}if(i&&html)html+='<br>';html+=inline(row)});
+  if(list)html+='</ul>';
+  return `<div id="${id}" class="el ${c}" data-p="${p}" data-ph="${ph}"${m?' data-m="1"':''} contenteditable="true" spellcheck="false">${html}</div>`;
+};
 const Hd=(k,t)=>`<h3><span id="cv-${k}-heading" class="el">${t}</span></h3>`;
 function render(){
   const d=S.d;
-  const list=(k,h,key,c)=>d[k].length?`<section>${Hd(key,h)}${d[k].map((x,i)=>E(`cv-${key}-${i}`,`${k}.${i}`,x,c,'Item')).join('')}</section>`:'';
+  const list=(k,h,key,c)=>{const item=k==='achievements'||k==='projects'?Em:E;return d[k].length?`<section>${Hd(key,h)}${d[k].map((x,i)=>item(`cv-${key}-${i}`,`${k}.${i}`,x,c,'Item')).join('')}</section>`:''};
   const C=(key,id,p,t)=>{const icons=d.icons||{};const ic=icons[key]||'';return `<span class="cti"><span class="cii" aria-hidden="true">${esc(ic)}</span>${E(id,p,t,'','Contact')}</span>`};
   const photo=d.photo?`<img class="cv-photo" src="${esc(d.photo)}" alt="Profile photo">`:'';
   const exp=d.exp.length?`<section>${Hd('experience','Experience')}${d.exp.map((x,i)=>{const q=f=>`exp.${i}.${f}`,id=f=>`cv-exp-${i}-${f}`;
-    return `<div class="it"><div class="row">${E(id('position'),q('position'),x.position,'pos','Job title')}<div class="dt">${E(id('start'),q('start'),x.start,'','Start')}<span>–</span>${E(id('end'),q('end'),x.end,'','End')}</div></div><div class="row">${E(id('company'),q('company'),x.company,'co','Company')}${E(id('location'),q('location'),x.location,'mt','Location')}</div>${E(id('description'),q('description'),x.description,'','Description',1)}</div>`}).join('')}</section>`:'';
+    return `<div class="it"><div class="row">${E(id('position'),q('position'),x.position,'pos','Job title')}<div class="dt">${E(id('start'),q('start'),x.start,'','Start')}<span>–</span>${E(id('end'),q('end'),x.end,'','End')}</div></div><div class="row">${E(id('company'),q('company'),x.company,'co','Company')}${E(id('location'),q('location'),x.location,'mt','Location')}</div>${Em(id('description'),q('description'),x.description,'','Description',1)}</div>`}).join('')}</section>`:'';
   const edu=d.edu.length?`<section>${Hd('education','Education')}${d.edu.map((x,i)=>{const q=f=>`edu.${i}.${f}`,id=f=>`cv-edu-${i}-${f}`;
     return `<div class="it">${E(id('degree'),q('degree'),x.degree,'pos','Degree')}${E(id('school'),q('institute'),x.institute,'co','Institute')}<div class="row mt">${E(id('year'),q('year'),x.year,'','Year')}${E(id('location'),q('location'),x.location,'','Location')}</div></div>`}).join('')}</section>`:'';
   paper.innerHTML=`<div class="hd${d.photo?' has-photo':''}">${photo}${E('cv-name','name',d.name,'nm','Full name')}${E('cv-title','title',d.title,'tt','Professional title')}<div class="ct">${C('email','cv-email','email',d.email)}${C('phone','cv-phone','phone',d.phone)}${C('location','cv-location','location',d.location)}${C('link','cv-portfolio','link',d.link)}</div></div>
 <div class="bd"><div class="lc">${list('skills','Skills','skills','li').replace(/cv-skills-(\d)/g,'cv-skill-$1')}${list('languages','Languages','languages','li')}${edu}${list('certs','Certifications','certs','li')}</div>
-<div class="rc"><section>${Hd('summary','Professional Summary')}${E('cv-summary','summary',d.summary,'','Write a short summary',1)}</section>${exp}${list('achievements','Achievements','achievements','bl')}${list('projects','Projects','projects','bl')}</div></div>`;
+<div class="rc"><section>${Hd('summary','Professional Summary')}${Em('cv-summary','summary',d.summary,'','Write a short summary',1)}</section>${exp}${list('achievements','Achievements','achievements','bl')}${list('projects','Projects','projects','bl')}</div></div>`;
   Q('.el',paper).forEach(applyStyle);
   const e=sel&&$(sel);if(e)e.classList.add('sel');else if(sel){sel=null;loadPanel()}
   fit();
