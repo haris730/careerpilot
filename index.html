@@ -485,7 +485,7 @@ const paper=$('paper');
 const eselPanel=$('esel');const editorPanelHost=$('ed');if(eselPanel&&editorPanelHost)editorPanelHost.prepend(eselPanel);
 const get=p=>p.split('.').reduce((o,k)=>o&&o[k],S.d);
 const set=(p,v)=>{const k=p.split('.'),l=k.pop();k.reduce((o,x)=>o[x],S.d)[l]=v};
-const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),1800)};
 const hex=c=>'#'+(c.match(/\d+/g)||[0,0,0]).slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join('');
 const persist=()=>{try{localStorage.setItem(cvStorageKey(KEY),JSON.stringify(S));return true}catch(e){return false}};
