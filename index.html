@@ -1578,6 +1578,227 @@ async function deleteCloudCV(id){
 async function hydrateAuth(){const {data}=await sb.auth.getSession();const next=data.session?.user||null;if((currentUser?.id||null)!==(next?.id||null)){const previous=currentUser;activateCVStorage(next,previous)}else currentUser=next;updateAccountUI();renderCVLibrary();if(currentUser){await loadCloud();await loadPlanStatus()}}
 sb.auth.onAuthStateChange(async(_event,session)=>{const next=session?.user||null;if((currentUser?.id||null)!==(next?.id||null)){const previous=currentUser;activateCVStorage(next,previous)}else currentUser=next;updateAccountUI();renderCVLibrary();if(currentUser){authModal.classList.remove('on');await loadCloud();await loadPlanStatus();await syncServerJobAlerts();toast('Signed in')}});
 const oldSync=sync;sync=function(){oldSync();syncActiveLibrary();scheduleCloudSave()};
+
+/* TEMPORARY DEBUG ONLY: enabled only with ?debug=1; never logs auth secrets or CV text. */
+if (new URLSearchParams(location.search).get('debug') === '1') {
+  const __debugEntries = [];
+  let __debugOutput;
+  const __debugString = value => value == null ? '(none)' : String(value);
+  function __debugLog(event, details) {
+    const entry = Object.assign({ms: Date.now(), elapsedMs: Math.round(performance.now()), event: event}, details || {});
+    __debugEntries.push(JSON.stringify(entry));
+    if (__debugEntries.length > 600) __debugEntries.shift();
+    if (__debugOutput) {
+      __debugOutput.textContent = __debugEntries.join('\n');
+      __debugOutput.scrollTop = __debugOutput.scrollHeight;
+    }
+  }
+  function __debugCallers() {
+    return (new Error().stack || '').split('\n').slice(2, 6).map(function(frame) {
+      const line = frame.trim();
+      const match = line.match(/^at (?:(.*?) \()?(.+?):(\d+):(\d+)\)?$/);
+      return match
+        ? {caller: match[1] || '(anonymous)', line: Number(match[3]), column: Number(match[4])}
+        : {frame: line};
+    });
+  }
+  function __debugWrap(name, original, formatArgs) {
+    if (typeof original !== 'function') {
+      __debugLog('wrap-missing', {function: name});
+      return original;
+    }
+    return function() {
+      const args = Array.prototype.slice.call(arguments);
+      const detail = {function: name, callers: __debugCallers()};
+      if (formatArgs) Object.assign(detail, formatArgs(args));
+      __debugLog('call', detail);
+      let result;
+      try {
+        result = original.apply(this, args);
+      } catch (error) {
+        __debugLog('finish', {function: name, outcome: 'throw', errorName: error && error.name || 'Error'});
+        throw error;
+      }
+      if (result && typeof result.then === 'function') {
+        return result.then(function(value) {
+          __debugLog('finish', {function: name, outcome: 'ok'});
+          return value;
+        }, function(error) {
+          __debugLog('finish', {function: name, outcome: 'reject', errorName: error && error.name || 'Error'});
+          throw error;
+        });
+      }
+      __debugLog('finish', {function: name, outcome: 'ok'});
+      return result;
+    };
+  }
+  go = __debugWrap('go', go, function(args) {
+    const opts = args[1] && typeof args[1] === 'object' ? args[1] : {};
+    const safeOpts = {};
+    ['designTab', 'skipHistory'].forEach(function(key) {
+      if (Object.prototype.hasOwnProperty.call(opts, key)) safeOpts[key] = opts[key];
+    });
+    return {view: typeof args[0] === 'string' ? args[0] : '(non-string)', opts: safeOpts};
+  });
+  refresh = __debugWrap('refresh', refresh);
+  restoreRoute = __debugWrap('restoreRoute', restoreRoute);
+  loadCloud = __debugWrap('loadCloud', loadCloud);
+  loadPlanStatus = __debugWrap('loadPlanStatus', loadPlanStatus);
+  activateCVStorage = __debugWrap('activateCVStorage', activateCVStorage);
+
+  const __debugPanel = document.createElement('section');
+  __debugPanel.id = 'cp-debug-panel';
+  __debugPanel.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:2147483647;max-height:40vh;height:34vh;display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid rgba(148,163,184,.55);border-radius:10px;background:rgba(8,12,20,.88);color:#f8fafc;box-shadow:0 4px 24px rgba(0,0,0,.45);font:12px/1.35 system-ui,sans-serif;backdrop-filter:blur(6px);';
+  const __debugToolbar = document.createElement('div');
+  __debugToolbar.style.cssText = 'display:flex;gap:6px;flex:0 0 auto;align-items:center;';
+  const __debugTitle = document.createElement('strong');
+  __debugTitle.textContent = 'DEBUG ONLY · ?debug=1';
+  __debugTitle.style.cssText = 'margin-right:auto;font-size:11px;';
+  const __debugMakeButton = function(label) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    button.style.cssText = 'padding:4px 8px;border:1px solid rgba(203,213,225,.5);border-radius:6px;background:rgba(255,255,255,.12);color:#fff;font:11px system-ui,sans-serif;';
+    return button;
+  };
+  const __debugClear = __debugMakeButton('Clear');
+  const __debugCopy = __debugMakeButton('Copy');
+  const __debugSnapshot = __debugMakeButton('Snapshot');
+  __debugToolbar.append(__debugTitle, __debugClear, __debugCopy, __debugSnapshot);
+  __debugOutput = document.createElement('pre');
+  __debugOutput.id = 'cp-debug-log';
+  __debugOutput.style.cssText = 'margin:0;flex:1 1 auto;min-height:0;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;-webkit-user-select:text;color:#e2e8f0;font:10px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;';
+  __debugPanel.append(__debugToolbar, __debugOutput);
+  document.body.appendChild(__debugPanel);
+  __debugClear.addEventListener('click', function() {
+    __debugEntries.length = 0;
+    __debugOutput.textContent = '';
+  });
+  __debugCopy.addEventListener('click', function() {
+    const text = __debugEntries.join('\n');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        __debugLog('clipboard', {result: 'copied'});
+      }).catch(function() {
+        __debugLog('clipboard', {result: 'failed'});
+      });
+    } else {
+      __debugLog('clipboard', {result: 'unavailable'});
+    }
+  });
+  __debugSnapshot.addEventListener('click', function() {
+    const design = document.getElementById('v-design');
+    const targets = [];
+    if (design) targets.push(design);
+    if (design) Array.prototype.forEach.call(design.querySelectorAll('.dp'), function(panel) { targets.push(panel); });
+    const gallery = document.getElementById('templateGallery');
+    if (gallery) targets.push(gallery);
+    const elements = targets.map(function(element) {
+      const style = getComputedStyle(element);
+      return {
+        element: element.id ? '#' + element.id : element.tagName.toLowerCase() + (element.className && typeof element.className === 'string' ? '.' + element.className.trim().replace(/\s+/g, '.') : ''),
+        display: style.display,
+        visibility: style.visibility,
+        opacity: style.opacity,
+        height: style.height,
+        position: style.position,
+        on: element.classList.contains('on'),
+        hidden: element.classList.contains('hidden')
+      };
+    });
+    __debugLog('snapshot', {elements: elements});
+  });
+
+  document.addEventListener('click', function(event) {
+    const target = event.target && event.target.nodeType === 1 ? event.target : event.target && event.target.parentElement;
+    if (!target) return;
+    const ancestors = [];
+    let node = target;
+    while (node && node !== document) {
+      if (node.nodeType === 1 && (node.hasAttribute('data-v') || node.hasAttribute('data-dt'))) {
+        ancestors.push({
+          tag: node.tagName.toLowerCase(),
+          id: node.id || '',
+          class: typeof node.className === 'string' ? node.className : '',
+          dataV: node.getAttribute('data-v'),
+          dataDt: node.getAttribute('data-dt')
+        });
+      }
+      node = node.parentElement;
+    }
+    __debugLog('tap', {
+      target: {tag: target.tagName.toLowerCase(), id: target.id || '', class: typeof target.className === 'string' ? target.className : ''},
+      ancestors: ancestors
+    });
+  }, true);
+
+  const __debugDesign = document.getElementById('v-design');
+  const __debugChildCounts = new WeakMap();
+  function __debugRememberChildren(root) {
+    if (!root || root.nodeType !== 1) return;
+    __debugChildCounts.set(root, root.children.length);
+    Array.prototype.forEach.call(root.children, __debugRememberChildren);
+  }
+  function __debugElementLabel(element) {
+    if (!element || element.nodeType !== 1) return '(unknown)';
+    return (element.id ? '#' + element.id : element.tagName.toLowerCase()) +
+      (typeof element.className === 'string' && element.className.trim() ? '.' + element.className.trim().replace(/\s+/g, '.') : '');
+  }
+  if (__debugDesign) {
+    __debugRememberChildren(__debugDesign);
+    const __debugObserver = new MutationObserver(function(records) {
+      records.forEach(function(record) {
+        if (record.type === 'attributes') {
+          __debugLog('mutation', {
+            type: record.attributeName,
+            element: __debugElementLabel(record.target),
+            change: __debugString(record.oldValue) + ' -> ' + __debugString(record.target.getAttribute(record.attributeName))
+          });
+        } else if (record.type === 'childList') {
+          const added = Array.prototype.filter.call(record.addedNodes, function(node) { return node.nodeType === 1; }).length;
+          const removed = Array.prototype.filter.call(record.removedNodes, function(node) { return node.nodeType === 1; }).length;
+          const before = __debugChildCounts.has(record.target)
+            ? __debugChildCounts.get(record.target)
+            : record.target.children.length - added + removed;
+          const after = before - removed + added;
+          __debugChildCounts.set(record.target, after);
+          __debugLog('mutation', {
+            type: 'childList',
+            element: __debugElementLabel(record.target),
+            childrenBefore: before,
+            childrenAfter: after
+          });
+          Array.prototype.forEach.call(record.addedNodes, function(node) {
+            if (node.nodeType === 1) __debugRememberChildren(node);
+          });
+        }
+      });
+    });
+    __debugObserver.observe(__debugDesign, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: ['class', 'style']
+    });
+  }
+
+  const __debugAuthEvents = ['SIGNED_IN', 'TOKEN_REFRESHED', 'INITIAL_SESSION', 'SIGNED_OUT'];
+  sb.auth.onAuthStateChange(function(event) {
+    if (__debugAuthEvents.indexOf(event) !== -1) __debugLog('auth', {event: event});
+  });
+  function __debugViewport() {
+    __debugLog('viewport', {
+      maxWidth767: window.matchMedia('(max-width:767px)').matches,
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+  }
+  __debugViewport();
+  window.addEventListener('resize', __debugViewport);
+}
+/* END TEMPORARY DEBUG ONLY */
+
 hydrateAuth();
 setTimeout(()=>{if(currentUser)syncServerJobAlerts()},1200);
 function refresh(){const v=document.body.dataset.v||'home',designTab=Q('#v-design [data-dt]').findIndex(b=>b.classList.contains('on'));dyn();applyT();render();loadPanel();renderCVLibrary();go(v,{skipHistory:true,designTab:v==='design'&&designTab>=0?designTab:undefined})}
