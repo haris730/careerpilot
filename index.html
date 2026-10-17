@@ -1580,7 +1580,7 @@ sb.auth.onAuthStateChange(async(_event,session)=>{const next=session?.user||null
 const oldSync=sync;sync=function(){oldSync();syncActiveLibrary();scheduleCloudSave()};
 hydrateAuth();
 setTimeout(()=>{if(currentUser)syncServerJobAlerts()},1200);
-function refresh(){dyn();applyT();render();loadPanel();renderCVLibrary();go(document.body.dataset.v)}
+function refresh(){const v=document.body.dataset.v||'home',designTab=Q('#v-design [data-dt]').findIndex(b=>b.classList.contains('on'));dyn();applyT();render();loadPanel();renderCVLibrary();go(v,{skipHistory:true,designTab:v==='design'&&designTab>=0?designTab:undefined})}
 const initialRoute=(()=>{const raw=location.hash.replace(/^#/,'');return decodeURIComponent(raw.split('?')[0]||'home')})();
 refresh();
 restoreRoute();
