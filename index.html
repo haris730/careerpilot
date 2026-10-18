@@ -23,6 +23,11 @@ button{background:var(--gl);border:1px solid var(--gb);border-radius:10px;paddin
 button:hover{transform:translateY(-1px);background:rgba(255,255,255,.1)}button:active{transform:scale(.97)}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid #818cf8;outline-offset:2px}
 .pri{background:var(--g);border:0;box-shadow:0 6px 18px rgba(99,102,241,.4)}.dg:hover{border-color:#f87171;color:#fca5a5}
+:is(#nav [data-soon],[data-upgrade],#upgradePlan,#buyMonthly,#buyYearly,#upgradeNow){background:var(--g);color:#fff;transform:none;transition:filter .16s,box-shadow .16s;box-shadow:0 6px 18px rgba(99,102,241,.4)}
+:is(#nav [data-soon],[data-upgrade],#upgradePlan,#buyMonthly,#buyYearly,#upgradeNow):hover{background:var(--g)!important;transform:none!important;filter:brightness(1.08);box-shadow:0 8px 22px rgba(99,102,241,.45)}
+:is(#nav [data-soon],[data-upgrade],#upgradePlan,#buyMonthly,#buyYearly,#upgradeNow):active{background:var(--g)!important;transform:none!important;filter:brightness(.96)}
+:is(#nav [data-soon],[data-upgrade],#upgradePlan,#buyMonthly,#buyYearly,#upgradeNow):focus-visible{background:var(--g);transform:none;outline:2px solid #a5b4fc;outline-offset:2px}
+:is(#nav [data-soon],[data-upgrade],#upgradePlan,#buyMonthly,#buyYearly,#upgradeNow):disabled{background:#4b5563!important;transform:none!important;filter:none;box-shadow:none;opacity:.72;cursor:wait}
 .ad-slot{min-height:90px;display:flex;align-items:center;justify-content:center;color:var(--mu);font-size:11px;letter-spacing:.08em;border:1px dashed var(--gb);border-radius:14px;background:rgba(0,0,0,.12)}
 .glass,.card{background:var(--gl);border:1px solid var(--gb);border-radius:16px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--sh)}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 18px}
@@ -777,7 +782,27 @@ $('makeInterview').onclick=()=>{
 $('v-profile').innerHTML=`<div class="card pad"><div class="ey">ACCOUNT & PLAN</div><div class="plan-bar"><div><b id="planName">Free Plan</b><div class="usage-line" id="planUsage">5 AI actions / month included</div></div><span class="plan-pill" id="planPill">FREE</span></div><div class="premium-grid"><div class="premium-card"><span class="premium-tag">FREE</span><h3>CareerPilot Free</h3><ul><li>5 professional CV templates</li><li>Basic PDF export</li><li>5 AI actions per month</li><li>Global job search</li></ul></div><div class="premium-card"><span class="premium-tag">PREMIUM</span><h3>CareerPilot Premium</h3><ul><li>All 30 professional CV templates</li><li>Up to 100 AI actions / month</li><li>Premium-only advanced career tools — coming soon</li><li>Ad-free Premium benefit — coming soon (ads are currently disabled for all users)</li><li>Priority cloud features — coming soon</li></ul><button class="pri" id="upgradePlan" style="margin-top:8px;${PREMIUM_LAUNCHED?'':'display:none'}">Upgrade to Premium</button><span class="hint" style="${PREMIUM_LAUNCHED?'display:none':''}">Premium plans are coming soon.</span></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button id="loadSaved">Load saved CV</button><button class="pri" id="saveCV2">Save CV</button><button id="exportCV2">Export PDF</button></div><div class="ad-slot" data-ad-slot style="margin-top:14px;${ADS_ENABLED?'':'display:none'}">ADVERTISEMENT</div></div>`;
 $('loadSaved').onclick=()=>{const x=activeCV();if(!x){toast('No saved CV found');return}openCV(x.id)};
 $('saveCV2').onclick=()=>$('bS').click();$('exportCV2').onclick=exportPDF;
-async function startCheckout(plan){if(!PREMIUM_LAUNCHED){toast('Premium plans are coming soon.');return}if(!currentUser){openAuth('login');toast('Please sign in first');return}try{const {data}=await sb.auth.getSession(),token=data.session?.access_token;if(!token)throw new Error('Please sign in again.');toast('Opening secure checkout…');const res=await fetch('/api/checkout',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},body:JSON.stringify({plan})});const out=await res.json().catch(()=>({}));if(!res.ok||!out.url)throw new Error(out.error||'Checkout is not configured yet.');window.open(out.url,'_blank','noopener,noreferrer')}catch(e){toast(e.message||'Checkout failed')}}
+let pendingCheckoutPlan=null;
+async function startCheckout(plan){
+ if(!PREMIUM_LAUNCHED){toast('Premium plans are coming soon.');return}
+ if(!currentUser){pendingCheckoutPlan=plan;openAuth('login');toast('Please sign in to continue to checkout.');return}
+ let loadingButtons=[];
+ try{
+  const {data}=await sb.auth.getSession(),token=data.session?.access_token;
+  if(!token){pendingCheckoutPlan=plan;openAuth('login');toast('Please sign in to continue to checkout.');return}
+  loadingButtons=Q('#nav [data-soon], [data-upgrade], #upgradePlan, #buyMonthly, #buyYearly, #upgradeNow');
+  loadingButtons.forEach(b=>{b.disabled=true;b.setAttribute('aria-busy','true')});
+  toast('Opening secure checkout…');
+  const res=await fetch('/api/checkout',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},body:JSON.stringify({plan})});
+  const out=await res.json().catch(()=>({}));
+  if(res.status===401){pendingCheckoutPlan=plan;openAuth('login');toast('Please sign in to continue to checkout.');return}
+  if(res.status===503){toast('Checkout is not configured yet.');return}
+  if(res.status===502){toast('Could not create checkout. Please try again.');return}
+  if(!res.ok||!out.url){toast(out.error||'Could not create checkout. Please try again.');return}
+  window.location.assign(out.url);
+ }catch(e){toast(e.message||'Could not create checkout. Please try again.')}
+ finally{loadingButtons.forEach(b=>{b.disabled=false;b.removeAttribute('aria-busy')})}
+}
 function openUpgrade(){if(!PREMIUM_LAUNCHED){toast('Premium plans are coming soon.');return}const box=document.createElement('div');box.className='card upgrade-modal';box.innerHTML='<div class="ey">CAREERPILOT PREMIUM</div><h2>Premium career toolkit</h2><p class="hint">Unlock templates 6–30 and up to 100 AI actions per month. Other Premium-only benefits are coming soon.</p><div class="price-card"><h3>Choose your plan</h3><ul><li>Up to 100 AI actions / month</li><li>All 30 professional CV templates</li><li>Ad-free Premium benefit — coming soon (ads are currently disabled for all users)</li><li>Premium-only advanced career tools — coming soon</li></ul><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="buyMonthly" class="pri">$2.99 / month</button><button id="buyYearly">$19.99 / year</button><button id="premiumClose">Close</button></div></div>';$('v-profile').prepend(box);$('premiumClose').onclick=()=>box.remove();$('buyMonthly').onclick=()=>startCheckout('monthly');$('buyYearly').onclick=()=>startCheckout('yearly')}
 $('upgradePlan').onclick=openUpgrade;Q('[data-upgrade]').forEach(b=>b.onclick=openUpgrade);
 $('upgradePlan').onclick=openUpgrade;Q('[data-upgrade]').forEach(b=>b.onclick=openUpgrade);
@@ -1547,7 +1572,7 @@ const authModal=$('authModal'),authMsg=$('authMsg');
 const legalAuthLinks=document.createElement('p');legalAuthLinks.style.cssText='margin:14px 0 0;text-align:center;font-size:12px;color:#9a9aae';legalAuthLinks.innerHTML='<a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a>';authModal.querySelector('.auth-box').append(legalAuthLinks);
 function authMessage(m){authMsg.textContent=m||''}
 function openAuth(mode='login'){authMode=mode;$('authTitle').textContent=mode==='login'?'Welcome back':'Create your account';$('authSubmit').textContent=mode==='login'?'Login':'Create account';$('authNameWrap').style.display=mode==='login'?'none':'block';$('tabLogin').classList.toggle('on',mode==='login');$('tabSignup').classList.toggle('on',mode!=='login');$('authLogoutRow').style.display=currentUser?'flex':'none';authMessage('');authModal.classList.add('on')}
-$('authOpen').onclick=()=>openAuth(currentUser?'login':'login');$('authClose').onclick=()=>authModal.classList.remove('on');$('tabLogin').onclick=()=>openAuth('login');$('tabSignup').onclick=()=>openAuth('signup');
+$('authOpen').onclick=()=>openAuth(currentUser?'login':'login');$('authClose').onclick=()=>{pendingCheckoutPlan=null;authModal.classList.remove('on')};$('tabLogin').onclick=()=>openAuth('login');$('tabSignup').onclick=()=>openAuth('signup');
 $('authSubmit').onclick=async()=>{authMessage('Please wait…');const email=$('authEmail').value.trim(),password=$('authPassword').value,name=$('authName').value.trim();if(!email||password.length<6){authMessage('Enter a valid email and password (6+ characters).');return}try{if(authMode==='signup'){const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name}}});if(error)throw error;authMessage(data.session?'Account created.':'Account created. Check your email to confirm, then login.')}else{const {error}=await sb.auth.signInWithPassword({email,password});if(error){const msg=String(error.message||'');if(/invalid login credentials/i.test(msg))authMessage('Email ya password ghalat hai. Agar account nahi bana to Sign up karein.');else if(/email not confirmed/i.test(msg))authMessage('Pehle apni email confirm karein, phir login karein.');else authMessage(msg||'Login failed.');return}authModal.classList.remove('on')}}catch(e){authMessage(e.message||'Authentication failed.')}};
 $('googleAuth').onclick=async()=>{authMessage('Opening Google Sign-in…');try{const {error}=await sb.auth.signInWithOAuth({provider:'google'});if(error){const msg=String(error.message||'');if(/not enabled|unsupported provider|provider is not enabled/i.test(msg)){authMessage('Google Sign-in Supabase mein enabled nahi hai. Supabase → Authentication → Sign In / Providers → Google ko enable karein.')}else authMessage(msg||'Google Sign-in failed.')}}catch(e){authMessage(e.message||'Google Sign-in failed.')}};
 $('authLogout').onclick=async()=>{const {error}=await sb.auth.signOut();if(error){toast('Sign out failed');return}authModal.classList.remove('on')};
@@ -1578,7 +1603,7 @@ async function deleteCloudCV(id){
   if(error)toast('Cloud delete failed');
 }
 async function hydrateAuth(){const {data}=await sb.auth.getSession();const next=data.session?.user||null;if((currentUser?.id||null)!==(next?.id||null)){const previous=currentUser;activateCVStorage(next,previous)}else currentUser=next;updateAccountUI();renderCVLibrary();if(currentUser){await loadCloud();await loadPlanStatus()}}
-sb.auth.onAuthStateChange(async(_event,session)=>{const next=session?.user||null;if((currentUser?.id||null)!==(next?.id||null)){const previous=currentUser;activateCVStorage(next,previous)}else currentUser=next;updateAccountUI();renderCVLibrary();if(currentUser){authModal.classList.remove('on');await loadCloud();await loadPlanStatus();await syncServerJobAlerts();toast('Signed in')}});
+sb.auth.onAuthStateChange(async(_event,session)=>{const next=session?.user||null;if((currentUser?.id||null)!==(next?.id||null)){const previous=currentUser;activateCVStorage(next,previous)}else currentUser=next;updateAccountUI();renderCVLibrary();if(currentUser){authModal.classList.remove('on');await loadCloud();await loadPlanStatus();await syncServerJobAlerts();toast('Signed in');if(pendingCheckoutPlan){const plan=pendingCheckoutPlan;pendingCheckoutPlan=null;await startCheckout(plan)}}});
 const oldSync=sync;sync=function(){oldSync();syncActiveLibrary();scheduleCloudSave()};
 hydrateAuth();
 setTimeout(()=>{if(currentUser)syncServerJobAlerts()},1200);
