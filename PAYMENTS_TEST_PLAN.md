@@ -27,7 +27,7 @@ Never place the service-role key or webhook secret in browser code.
 
 1. Create/configure monthly and yearly subscription variants in the intended test store.
 2. Set the Worker variables above to the test store, matching variant IDs, test-mode API key, webhook signing secret, and service-role key.
-3. Create a webhook pointing to `https://careerpilot.mohammadhariscom7.workers.dev/api/billing/webhook`.
+3. For testing this PR, point the Lemon Squeezy **test-mode** webhook at the latest Cloudflare Preview hostname shown in PR #40's deployment comment, followed by `/api/billing/webhook`. The production endpoint after approved code deployment is `https://careerpilot.mohammadhariscom7.workers.dev/api/billing/webhook`; do not use it to test this PR unless you intentionally want to exercise the currently deployed production Worker.
 4. Select these webhook events: `order_created`, `subscription_created`, `subscription_updated`, `subscription_cancelled`, and `subscription_expired`. `order_created` is audit-only; Premium access comes from subscription lifecycle events.
 5. Send a test webhook and confirm the delivery returns a successful response. A wrong signature should return HTTP 401.
 
