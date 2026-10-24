@@ -26,11 +26,6 @@ async function handleBillingWebhook(request,env){
   const eventId=String(event?.data?.id||'')+'::'+eventName;
   const userId=String(event?.meta?.custom_data?.user_id||'');
   if(!eventId||!userId)return apiJson({ok:true},200,'*');
-  const saved=await supabaseAdmin(env,'/rest/v1/billing_events',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({event_id:eventId,event_name:eventName,user_id:userId,provider:'lemonsqueezy',payload:event})});
-  if(saved===null){
-    const check=await fetch(SUPABASE_URL+'/rest/v1/billing_events?event_id=eq.'+encodeURIComponent(eventId),{headers:{apikey:env.SUPABASE_SERVICE_ROLE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY,accept:'application/json'}});
-    if(check.ok){const rows=await check.json();if(rows?.length)return apiJson({ok:true,duplicate:true},200,'*')}
-  }
   const a=event?.data?.attributes||{};
   const status=String(a.status||'').toLowerCase();
   const ends=a.ends_at||null;
@@ -41,6 +36,11 @@ async function handleBillingWebhook(request,env){
   const plan=active?'premium':'free';
   const entitlement=await supabaseAdmin(env,'/rest/v1/user_entitlements',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({user_id:userId,plan,premium_until:active?until:null,updated_at:new Date().toISOString()})});
   if(entitlement===null)return apiJson({error:'Unable to update subscription entitlement.'},500,'*');
+  const saved=await supabaseAdmin(env,'/rest/v1/billing_events',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({event_id:eventId,event_name:eventName,user_id:userId,provider:'lemonsqueezy',payload:event})});
+  if(saved===null){
+    const check=await fetch(SUPABASE_URL+'/rest/v1/billing_events?event_id=eq.'+encodeURIComponent(eventId),{headers:{apikey:env.SUPABASE_SERVICE_ROLE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY,accept:'application/json'}});
+    if(check.ok){const rows=await check.json();if(rows?.length)return apiJson({ok:true,duplicate:true},200,'*')}
+  }
   return apiJson({ok:true,plan},200,'*');
 }
 async function createLemonCheckout(request,env,url){
