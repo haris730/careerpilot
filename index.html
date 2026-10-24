@@ -204,6 +204,13 @@ body[data-v=cv]:not(.prev) .fab{display:block}.fab{position:fixed;right:16px;bot
 .jobs-quick-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:4px}
 .jobs-quick-nav button{min-height:40px;border:1px solid var(--gb);border-radius:12px;padding:8px 13px;font-weight:700}
 .jobs-quick-nav button.on{background:var(--pri,#2563eb);color:#fff;border-color:transparent}
+.job-links-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.job-link-card{display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-width:0;padding:16px;border:1px solid var(--gb);border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.job-link-card b{display:block;font-size:16px}.job-link-card p{margin:5px 0;color:var(--mu)}
+.job-link-open{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 12px;border:1px solid var(--gb);border-radius:11px;color:var(--tx);text-decoration:none;font-weight:700}
+.job-link-open:hover{background:rgba(255,255,255,.08)}
+.job-links-filter{display:grid;gap:6px;max-width:360px;font-weight:700}.job-links-filter select{width:100%}
+@media(max-width:820px){.job-links-grid{grid-template-columns:1fr}}
 @media(max-width:820px){.jobs-quick-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.jobs-quick-nav button{width:100%}}
 /* Global Jobs connected workflow */
 .job-detail-backdrop{display:none;position:fixed;inset:0;z-index:140;background:rgba(0,0,0,.58);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:18px}
@@ -395,7 +402,7 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
 <div class="shell">
   <nav class="side glass" id="nav" aria-label="Main"></nav>
   <section class="editor" id="ed">
-    <div class="view on" id="v-home"></div><div class="view" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div><div class="view" id="v-jobs"></div><div class="view" id="v-business"></div><div class="view" id="v-cvs"></div><div class="view" id="v-match"></div><div class="view" id="v-writer"></div><div class="view" id="v-letter"></div><div class="view" id="v-interview"></div><div class="view" id="v-tracker"></div>
+    <div class="view on" id="v-home"></div><div class="view" id="v-cv"></div><div class="view" id="v-design"></div><div class="view" id="v-profile"></div><div class="view" id="v-jobs"></div><div class="view" id="v-joblinks"></div><div class="view" id="v-business"></div><div class="view" id="v-cvs"></div><div class="view" id="v-match"></div><div class="view" id="v-writer"></div><div class="view" id="v-letter"></div><div class="view" id="v-interview"></div><div class="view" id="v-tracker"></div>
   </section>
   <main class="canvas">
     <div class="ctb glass"><button type="button" class="mo" data-v="cv">Edit</button><button type="button" id="zm" aria-label="Zoom out">−</button><span id="zv">100%</span><button type="button" id="zp" aria-label="Zoom in">+</button><button type="button" id="zf">Fit</button><button type="button" class="mo" data-v="design">Design</button><button type="button" class="mo" id="bX2">Export</button></div>
@@ -513,6 +520,7 @@ const NAV_ICONS={
  cvs:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
  design:'<path d="m12 3 1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="m19 3 .6 1.4L21 5l-1.4.6L19 7l-.6-1.4L17 5l1.4-.6z"/>',
  jobs:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+ joblinks:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2"/>',
  business:'<path d="M3 21v-8l9-6 9 6v8"/><path d="M7 21v-5h10v5M9 10h6M12 7v6"/>',
  match:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 8v6M8 11h6"/>',
  writer:'<path d="m4 20 4.5-1L19 8.5a2.1 2.1 0 0 0-3-3L5.5 16z"/><path d="m14 7 3 3M4 20l3-3"/>',
@@ -522,7 +530,7 @@ const NAV_ICONS={
  profile:'<circle cx="12" cy="8" r="3"/><path d="M5 21a7 7 0 0 1 14 0M19 8v6M22 11h-6"/>'
 };
 const sideIcon=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
-const NAV=[['home','Dashboard'],['cv','CV Builder'],['design','Templates'],['jobs','Live Jobs'],['business','Business Network'],['match','Job Match'],['writer','AI Writing'],['letter','Cover Letter'],['interview','Interview Prep'],['tracker','Application Tracker'],['cvs','My CVs'],['profile','Settings']];
+const NAV=[['home','Dashboard'],['cv','CV Builder'],['design','Templates'],['joblinks','Jobs'],['jobs','Live Jobs'],['business','Business Network'],['match','Job Match'],['writer','AI Writing'],['letter','Cover Letter'],['interview','Interview Prep'],['tracker','Application Tracker'],['cvs','My CVs'],['profile','Settings']];
 $('nav').innerHTML='<button type="button" class="side-collapse" id="sideCollapse" aria-label="Collapse sidebar" title="Collapse sidebar">'+sideIcon('<path d="M19 12H5M12 5l-7 7 7 7"/>')+'<span>Collapse</span></button>'+NAV.map(([v,l])=>`<button class="nb" data-v="${v}"><i aria-hidden="true">${sideIcon(NAV_ICONS[v])}</i><span>${l}</span></button>`).join('')+'<div class="usr"><div><b data-n></b><small>Free Plan</small></div><button data-soon="1" class="pri" title="Upgrade">Upgrade</button></div>';
 if(!PREMIUM_LAUNCHED)Q('#nav [data-soon]').forEach(b=>b.style.setProperty('display','none','important'));
 const SIDE_KEY='careerpilot_sidebar_collapsed_2026';
@@ -530,7 +538,21 @@ const applySidebarState=collapsed=>{document.body.classList.toggle('sidebar-coll
 applySidebarState(ls(SIDE_KEY)==='1');
 $('sideCollapse').onclick=()=>applySidebarState(!document.body.classList.contains('sidebar-collapsed'));
 $('mnav').innerHTML=`<button data-v="cv"><i>✎</i><small>Edit</small></button><button data-action="preview"><i>◉</i><small>Preview</small></button><button data-v="design" data-design="1"><i>◈</i><small>Design</small></button><button data-v="templates" data-templates="1"><i>▦</i><small>Templates</small></button><button data-action="export"><i>⇩</i><small>Export</small></button><button data-action="mobile-more"><i>☰</i><small>More</small></button>`;
-document.body.insertAdjacentHTML('beforeend',`<div class="mobile-more-backdrop" id="mobileMore" aria-hidden="true"><div class="mobile-more-sheet" role="dialog" aria-label="CareerPilot tools"><button class="mobile-more-close" data-action="mobile-more-close" aria-label="Close">×</button><div class="ey">CAREERPILOT TOOLS</div><h3>Career tools</h3><div class="mobile-more-grid"><button data-v="jobs"><b>🌐</b><span>Live Jobs</span></button><button data-v="business"><b>◉</b><span>Business Network</span></button><button data-v="match"><b>◎</b><span>Job Match</span></button><button data-v="writer"><b>✦</b><span>AI Writing</span></button><button data-v="letter"><b>✉</b><span>Cover Letter</span></button><button data-v="interview"><b>☏</b><span>Interview Prep</span></button><button data-v="tracker"><b>✓</b><span>Application Tracker</span></button><button data-v="cvs"><b>▤</b><span>My CVs</span></button><button data-v="profile"><b>⚙</b><span>Settings</span></button></div></div></div>`);
+document.body.insertAdjacentHTML('beforeend',`<div class="mobile-more-backdrop" id="mobileMore" aria-hidden="true"><div class="mobile-more-sheet" role="dialog" aria-label="CareerPilot tools"><button class="mobile-more-close" data-action="mobile-more-close" aria-label="Close">×</button><div class="ey">CAREERPILOT TOOLS</div><h3>Career tools</h3><div class="mobile-more-grid"><button data-v="joblinks"><b>🔗</b><span>Jobs</span></button><button data-v="jobs"><b>🌐</b><span>Live Jobs</span></button><button data-v="business"><b>◉</b><span>Business Network</span></button><button data-v="match"><b>◎</b><span>Job Match</span></button><button data-v="writer"><b>✦</b><span>AI Writing</span></button><button data-v="letter"><b>✉</b><span>Cover Letter</span></button><button data-v="interview"><b>☏</b><span>Interview Prep</span></button><button data-v="tracker"><b>✓</b><span>Application Tracker</span></button><button data-v="cvs"><b>▤</b><span>My CVs</span></button><button data-v="profile"><b>⚙</b><span>Settings</span></button></div></div></div>`);
+const JOB_LINKS=[
+ {name:'LinkedIn',description:'Professional networking and jobs across industries.',url:'https://www.linkedin.com/jobs/',regions:['pakistan','us-global','europe','remote']},
+ {name:'Indeed',description:'Search jobs by title, company and location.',url:'https://www.indeed.com/',regions:['pakistan','us-global','europe']},
+ {name:'Glassdoor',description:'Job listings and employer research.',url:'https://www.glassdoor.com/Job/index.htm',regions:['us-global','europe']},
+ {name:'Rozee.pk',description:'Pakistan-focused jobs and recruitment.',url:'https://www.rozee.pk/',regions:['pakistan']},
+ {name:'Remote OK',description:'Remote jobs from global employers.',url:'https://remoteok.com/',regions:['pakistan','us-global','europe','remote']},
+ {name:'We Work Remotely',description:'Remote roles across multiple job categories.',url:'https://weworkremotely.com/',regions:['pakistan','us-global','europe','remote']},
+ {name:'Wellfound',description:'Startup jobs and technology roles.',url:'https://wellfound.com/jobs',regions:['us-global','europe','remote']},
+ {name:'Google Jobs',description:'Search job listings across the web.',url:'https://www.google.com/search?q=jobs&ibp=htl;jobs',regions:['pakistan','us-global','europe','remote']}
+];
+$('v-joblinks').innerHTML=`<div class="card pad"><div class="ey">JOB LINKS</div><h2 style="margin:0 0 6px">Explore trusted job platforms</h2><p class="hint">Choose a region to narrow the links. Applications open on each original job website.</p><label class="job-links-filter" for="jobLinksRegion">Filter by region<select id="jobLinksRegion" aria-label="Filter job links by region"><option value="all">All regions</option><option value="pakistan">Pakistan</option><option value="us-global">US &amp; Global</option><option value="europe">Europe</option><option value="remote">Remote</option></select></label><div id="jobLinksGrid" class="job-links-grid"></div></div>`;
+function renderJobLinks(){const region=$('jobLinksRegion')?.value||'all';const links=JOB_LINKS.filter(x=>region==='all'||x.regions.includes(region));$('jobLinksGrid').innerHTML=links.map(x=>'<article class="job-link-card"><div><b>'+x.name+'</b><p>'+x.description+'</p></div><a class="job-link-open" href="'+x.url+'" target="_blank" rel="noopener noreferrer">Open site ↗</a></article>').join('')}
+$('jobLinksRegion').addEventListener('change',renderJobLinks);renderJobLinks();
+
 function go(v,opts={}){const from=document.body.dataset.v||'home';document.body.dataset.v=v;document.body.classList.remove('prev');Q('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));if(v==='design'){const tab=opts.designTab===0?'templates':'design';Q('#nav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));Q('#mnav button').forEach(b=>b.classList.remove('on'));const activeMobile=tab==='templates'?Q('#mnav [data-templates="1"]')[0]:Q('#mnav [data-design="1"]')[0];if(activeMobile)activeMobile.classList.add('on');if(opts.designTab!==undefined){const tabs=Q('#v-design [data-dt]');const panels=Q('#v-design .dp');tabs.forEach((b,i)=>b.classList.toggle('on',i===opts.designTab));panels.forEach((p,i)=>p.classList.toggle('on',i===opts.designTab))}$('v-design').dataset.mobileMode=tab}else{Q('#nav [data-v],#mnav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('v-design').removeAttribute('data-mobile-mode')}if(!opts.skipHistory&&from!==v){history.pushState({v},'',location.pathname+'#'+encodeURIComponent(v))}requestAnimationFrame(fit)}
 function prev(on,opts={}){const was=document.body.classList.contains('prev');document.body.classList.toggle('prev',on);if(!opts.skipHistory&&was!==on){history.pushState({v:document.body.dataset.v,prev:on},'',location.pathname+'#'+encodeURIComponent(document.body.dataset.v)+(on?'?preview=1':''))}requestAnimationFrame(fit)}
 function restoreRoute(){const raw=location.hash.replace(/^#/,'');const v=decodeURIComponent(raw.split('?')[0]||'home');const valid=document.getElementById('v-'+v)?v:'home';const isPrev=new URLSearchParams(location.hash.split('?')[1]||'').get('preview')==='1';go(valid,{skipHistory:true});if(isPrev)prev(true,{skipHistory:true})}
@@ -1538,8 +1560,8 @@ async function loadPlanStatus(){
     if(line)line.textContent='AI actions: '+remaining+' of '+limit+' remaining this month';
     Q('[data-n]').forEach(x=>x.closest('.usr')?.querySelector('small')&&(x.closest('.usr').querySelector('small').textContent=plan==='premium'?'Premium Plan':'Free Plan'));
     Q('[data-ad-slot]').forEach(x=>x.style.display=!ADS_ENABLED||plan==='premium'?'none':'flex');
-    Q('#nav [data-soon], [data-upgrade], #upgradePlan').forEach(x=>x.style.display=plan==='premium'?'none':'');
-    const monetizationCard=$('[data-monetization-card]');if(monetizationCard)monetizationCard.style.display=plan==='premium'?'none':'';
+    Q('#nav [data-soon], [data-upgrade], #upgradePlan').forEach(x=>x.style.display=!PREMIUM_LAUNCHED||plan==='premium'?'none':'');
+    const monetizationCard=$('[data-monetization-card]');if(monetizationCard)monetizationCard.style.display=!PREMIUM_LAUNCHED||plan==='premium'?'none':'';
   }catch(e){console.warn('Plan status unavailable',e)}
 }
 
