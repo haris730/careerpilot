@@ -23,32 +23,51 @@ async function handleBillingWebhook(request,env){
   if(!safeEqual(digest,signature))return apiJson({error:'Invalid webhook signature.'},401,'*');
   let event;try{event=JSON.parse(raw)}catch{return apiJson({error:'Invalid webhook payload.'},400,'*')}
   const eventName=String(event?.meta?.event_name||request.headers.get('X-Event-Name')||'unknown');
-  const eventId=String(event?.data?.id||'')+'::'+eventName;
+  const resourceId=String(event?.data?.id||'');
+  const eventId=resourceId+'::'+eventName;
   const userId=String(event?.meta?.custom_data?.user_id||'');
-  if(!eventId||!userId)return apiJson({ok:true},200,'*');
+  const supportedEvents=new Set(['order_created','subscription_created','subscription_updated','subscription_cancelled','subscription_expired']);
+  if(!resourceId||!userId||!supportedEvents.has(eventName)){console.log('Lemon Squeezy webhook ignored',{eventName});return apiJson({ok:true,ignored:true},200,'*')}
+  const a=event?.data?.attributes||{};
+  let plan=null;
+  if(eventName!=='order_created'){
+    const status=String(a.status||'').toLowerCase();
+    const rawUntil=a.ends_at||a.renews_at||null;
+    const expiryMs=rawUntil?Date.parse(rawUntil):NaN;
+    const hasFutureExpiry=Number.isFinite(expiryMs)&&expiryMs>Date.now();
+    let active=false;
+    let until=null;
+    if(eventName==='subscription_cancelled'){
+      active=hasFutureExpiry;
+      until=active?new Date(expiryMs).toISOString():null;
+    }else if(eventName==='subscription_created'||eventName==='subscription_updated'){
+      const activeStatus=['active','on_trial','past_due'].includes(status);
+      const cancelledButPaid=status==='cancelled'&&hasFutureExpiry;
+      active=(activeStatus||cancelledButPaid)&&(!Number.isFinite(expiryMs)||hasFutureExpiry);
+      until=active?(Number.isFinite(expiryMs)?new Date(expiryMs).toISOString():new Date(Date.now()+31*86400000).toISOString()):null;
+    }
+    if(eventName==='subscription_expired')active=false;
+    plan=active?'premium':'free';
+    const entitlement=await supabaseAdmin(env,'/rest/v1/user_entitlements',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({user_id:userId,plan,premium_until:active?until:null,updated_at:new Date().toISOString()})});
+    if(entitlement===null){console.error('Lemon Squeezy entitlement update failed',{eventName});return apiJson({error:'Unable to update subscription entitlement.'},500,'*')}
+  }
   const saved=await supabaseAdmin(env,'/rest/v1/billing_events',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({event_id:eventId,event_name:eventName,user_id:userId,provider:'lemonsqueezy',payload:event})});
   if(saved===null){
     const check=await fetch(SUPABASE_URL+'/rest/v1/billing_events?event_id=eq.'+encodeURIComponent(eventId),{headers:{apikey:env.SUPABASE_SERVICE_ROLE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY,accept:'application/json'}});
-    if(check.ok){const rows=await check.json();if(rows?.length)return apiJson({ok:true,duplicate:true},200,'*')}
+    if(check.ok){const rows=await check.json();if(rows?.length){console.log('Lemon Squeezy duplicate webhook reconciled',{eventName,plan});return apiJson({ok:true,duplicate:true,...(plan?{plan}:{})},200,'*')}}
+    console.error('Lemon Squeezy billing event could not be recorded',{eventName});
+    return apiJson({error:'Unable to record billing event.'},500,'*');
   }
-  const a=event?.data?.attributes||{};
-  const status=String(a.status||'').toLowerCase();
-  const ends=a.ends_at||null;
-  const renews=a.renews_at||null;
-  const activeStatuses=new Set(['active','on_trial','past_due','cancelled']);
-  const until=ends||renews||new Date(Date.now()+31*86400000).toISOString();
-  const active=activeStatuses.has(status)&&(!ends||new Date(ends)>new Date());
-  const plan=active?'premium':'free';
-  const entitlement=await supabaseAdmin(env,'/rest/v1/user_entitlements',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({user_id:userId,plan,premium_until:active?until:null,updated_at:new Date().toISOString()})});
-  if(entitlement===null)return apiJson({error:'Unable to update subscription entitlement.'},500,'*');
-  return apiJson({ok:true,plan},200,'*');
+  console.log('Lemon Squeezy webhook processed',{eventName,...(plan?{plan}:{})});
+  return apiJson({ok:true,event:eventName,...(plan?{plan}:{})},200,'*');
 }
 async function createLemonCheckout(request,env,url){
   if(request.method!=='POST')return apiJson({error:'Method not allowed'},405,url.origin);
-  if(!env.LEMONSQUEEZY_API_KEY||!env.LEMONSQUEEZY_STORE_ID||!env.LEMONSQUEEZY_MONTHLY_VARIANT_ID)return apiJson({error:'Payment checkout is not configured yet.'},503,url.origin);
+  if(!env.LEMONSQUEEZY_API_KEY||!env.LEMONSQUEEZY_STORE_ID)return apiJson({error:'Payment checkout is not configured yet.'},503,url.origin);
   const user=await supabaseUser(request);if(!user?.id)return apiJson({error:'Sign in required.'},401,url.origin);
   let body;try{body=await request.json()}catch{return apiJson({error:'Invalid JSON request.'},400,url.origin)}
   const plan=body.plan==='yearly'?'yearly':'monthly';
+  if(plan==='monthly'&&!env.LEMONSQUEEZY_MONTHLY_VARIANT_ID)return apiJson({error:'Monthly checkout is not configured yet.'},503,url.origin);
   if(plan==='yearly'&&!env.LEMONSQUEEZY_YEARLY_VARIANT_ID)return apiJson({error:'Yearly checkout is not configured yet.'},503,url.origin);
   const variant=plan==='yearly'?env.LEMONSQUEEZY_YEARLY_VARIANT_ID:env.LEMONSQUEEZY_MONTHLY_VARIANT_ID;
   const payload={data:{type:'checkouts',attributes:{checkout_options:{embed:true},checkout_data:{email:user.email||'',name:user.user_metadata?.full_name||'',custom:{user_id:user.id,plan}},product_options:{redirect_url:url.origin+'/#profile'}},relationships:{store:{data:{type:'stores',id:String(env.LEMONSQUEEZY_STORE_ID)}},variant:{data:{type:'variants',id:String(variant)}}}}};
