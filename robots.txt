@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://careerpilot.mohammadhariscom7.workers.dev/sitemap.xml

@@ -4,8 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a0c11">
-<meta name="description" content="CareerPilot — professional CV builder and global career assistant.">
-<link rel="manifest" href="manifest.json">
+<meta name="description" content="Build, edit and export professional CVs with CareerPilot, your AI career suite.">
+<link rel="canonical" href="https://careerpilot.mohammadhariscom7.workers.dev/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CareerPilot">
+<meta property="og:title" content="CareerPilot — AI Career Suite">
+<meta property="og:description" content="Build, edit and export professional CVs with CareerPilot, your AI career suite.">
+<meta property="og:url" content="https://careerpilot.mohammadhariscom7.workers.dev/">
+<meta property="og:image" content="https://careerpilot.mohammadhariscom7.workers.dev/icon-512.svg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CareerPilot — AI Career Suite">
+<meta name="twitter:description" content="Build, edit and export professional CVs with CareerPilot, your AI career suite.">
+<link rel="icon" href="/icon-192.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.json">
 <title>CareerPilot — AI Career Suite</title>
 <!-- CareerPilot premium font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1618,7 +1629,7 @@ function refresh(){dyn();applyT();render();loadPanel();renderCVLibrary();go(docu
 const initialRoute=(()=>{const raw=location.hash.replace(/^#/,'');return decodeURIComponent(raw.split('?')[0]||'home')})();
 refresh();
 restoreRoute();
-let cpInstallPrompt=null;const cpInstallBtn=$("installApp"),cpOnline=$("cpOnline");function cpStandalone(){return window.matchMedia?.("(display-mode: standalone)").matches||window.navigator.standalone===true}function cpUpdateInstallUI(){if(cpInstallBtn)cpInstallBtn.classList.toggle("show",!!cpInstallPrompt&&!cpStandalone())}window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();cpInstallPrompt=e;cpUpdateInstallUI()});window.addEventListener("appinstalled",()=>{cpInstallPrompt=null;cpUpdateInstallUI();toast("✓ CareerPilot installed")});if(cpInstallBtn)cpInstallBtn.onclick=async()=>{if(!cpInstallPrompt){toast(cpStandalone()?"CareerPilot is already installed":"Use your browser menu to install CareerPilot");return}const p=cpInstallPrompt;cpInstallPrompt=null;cpUpdateInstallUI();try{await p.prompt();await p.userChoice}catch(e){}};function cpNetwork(){if(cpOnline){cpOnline.textContent=navigator.onLine?"✓ Back online":"⚠ You are offline — saved drafts remain available";cpOnline.classList.toggle("off",!navigator.onLine);cpOnline.classList.add("on");clearTimeout(window.__cpNetTimer);window.__cpNetTimer=setTimeout(()=>cpOnline.classList.remove("on"),2200)}}window.addEventListener("online",cpNetwork);window.addEventListener("offline",cpNetwork);cpUpdateInstallUI();if(!navigator.onLine)cpNetwork();if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('api/sw.js?v=21',{scope:'/',updateViaCache:'none'}).catch(()=>{}));}
+let cpInstallPrompt=null;const cpInstallBtn=$("installApp"),cpOnline=$("cpOnline");function cpStandalone(){return window.matchMedia?.("(display-mode: standalone)").matches||window.navigator.standalone===true}function cpUpdateInstallUI(){if(cpInstallBtn)cpInstallBtn.classList.toggle("show",!!cpInstallPrompt&&!cpStandalone())}window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();cpInstallPrompt=e;cpUpdateInstallUI()});window.addEventListener("appinstalled",()=>{cpInstallPrompt=null;cpUpdateInstallUI();toast("✓ CareerPilot installed")});if(cpInstallBtn)cpInstallBtn.onclick=async()=>{if(!cpInstallPrompt){toast(cpStandalone()?"CareerPilot is already installed":"Use your browser menu to install CareerPilot");return}const p=cpInstallPrompt;cpInstallPrompt=null;cpUpdateInstallUI();try{await p.prompt();await p.userChoice}catch(e){}};function cpNetwork(){if(cpOnline){cpOnline.textContent=navigator.onLine?"✓ Back online":"⚠ You are offline — saved drafts remain available";cpOnline.classList.toggle("off",!navigator.onLine);cpOnline.classList.add("on");clearTimeout(window.__cpNetTimer);window.__cpNetTimer=setTimeout(()=>cpOnline.classList.remove("on"),2200)}}window.addEventListener("online",cpNetwork);window.addEventListener("offline",cpNetwork);cpUpdateInstallUI();if(!navigator.onLine)cpNetwork();if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('api/sw.js?v=22',{scope:'/',updateViaCache:'none'}).catch(()=>{}));}
 })();
 </script>
 </body>
