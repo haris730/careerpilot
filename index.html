@@ -204,6 +204,14 @@ body[data-v=cv]:not(.prev) .fab{display:block}.fab{position:fixed;right:16px;bot
 .jobs-quick-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:4px}
 .jobs-quick-nav button{min-height:40px;border:1px solid var(--gb);border-radius:12px;padding:8px 13px;font-weight:700}
 .jobs-quick-nav button.on{background:var(--pri,#2563eb);color:#fff;border-color:transparent}
+.job-region-label{display:grid;gap:6px;margin:12px 0;font-weight:700;color:var(--tx)}
+.job-region-label select{width:100%;max-width:320px}
+.job-links-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.job-link-card{display:flex;justify-content:space-between;align-items:center;gap:12px;min-width:0;padding:15px;border:1px solid var(--gb);border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.job-link-card b{display:block}.job-link-card p{margin:4px 0}.job-link-card small{color:var(--mu)}
+.job-link-open{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:8px 12px;border:1px solid var(--gb);border-radius:11px;color:var(--tx);text-decoration:none;font-weight:700}
+.job-link-open:hover{background:rgba(255,255,255,.08)}
+@media(max-width:820px){.job-links-grid{grid-template-columns:1fr}.job-link-card{align-items:flex-start;flex-direction:column}.job-link-open{width:100%}}
 @media(max-width:820px){.jobs-quick-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.jobs-quick-nav button{width:100%}}
 /* Global Jobs connected workflow */
 .job-detail-backdrop{display:none;position:fixed;inset:0;z-index:140;background:rgba(0,0,0,.58);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:18px}
@@ -428,7 +436,7 @@ body.light .mnav button{color:#64748b}.light .mnav button.on{color:#111827}
 
 
 const $=i=>document.getElementById(i),Q=(s,r)=>Array.from((r||document).querySelectorAll(s)),KEY='careerpilot_cv_builder_2026',OLD='careerpilot_cv_builder_v2';
-const PREMIUM_LAUNCHED=true;
+const PREMIUM_LAUNCHED=false;
 const ADS_ENABLED=false;
 const FONTS=[['','Template default'],['Inter,Segoe UI,Arial,sans-serif','Inter — Modern'],['Source Sans 3,Segoe UI,Arial,sans-serif','Source Sans 3 — Clean'],['IBM Plex Sans,Segoe UI,Arial,sans-serif','IBM Plex Sans — Professional'],['Lato,Segoe UI,Arial,sans-serif','Lato — Humanist'],['Roboto,Arial,sans-serif','Roboto — Universal'],['Open Sans,Arial,sans-serif','Open Sans — Classic'],['Nunito Sans,Arial,sans-serif','Nunito Sans — Friendly'],['Calibri,Arial,sans-serif','Calibri — Business'],['Helvetica,Arial,sans-serif','Helvetica — Corporate'],['Arial,Helvetica,sans-serif','Arial — Safe'],['Georgia,serif','Georgia — Serif'],['Cambria,Georgia,serif','Cambria — Executive'],['Merriweather,Georgia,serif','Merriweather — Editorial'],['Libre Baskerville,Georgia,serif','Libre Baskerville — Traditional'],['EB Garamond,Georgia,serif','EB Garamond — Elegant'],['Times New Roman,serif','Times New Roman'],['Trebuchet MS,sans-serif','Trebuchet MS'],['Courier New,monospace','Courier New — Mono']];
 const BGS=[['#ffffff','White'],['#fffaf0','Warm ivory'],['#f3f4f6','Light gray'],['#f2f7ff','Soft blue']];
@@ -522,7 +530,7 @@ const NAV_ICONS={
  profile:'<circle cx="12" cy="8" r="3"/><path d="M5 21a7 7 0 0 1 14 0M19 8v6M22 11h-6"/>'
 };
 const sideIcon=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
-const NAV=[['home','Dashboard'],['cv','CV Builder'],['design','Templates'],['jobs','Live Jobs'],['business','Business Network'],['match','Job Match'],['writer','AI Writing'],['letter','Cover Letter'],['interview','Interview Prep'],['tracker','Application Tracker'],['cvs','My CVs'],['profile','Settings']];
+const NAV=[['home','Dashboard'],['cv','CV Builder'],['design','Templates'],['jobs','Jobs'],['business','Business Network'],['match','Job Match'],['writer','AI Writing'],['letter','Cover Letter'],['interview','Interview Prep'],['tracker','Application Tracker'],['cvs','My CVs'],['profile','Settings']];
 $('nav').innerHTML='<button type="button" class="side-collapse" id="sideCollapse" aria-label="Collapse sidebar" title="Collapse sidebar">'+sideIcon('<path d="M19 12H5M12 5l-7 7 7 7"/>')+'<span>Collapse</span></button>'+NAV.map(([v,l])=>`<button class="nb" data-v="${v}"><i aria-hidden="true">${sideIcon(NAV_ICONS[v])}</i><span>${l}</span></button>`).join('')+'<div class="usr"><div><b data-n></b><small>Free Plan</small></div><button data-soon="1" class="pri" title="Upgrade">Upgrade</button></div>';
 if(!PREMIUM_LAUNCHED)Q('#nav [data-soon]').forEach(b=>b.style.setProperty('display','none','important'));
 const SIDE_KEY='careerpilot_sidebar_collapsed_2026';
@@ -530,7 +538,7 @@ const applySidebarState=collapsed=>{document.body.classList.toggle('sidebar-coll
 applySidebarState(ls(SIDE_KEY)==='1');
 $('sideCollapse').onclick=()=>applySidebarState(!document.body.classList.contains('sidebar-collapsed'));
 $('mnav').innerHTML=`<button data-v="cv"><i>✎</i><small>Edit</small></button><button data-action="preview"><i>◉</i><small>Preview</small></button><button data-v="design" data-design="1"><i>◈</i><small>Design</small></button><button data-v="templates" data-templates="1"><i>▦</i><small>Templates</small></button><button data-action="export"><i>⇩</i><small>Export</small></button><button data-action="mobile-more"><i>☰</i><small>More</small></button>`;
-document.body.insertAdjacentHTML('beforeend',`<div class="mobile-more-backdrop" id="mobileMore" aria-hidden="true"><div class="mobile-more-sheet" role="dialog" aria-label="CareerPilot tools"><button class="mobile-more-close" data-action="mobile-more-close" aria-label="Close">×</button><div class="ey">CAREERPILOT TOOLS</div><h3>Career tools</h3><div class="mobile-more-grid"><button data-v="jobs"><b>🌐</b><span>Live Jobs</span></button><button data-v="business"><b>◉</b><span>Business Network</span></button><button data-v="match"><b>◎</b><span>Job Match</span></button><button data-v="writer"><b>✦</b><span>AI Writing</span></button><button data-v="letter"><b>✉</b><span>Cover Letter</span></button><button data-v="interview"><b>☏</b><span>Interview Prep</span></button><button data-v="tracker"><b>✓</b><span>Application Tracker</span></button><button data-v="cvs"><b>▤</b><span>My CVs</span></button><button data-v="profile"><b>⚙</b><span>Settings</span></button></div></div></div>`);
+document.body.insertAdjacentHTML('beforeend',`<div class="mobile-more-backdrop" id="mobileMore" aria-hidden="true"><div class="mobile-more-sheet" role="dialog" aria-label="CareerPilot tools"><button class="mobile-more-close" data-action="mobile-more-close" aria-label="Close">×</button><div class="ey">CAREERPILOT TOOLS</div><h3>Career tools</h3><div class="mobile-more-grid"><button data-v="jobs"><b>🌐</b><span>Jobs</span></button><button data-v="business"><b>◉</b><span>Business Network</span></button><button data-v="match"><b>◎</b><span>Job Match</span></button><button data-v="writer"><b>✦</b><span>AI Writing</span></button><button data-v="letter"><b>✉</b><span>Cover Letter</span></button><button data-v="interview"><b>☏</b><span>Interview Prep</span></button><button data-v="tracker"><b>✓</b><span>Application Tracker</span></button><button data-v="cvs"><b>▤</b><span>My CVs</span></button><button data-v="profile"><b>⚙</b><span>Settings</span></button></div></div></div>`);
 function go(v,opts={}){const from=document.body.dataset.v||'home';document.body.dataset.v=v;document.body.classList.remove('prev');Q('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));if(v==='design'){const tab=opts.designTab===0?'templates':'design';Q('#nav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));Q('#mnav button').forEach(b=>b.classList.remove('on'));const activeMobile=tab==='templates'?Q('#mnav [data-templates="1"]')[0]:Q('#mnav [data-design="1"]')[0];if(activeMobile)activeMobile.classList.add('on');if(opts.designTab!==undefined){const tabs=Q('#v-design [data-dt]');const panels=Q('#v-design .dp');tabs.forEach((b,i)=>b.classList.toggle('on',i===opts.designTab));panels.forEach((p,i)=>p.classList.toggle('on',i===opts.designTab))}$('v-design').dataset.mobileMode=tab}else{Q('#nav [data-v],#mnav [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('v-design').removeAttribute('data-mobile-mode')}if(!opts.skipHistory&&from!==v){history.pushState({v},'',location.pathname+'#'+encodeURIComponent(v))}requestAnimationFrame(fit)}
 function prev(on,opts={}){const was=document.body.classList.contains('prev');document.body.classList.toggle('prev',on);if(!opts.skipHistory&&was!==on){history.pushState({v:document.body.dataset.v,prev:on},'',location.pathname+'#'+encodeURIComponent(document.body.dataset.v)+(on?'?preview=1':''))}requestAnimationFrame(fit)}
 function restoreRoute(){const raw=location.hash.replace(/^#/,'');const v=decodeURIComponent(raw.split('?')[0]||'home');const valid=document.getElementById('v-'+v)?v:'home';const isPrev=new URLSearchParams(location.hash.split('?')[1]||'').get('preview')==='1';go(valid,{skipHistory:true});if(isPrev)prev(true,{skipHistory:true})}
@@ -784,37 +792,14 @@ $('upgradePlan').onclick=openUpgrade;Q('[data-upgrade]').forEach(b=>b.onclick=op
 
 /* ---------- global jobs + saved CV views ---------- */
 const JOBS=[
- ['LinkedIn Jobs','Millions of jobs and people hiring.','https://www.linkedin.com/jobs/','Worldwide'],
- ['Indeed','Global job search with keyword and location search.','https://www.indeed.com/','Worldwide'],
- ['Glassdoor Jobs','Jobs plus company and workplace information.','https://www.glassdoor.com/Job/','Worldwide'],
- ['Adzuna','Job search and aggregation across multiple countries.','https://www.adzuna.com/','Worldwide / Multi-country'],
- ['Jooble','International job search engine covering many countries.','https://jooble.org/','Worldwide / Multi-country'],
- ['Jora','Worldwide job search with country-specific sites.','https://www.jora.com/','Worldwide'],
- ['Jobfound','Aggregated job discovery with direct links to original postings.','https://jobfound.org/','Worldwide'],
- ['Wellfound','Startup and technology jobs.','https://wellfound.com/jobs','Worldwide / Startups'],
- ['We Work Remotely','Remote jobs from companies worldwide.','https://weworkremotely.com/','Remote / Worldwide'],
- ['Remote OK','Remote jobs from around the world.','https://remoteok.com/','Remote / Worldwide'],
- ['Remotive','Remote jobs from international employers.','https://remotive.com/','Remote / Worldwide'],
- ['GoGlobal Jobs','Overseas jobs across Gulf, Asia-Pacific and global markets.','https://goglobaljobs.com/','Worldwide / Overseas'],
- ['EURES','Official European job portal and mobility services.','https://eures.europa.eu/','Europe'],
- ['Arbeitnow','European jobs aggregator with Germany/Europe-focused listings.','https://www.arbeitnow.com/','Europe'],
- ['EuroJobs','European job search portal.','https://www.eurojobs.com/','Europe'],
- ['Europe Language Jobs','Jobs across Europe with language and international roles.','https://www.europelanguagejobs.com/','Europe'],
- ['Relocate.me','International tech jobs and relocation opportunities.','https://relocate.me/','Europe / Worldwide'],
- ['EURACTIV Jobs','Jobs across European policy and professional sectors.','https://jobs.euractiv.com/','Europe'],
- ['Jobs.com.pk','Pakistan-focused jobs portal.','https://www.jobs.com.pk/','Pakistan'],
- ['National Jobs Portal (NJP)','Pakistan government jobs portal.','https://www.njp.gov.pk/','Pakistan'],
- ['Rozee.pk','Pakistan jobs and recruitment platform.','https://www.rozee.pk/','Pakistan'],
- ['Naukri','Major India-focused job and recruitment platform.','https://www.naukri.com/','India'],
- ['JobStreet','Asia-focused career site covering markets including Malaysia, Singapore, Philippines and Indonesia.','https://www.jobstreet.com/','Asia-Pacific'],
- ['JobsDB','Jobs and recruitment platform for Southeast Asia.','https://www.jobsdb.com/','Asia-Pacific'],
- ['SEEK','Major employment and recruitment platform for Australia and New Zealand.','https://www.seek.com.au/','Australia / New Zealand'],
- ['USAJOBS','Official U.S. federal government jobs portal.','https://www.usajobs.gov/','USA'],
- ['ZipRecruiter','U.S. job search and recruitment platform.','https://www.ziprecruiter.com/','USA'],
- ['Dice','Technology and IT jobs platform.','https://www.dice.com/jobs','USA / Technology'],
- ['Devex','Global development jobs across international organizations and sectors.','https://www.devex.com/jobs','Worldwide / Development'],
- ['ReliefWeb','Humanitarian jobs and opportunities from international organizations.','https://reliefweb.int/jobs','Worldwide / Humanitarian'],
- ['ILO Jobs','International Labour Organization career opportunities.','https://jobs.ilo.org/','Worldwide / International Organizations']
+ ['LinkedIn','Professional networking and jobs across industries.','https://www.linkedin.com/jobs/','Worldwide',['pakistan','us-global','europe','remote']],
+ ['Indeed','Search jobs by title, company and location.','https://www.indeed.com/','Worldwide',['pakistan','us-global','europe']],
+ ['Glassdoor','Job listings and employer research.','https://www.glassdoor.com/Job/index.htm','US & Global',['us-global','europe']],
+ ['Rozee.pk','Pakistan-focused jobs and recruitment.','https://www.rozee.pk/','Pakistan',['pakistan']],
+ ['Remote OK','Remote jobs from global employers.','https://remoteok.com/','Remote / Worldwide',['pakistan','us-global','europe','remote']],
+ ['We Work Remotely','Remote roles across multiple job categories.','https://weworkremotely.com/','Remote / Worldwide',['pakistan','us-global','europe','remote']],
+ ['Wellfound','Startup jobs and technology roles.','https://wellfound.com/jobs','Global / Startups',['us-global','europe','remote']],
+ ['Google Jobs','Search job listings across the web.','https://www.google.com/search?q=jobs&ibp=htl;jobs','Worldwide',['pakistan','us-global','europe','remote']]
 ];
 
 $('v-jobs').innerHTML=`<div class="jobs-quick-nav"><button class="on" data-jobs-tab="live">🌐 Live Jobs</button><button data-jobs-tab="saved">☆ Saved Jobs</button><button data-jobs-tab="alerts">🔔 Job Alerts</button><button data-jobs-tab="tracker">✓ Application Tracker</button></div><div class="card pad">
@@ -829,7 +814,7 @@ $('v-jobs').innerHTML=`<div class="jobs-quick-nav"><button class="on" data-jobs-
 <div id="jobCards"></div>
 <div class="card pad" style="margin-top:12px"><div class="ey">LIVE JOB SOURCES</div><p class="hint" style="margin:4px 0 0">Jobs are aggregated from: <a href="https://himalayas.app/" target="_blank" rel="noopener noreferrer">Himalayas</a> · <a href="https://remoteok.com/" target="_blank" rel="noopener noreferrer">Remote OK</a> · <a href="https://jobicy.com/" target="_blank" rel="noopener noreferrer">Jobicy</a></p></div>
 <div class="card pad" id="savedJobsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">SAVED JOBS</div><p class="hint" style="margin:4px 0 0">Keep interesting jobs here before you apply.</p></div><b id="savedJobCount">0</b></div><div id="savedJobCards" style="margin-top:12px"></div></div>
-<div class="card pad" id="jobAlertsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">JOB ALERTS</div><p class="hint" style="margin:4px 0 0">Save your preferred jobs and detect new matching listings.</p></div><b id="jobAlertNewCount">0</b></div><div class="row" style="margin-top:10px"><input id="alertQ" placeholder="Job title or skill" style="margin:0"><input id="alertLoc" placeholder="Country, region or Remote" style="margin:0"></div><div class="row" style="margin-top:8px"><select id="alertType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><select id="alertExp" style="margin:0"><option value="">All experience levels</option><option value="entry">Entry / Junior</option><option value="mid">Mid-level</option><option value="senior">Senior / Lead</option></select></div><div class="row" style="margin-top:8px"><select id="alertSalary" style="margin:0"><option value="0">Any salary</option><option value="30000">$30k+ / year</option><option value="50000">$50k+ / year</option><option value="75000">$75k+ / year</option><option value="100000">$100k+ / year</option><option value="150000">$150k+ / year</select><select id="alertFreq" style="margin:0"><option value="daily">Check daily</option><option value="weekly">Check weekly</option></select><button class="pri" id="createJobAlert">Create Job Alert</button></div><div id="jobAlertStatus" class="hint" style="margin-top:9px">Alerts are saved on this device.</div><div id="jobAlertList" style="margin-top:12px"></div><div id="jobAlertMatches" style="margin-top:12px"></div><div style="margin-top:10px"><button id="checkJobAlerts">Check New Jobs</button></div></div><div class="card pad"><div class="ey">OTHER JOB PLATFORMS</div><p class="hint" style="margin:4px 0 10px">You can also open established job portals directly.</p><div id="jobPortals"></div></div>`;
+<div class="card pad" id="jobAlertsPanel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div class="ey">JOB ALERTS</div><p class="hint" style="margin:4px 0 0">Save your preferred jobs and detect new matching listings.</p></div><b id="jobAlertNewCount">0</b></div><div class="row" style="margin-top:10px"><input id="alertQ" placeholder="Job title or skill" style="margin:0"><input id="alertLoc" placeholder="Country, region or Remote" style="margin:0"></div><div class="row" style="margin-top:8px"><select id="alertType" style="margin:0"><option value="">All employment types</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="freelance">Freelance</option></select><select id="alertExp" style="margin:0"><option value="">All experience levels</option><option value="entry">Entry / Junior</option><option value="mid">Mid-level</option><option value="senior">Senior / Lead</option></select></div><div class="row" style="margin-top:8px"><select id="alertSalary" style="margin:0"><option value="0">Any salary</option><option value="30000">$30k+ / year</option><option value="50000">$50k+ / year</option><option value="75000">$75k+ / year</option><option value="100000">$100k+ / year</option><option value="150000">$150k+ / year</select><select id="alertFreq" style="margin:0"><option value="daily">Check daily</option><option value="weekly">Check weekly</option></select><button class="pri" id="createJobAlert">Create Job Alert</button></div><div id="jobAlertStatus" class="hint" style="margin-top:9px">Alerts are saved on this device.</div><div id="jobAlertList" style="margin-top:12px"></div><div id="jobAlertMatches" style="margin-top:12px"></div><div style="margin-top:10px"><button id="checkJobAlerts">Check New Jobs</button></div></div><div class="card pad"><div class="ey">OTHER JOB PLATFORMS</div><p class="hint" style="margin:4px 0 10px">You can also open established job portals directly.</p><label class="job-region-label" for="jobLinksRegion">Filter by region<select id="jobLinksRegion" aria-label="Filter job portals by region"><option value="all">All regions</option><option value="pakistan">Pakistan</option><option value="us-global">US &amp; Global</option><option value="europe">Europe</option><option value="remote">Remote</option></select></label><div id="jobPortals" class="job-links-grid"></div></div>`;
 $('v-business').innerHTML=`<div class="card pad">
 <div class="ey">BUSINESS NETWORK · CLIENT DISCOVERY</div>
 <h2 style="margin:0 0 6px">Find businesses, decision-makers and potential clients</h2>
@@ -904,7 +889,7 @@ function jobEsc(v){return escHtml(String(v||''))}
 document.body.insertAdjacentHTML('beforeend','<div class="job-detail-backdrop" id="jobDetailModal" aria-hidden="true"><div class="job-detail-modal" id="jobDetailContent"></div></div>');
 function jobTypeLabel(v){return String(v||'').replace(/_/g,' ').replace(/\\b\\w/g,m=>m.toUpperCase())}
 function renderJobPortals(){
-  $('jobPortals').innerHTML=JOBS.map(x=>'<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--gb)"><div><b>'+jobEsc(x[0])+'</b><div class="hint">'+jobEsc(x[1])+' · '+jobEsc(x[3])+'</div></div><a href="'+x[2]+'" target="_blank" rel="noopener noreferrer" style="text-decoration:none"><button>Open ↗</button></a></div>').join('')
+  const renderJobPortals=()=>{const region=$('jobLinksRegion')?.value||'all';const links=JOBS.filter(x=>region==='all'||x[4].includes(region));$('jobPortals').innerHTML=links.map(x=>'<article class="job-link-card"><div><b>'+jobEsc(x[0])+'</b><p class="hint">'+jobEsc(x[1])+'</p><small>'+jobEsc(x[3])+'</small></div><a class="job-link-open" href="'+x[2]+'" target="_blank" rel="noopener noreferrer">Open site ↗</a></article>').join('')};$('jobLinksRegion').addEventListener('change',renderJobPortals);renderJobPortals()
 }
 const SAVED_JOBS_KEY='careerpilot_saved_jobs_v1';
 function loadSavedJobs(){try{const a=JSON.parse(localStorage.getItem(SAVED_JOBS_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
@@ -1538,8 +1523,8 @@ async function loadPlanStatus(){
     if(line)line.textContent='AI actions: '+remaining+' of '+limit+' remaining this month';
     Q('[data-n]').forEach(x=>x.closest('.usr')?.querySelector('small')&&(x.closest('.usr').querySelector('small').textContent=plan==='premium'?'Premium Plan':'Free Plan'));
     Q('[data-ad-slot]').forEach(x=>x.style.display=!ADS_ENABLED||plan==='premium'?'none':'flex');
-    Q('#nav [data-soon], [data-upgrade], #upgradePlan').forEach(x=>x.style.display=plan==='premium'?'none':'');
-    const monetizationCard=$('[data-monetization-card]');if(monetizationCard)monetizationCard.style.display=plan==='premium'?'none':'';
+    Q('#nav [data-soon], [data-upgrade], #upgradePlan').forEach(x=>x.style.display=!PREMIUM_LAUNCHED||plan==='premium'?'none':'');
+    const monetizationCard=$('[data-monetization-card]');if(monetizationCard)monetizationCard.style.display=!PREMIUM_LAUNCHED||plan==='premium'?'none':'';
   }catch(e){console.warn('Plan status unavailable',e)}
 }
 
