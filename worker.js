@@ -63,10 +63,11 @@ async function handleBillingWebhook(request,env){
 }
 async function createLemonCheckout(request,env,url){
   if(request.method!=='POST')return apiJson({error:'Method not allowed'},405,url.origin);
-  if(!env.LEMONSQUEEZY_API_KEY||!env.LEMONSQUEEZY_STORE_ID||!env.LEMONSQUEEZY_MONTHLY_VARIANT_ID)return apiJson({error:'Payment checkout is not configured yet.'},503,url.origin);
+  if(!env.LEMONSQUEEZY_API_KEY||!env.LEMONSQUEEZY_STORE_ID)return apiJson({error:'Payment checkout is not configured yet.'},503,url.origin);
   const user=await supabaseUser(request);if(!user?.id)return apiJson({error:'Sign in required.'},401,url.origin);
   let body;try{body=await request.json()}catch{return apiJson({error:'Invalid JSON request.'},400,url.origin)}
   const plan=body.plan==='yearly'?'yearly':'monthly';
+  if(plan==='monthly'&&!env.LEMONSQUEEZY_MONTHLY_VARIANT_ID)return apiJson({error:'Monthly checkout is not configured yet.'},503,url.origin);
   if(plan==='yearly'&&!env.LEMONSQUEEZY_YEARLY_VARIANT_ID)return apiJson({error:'Yearly checkout is not configured yet.'},503,url.origin);
   const variant=plan==='yearly'?env.LEMONSQUEEZY_YEARLY_VARIANT_ID:env.LEMONSQUEEZY_MONTHLY_VARIANT_ID;
   const payload={data:{type:'checkouts',attributes:{checkout_options:{embed:true},checkout_data:{email:user.email||'',name:user.user_metadata?.full_name||'',custom:{user_id:user.id,plan}},product_options:{redirect_url:url.origin+'/#profile'}},relationships:{store:{data:{type:'stores',id:String(env.LEMONSQUEEZY_STORE_ID)}},variant:{data:{type:'variants',id:String(variant)}}}}};
